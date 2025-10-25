@@ -1,0 +1,278 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "type": "SHA256",
+        "value": "={{ $now.toMillis().toString() }}",
+        "dataPropertyName": "fileHash"
+      },
+      "id": "079702f6-e9f0-4a12-be16-0c31390b7e0b",
+      "name": "Generate File Hash",
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        720,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const originalName = $('Start').first().json.filename;\nconst webhook_uuid = $(\"Workflow Settings\").first().json.webhook_file_server_uuid\nconst hash = $input.first().json.fileHash;\nlet extension = \"\";\ntry {\n  extension = $input.first().json.data.data.fileExtension;\n} catch (error) {\n  extension = originalName.split('.').pop();\n}\nconst hashedFilename = `${hash}.${extension}`;\nconst tempDir = '/tmp/n8n-files';\n\nreturn [{\n  json: {\n    hashedFilename,\n    originalFilename: originalName,\n    tempDir: tempDir,\n    fileHash: hash,\n    filePath: `${tempDir}/${hashedFilename}`,\n    timestamp: new Date().toISOString(),\n    baseUrl: `https://n8n.connectcircuits.com/webhook/${webhook_uuid}`,\n  },\n  binary: {\n    data: $(\"Start\").first().binary.data\n  }\n}];"
+      },
+      "id": "b967aeab-113d-4899-958a-63f37e09da11",
+      "name": "Create Filename",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        944,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fileUrl",
+              "name": "fileUrl",
+              "value": "={{ $('Create Filename').first().json.baseUrl }}/file/{{ $('Create Filename').first().json.hashedFilename }}",
+              "type": "string"
+            },
+            {
+              "id": "hashedFilename",
+              "name": "hashedFilename",
+              "value": "={{ $('Create Filename').first().json.hashedFilename }}",
+              "type": "string"
+            },
+            {
+              "id": "originalFilename",
+              "name": "originalFilename",
+              "value": "={{ $('Start').first().json.filename }}",
+              "type": "string"
+            },
+            {
+              "id": "expiresAt",
+              "name": "expiresAt",
+              "value": "={{ DateTime.now().plus({hours: 4}).toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "success",
+              "name": "success",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "filePath",
+              "name": "filePath",
+              "value": "={{ $json.filePath }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "8752dab2-1473-45fb-9199-c852f13ca8e2",
+      "name": "Return File Info",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1376,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "filename"
+            },
+            {
+              "name": "data",
+              "type": "any"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        288,
+        64
+      ],
+      "id": "270814b8-b0f0-4f7c-b7bb-2bb234371e6d",
+      "name": "Start"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "={{ $('Create Filename').first().json.filePath }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1136,
+        112
+      ],
+      "id": "21672623-93c4-4f89-9ed6-b1e8904d816f",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "223a14bb-c307-4c7d-8502-2e7832ddc407",
+              "name": "webhook_file_server_uuid",
+              "value": "a60c3f68-7bcf-4504-a087-0fb9c7a3fce0",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        496,
+        64
+      ],
+      "id": "fbc52c77-ffca-4c36-ab1c-618cdc76acef",
+      "name": "Workflow Settings"
+    },
+    {
+      "parameters": {
+        "command": "=mkdir -p {{ $json.tempDir }}"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1168,
+        -32
+      ],
+      "id": "a50d53ca-7efa-4008-963f-de2727019fd7",
+      "name": "Create directory"
+    },
+    {
+      "parameters": {
+        "content": "# Temporary Binary File Storage\n## SWF020\n### Purpose\nStore binary data in a temporary file which is retrievable via the Webhook File Server workflow. The Temporary File Cleanup workflow will remove the file at 4 hours or shortly after.\n\n### Input\n* filename\n    * The name of the file to save data into (e.g. thumbnail.jpg)\n* data\n    * Binary data\n\n### Output\n* fileUrl\n    * The URL to use to obtain the file data.\n* hashedFilename\n* originalFilename\n* expiresAt\n* success\n* filePath\n    * The local file path.",
+        "height": 480,
+        "width": 544
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        -176
+      ],
+      "id": "372e6a0f-faab-40a6-b057-f65d318cd38b",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## 2025-09-25\n* Modify the Generate Hash value so to ensure a unique value for each execution.",
+        "width": 544,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        352
+      ],
+      "id": "97e72933-c1d1-4503-a953-c5de2c532b03",
+      "name": "Sticky Note1"
+    }
+  ],
+  "connections": {
+    "Generate File Hash": {
+      "main": [
+        [
+          {
+            "node": "Create Filename",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Filename": {
+      "main": [
+        [
+          {
+            "node": "Create directory",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Workflow Settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Return File Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Settings": {
+      "main": [
+        [
+          {
+            "node": "Generate File Hash",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create directory": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "pinData": {
+    "Start": [
+      {
+        "filename": "bibleReadings-ISV.mp3",
+        "data": {
+          "data": {
+            "mimeType": "audio/mpeg",
+            "fileType": "audio",
+            "fileExtension": "mp3",
+            "fileName": "speech.mp3",
+            "id": "filesystem-v2:workflows/Hqnsn7sEwrc1XeHG/executions/63341/binary_data/d180b7a9-f91b-4810-8394-0fa15f296bdd",
+            "fileSize": "5.18 MB"
+          }
+        }
+      }
+    ]
+  },
+  "meta": {
+    "instanceId": "37fe6d8c3b2aaeda95afa9d59c8cbc7c79e8171e6cc2a68043e239f8403c390e"
+  }
+}

@@ -1,0 +1,295 @@
+{
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c9662f0d-15c9-4b74-ac3f-9cc9b320e729",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "fromEmail": "ssadvisor@seasonedsolutionsadvisor.com",
+        "toEmail": "6142142693@tmomail.net",
+        "subject": "A workflow has issues",
+        "emailFormat": "text",
+        "text": "=\nWorkflow Name: {{ $json.workflow.name }}\n\nExecution Id: {{ $json.execution.id }}\n\nExecution URL: {{ $json.execution.url }}\n\nExecution Error Description: {{ $json.execution.error.description }}\n\nExecution Error Message: {{ $json.execution.error.message }}\n\nPlease take a look into this issue.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "274899fc-ae03-4c7b-a608-e4edccad87b8",
+      "name": "Send email",
+      "webhookId": "77366135-ed34-47a4-83b3-f1bd30c43a92",
+      "credentials": {
+        "smtp": {
+          "id": "z30fnIDud6K6PjAL",
+          "name": "SMTP ssadvisor@seasonedsolutionsadvisor.com"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Error Trigger": [
+      {
+        "execution": {
+          "id": "109194",
+          "url": "https://n8n.connectcircuits.com/workflow/q8PrE9cpJEJkNozj/executions/109194",
+          "error": {
+            "level": "warning",
+            "tags": {},
+            "description": "Code doesn't return items properly",
+            "timestamp": 1761398947151,
+            "context": {
+              "itemIndex": 0
+            },
+            "functionality": "regular",
+            "name": "NodeOperationError",
+            "node": {
+              "parameters": {
+                "operation": "call_workflow",
+                "source": "database",
+                "workflowId": {
+                  "__rl": true,
+                  "value": "UKwiPykk0RAeYSgb",
+                  "mode": "list",
+                  "cachedResultName": "SWF021 - Upload Video PR5"
+                },
+                "workflowInputs": {
+                  "mappingMode": "defineBelow",
+                  "value": {
+                    "WHICH_YT_CHANNEL": "BIBLE READINGS",
+                    "title": "={{ $('Call Generate Bible Text PR5').item.json.translations.split('--')[0].trim() +' - Day: ' +$('Start').item.json.dailyBibleReading[0] +' - Passage: ' +$('Start').item.json.dailyBibleReading[2] }}",
+                    "description": "={{ $('Generate Metadata').item.json.description }}",
+                    "hashtags": "={{ $('Generate Metadata').item.json.hashtags }}",
+                    "attribution": "={{ \"Copyright (C) \" +$now.year +\" Seasoned Solutions Advisor LLC\"}}",
+                    "tags": "={{ $('Generate Metadata').item.json.tags }}",
+                    "YT_privacy_status": "={{ $('Workflow Control').item.json.YT_privacy_status }}",
+                    "video_url": "={{ $('Generate Video').item.json.video_url }}",
+                    "thumbnail_url": "={{ $('Generate Thumbnail').item.json.thumbnail_url }}",
+                    "WHICH_GGL_ACCOUNT": "EBOYD53",
+                    "GGL_base_path": "={{ \"/Bible Readings/\" + $('Call Generate Bible Text PR5').item.json.translations.split('--')[0].trim() +\"/\" +$('Start').item.json.dailyBibleReading[0] }}",
+                    "audio_url": "={{ $('Generate Audio').item.json.audioUrl }}",
+                    "avatar_url": "={{ $('Generate Thumbnail').item.json.avatar_url }}",
+                    "channel_playlists": "={{ $json.channel_playlists }}",
+                    "upload_to_YT": "={{ true }}",
+                    "upload_to_GGL": "={{ true }}"
+                  },
+                  "matchingColumns": [],
+                  "schema": [
+                    {
+                      "id": "upload_to_YT",
+                      "displayName": "upload_to_YT",
+                      "required": false,
+                      "defaultMatch": false,
+                      "display": true,
+                      "canBeUsedToMatch": true,
+                      "type": "boolean",
+                      "removed": false
+                    },
+                    {
+                      "id": "WHICH_YT_CHANNEL",
+                      "displayName": "WHICH_YT_CHANNEL",
+                      "required": false,
+                      "defaultMatch": false,
+                      "display": true,
+                      "canBeUsedToMatch": true,
+                      "type": "string",
+                      "removed": false
+                    },
+                    {
+                      "id": "title",
+                      "displayName": "title",
+                      "required": false,
+                      "defaultMatch": false,
+                      "display": true,
+                      "canBeUsedToMatch": true,
+                      "type": "string",
+                      "removed": false
+                    },
+                    {
+                      "id": "description",
+                      "displayName": "description",
+                      "required": false,
+                      "defaultMatch": false,
+                      "display": true,
+                      "canBeUsedToMatch": true,
+                      "type": "string",
+                      "removed": false
+                    },
+                    {
+                      "id": "hashtags",
+                      "displayName": "hashtags",
+                      "required": false,
+                      "defaultMatch": false,
+                      "display": true,
+                      "canBeUsedToMatch": true,
+                      "type": "string",
+                      "removed": false
+                    },
+                    {
+                      "id": "attribution",
+                      "displayName": "attribution",
+                      "required": false,
+                      "defaultMatch": false,
+                      "display": true,
+                      "canBeUsedToMatch": true,
+                      "type": "string",
+                      "removed": false
+                    },
+                    {
+                      "id": "tags",
+                      "displayName": "tags",
+                      "required": false,
+                      "defaultMatch": false,
+                      "display": true,
+                      "canBeUsedToMatch": true,
+                      "type": "string",
+                      "removed": false
+                    },
+                    {
+                      "id": "YT_privacy_status",
+                      "displayName": "YT_privacy_status",
+                      "required": false,
+                      "defaultMatch": false,
+                      "display": true,
+                      "canBeUsedToMatch": true,
+                      "type": "string",
+                      "removed": false
+                    },
+                    {
+                      "id": "video_url",
+                      "displayName": "video_url",
+                      "required": false,
+                      "defaultMatch": false,
+                      "display": true,
+                      "canBeUsedToMatch": true,
+                      "type": "string",
+                      "removed": false
+                    },
+                    {
+                      "id": "thumbnail_url",
+                      "displayName": "thumbnail_url",
+                      "required": false,
+                      "defaultMatch": false,
+                      "display": true,
+                      "canBeUsedToMatch": true,
+                      "type": "string",
+                      "removed": false
+                    },
+                    {
+                      "id": "upload_to_GGL",
+                      "displayName": "upload_to_GGL",
+                      "required": false,
+                      "defaultMatch": false,
+                      "display": true,
+                      "canBeUsedToMatch": true,
+                      "type": "boolean",
+                      "removed": false
+                    },
+                    {
+                      "id": "WHICH_GGL_ACCOUNT",
+                      "displayName": "WHICH_GGL_ACCOUNT",
+                      "required": false,
+                      "defaultMatch": false,
+                      "display": true,
+                      "canBeUsedToMatch": true,
+                      "type": "string",
+                      "removed": false
+                    },
+                    {
+                      "id": "GGL_base_path",
+                      "displayName": "GGL_base_path",
+                      "required": false,
+                      "defaultMatch": false,
+                      "display": true,
+                      "canBeUsedToMatch": true,
+                      "type": "string",
+                      "removed": false
+                    },
+                    {
+                      "id": "audio_url",
+                      "displayName": "audio_url",
+                      "required": false,
+                      "defaultMatch": false,
+                      "display": true,
+                      "canBeUsedToMatch": true,
+                      "type": "string",
+                      "removed": false
+                    },
+                    {
+                      "id": "avatar_url",
+                      "displayName": "avatar_url",
+                      "required": false,
+                      "defaultMatch": false,
+                      "display": true,
+                      "canBeUsedToMatch": true,
+                      "type": "string",
+                      "removed": false
+                    },
+                    {
+                      "id": "channel_playlists",
+                      "displayName": "channel_playlists",
+                      "required": false,
+                      "defaultMatch": false,
+                      "display": true,
+                      "canBeUsedToMatch": true,
+                      "type": "array",
+                      "removed": false
+                    }
+                  ],
+                  "attemptToConvertTypes": false,
+                  "convertFieldsToString": true
+                },
+                "mode": "each",
+                "options": {}
+              },
+              "type": "n8n-nodes-base.executeWorkflow",
+              "typeVersion": 1.2,
+              "position": [
+                3136,
+                -80
+              ],
+              "id": "27aad9ff-63c5-41cf-abfe-95d4f38993b9",
+              "name": "Upload Video"
+            },
+            "messages": [],
+            "message": "Error executing workflow with item at index 0",
+            "stack": "NodeOperationError: Error executing workflow with item at index 0\n    at ExecuteContext.execute (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-nodes-base@file+packages+nodes-base_@aws-sdk+credential-providers@3.808.0_asn1.js@5_1af219c3f47f2a1223ec4ccec249a974/node_modules/n8n-nodes-base/nodes/ExecuteWorkflow/ExecuteWorkflow/ExecuteWorkflow.node.ts:383:12)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at WorkflowExecute.executeNode (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-core@file+packages+core_@opentelemetry+api@1.9.0_@opentelemetry+sdk-trace-base@1.30_5aee33ef851c7de341eb325c6a25e0ff/node_modules/n8n-core/src/execution-engine/workflow-execute.ts:1253:8)\n    at WorkflowExecute.runNode (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-core@file+packages+core_@opentelemetry+api@1.9.0_@opentelemetry+sdk-trace-base@1.30_5aee33ef851c7de341eb325c6a25e0ff/node_modules/n8n-core/src/execution-engine/workflow-execute.ts:1427:11)\n    at /usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-core@file+packages+core_@opentelemetry+api@1.9.0_@opentelemetry+sdk-trace-base@1.30_5aee33ef851c7de341eb325c6a25e0ff/node_modules/n8n-core/src/execution-engine/workflow-execute.ts:1727:27\n    at /usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-core@file+packages+core_@opentelemetry+api@1.9.0_@opentelemetry+sdk-trace-base@1.30_5aee33ef851c7de341eb325c6a25e0ff/node_modules/n8n-core/src/execution-engine/workflow-execute.ts:2303:11"
+          },
+          "lastNodeExecuted": "Upload Video",
+          "mode": "integrated"
+        },
+        "workflow": {
+          "id": "q8PrE9cpJEJkNozj",
+          "name": "SWF033 - Bible Readings with Trello"
+        }
+      }
+    ]
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "37fe6d8c3b2aaeda95afa9d59c8cbc7c79e8171e6cc2a68043e239f8403c390e"
+  }
+}

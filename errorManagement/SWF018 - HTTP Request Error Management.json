@@ -1,0 +1,450 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "status",
+              "type": "number"
+            },
+            {
+              "name": "code"
+            },
+            {
+              "name": "E429_wait_seconds",
+              "type": "number"
+            },
+            {
+              "name": "E500_wait_seconds",
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        96
+      ],
+      "id": "877f8a73-e391-46c9-9e85-6f9939da6ac5",
+      "name": "Start"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "38cd8d5d-be10-40c0-a7be-5058024ac800",
+              "name": "retry",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "8a1bb2e8-c78d-4397-98b9-4abf5b6f2ca1",
+              "name": "status",
+              "value": "={{ $('Normalize inputs').first().json.status }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        896,
+        0
+      ],
+      "id": "0be2e152-cdaf-41b0-982b-1c467b94dd60",
+      "name": "Return Retry true"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9993dc38-19d0-4a15-a508-8d5656501389",
+              "name": "retry",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "263499fa-e61e-44d6-8756-5647e0963d02",
+              "name": "status",
+              "value": "={{ $('Normalize inputs').first().json.status }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        896,
+        272
+      ],
+      "id": "37fb46a4-b023-409c-8b7a-20fb2c653a0b",
+      "name": "Return Retry false"
+    },
+    {
+      "parameters": {
+        "amount": "={{ $json.E429_wait }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        672,
+        -96
+      ],
+      "id": "50ef097f-9f96-4f4d-a553-9f5029fffb8e",
+      "name": "E429 Wait",
+      "webhookId": "47072319-165a-41ae-81da-61f4dc94eeee"
+    },
+    {
+      "parameters": {
+        "amount": "={{ $json.E500_wait }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        672,
+        96
+      ],
+      "id": "083d5135-94fb-4c11-8843-801b01924255",
+      "name": "E500 Wait",
+      "webhookId": "0f3800d7-72a2-4856-b7ad-8d5ba6469eeb"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7ceb7fe7-a491-4d08-a6c6-b220a21738ce",
+              "name": "status",
+              "value": "={{ $json.status || $if($json.code === 'EAI_AGAIN', 500, 0) }}",
+              "type": "number"
+            },
+            {
+              "id": "3bce6bea-9e45-4942-907e-983dde7f7aab",
+              "name": "code",
+              "value": "={{ $json.code }}",
+              "type": "string"
+            },
+            {
+              "id": "ccfd35f2-4f07-4433-8b83-23f4866b1662",
+              "name": "E429_wait",
+              "value": "={{ $if($json.E429_wait_seconds >= 5, $json.E429_wait_seconds, 5.01) }}",
+              "type": "number"
+            },
+            {
+              "id": "4f6b0f53-f79b-4d9e-8dcc-79bd00a21524",
+              "name": "E500_wait",
+              "value": "={{ $if($json.E500_wait_seconds <= 60, $json.E500_wait_seconds, 60) }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        96
+      ],
+      "id": "53b027de-4b52-462a-9665-4be0b00761fc",
+      "name": "Normalize inputs"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "8c2878de-f3f4-48b2-abb1-b669ccfec351",
+                    "leftValue": "={{ $json.status === 429 }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "E429"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ ($json.status >= 500 && $json.status <= 599) }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    },
+                    "id": "80e3b7a0-2bc8-4fdb-b561-8c68b8272c15"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "E500"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b78c786e-5b52-4b38-b8bf-831921b55d89",
+                    "leftValue": "={{$json.status > 0 || true}}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Eother"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "e43b5fca-c5e6-4f3a-8184-fbb31d35dde7",
+                    "leftValue": "={{ $json.code }}",
+                    "rightValue": "ECONNRESET",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "ECONNRESET"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "4cbe3255-f420-4388-b96f-bebde7787aba",
+                    "leftValue": "={{ $json.code }}",
+                    "rightValue": "ECONNABORTED",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "ECONNABORTED"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        416,
+        48
+      ],
+      "id": "a6dfa835-52c7-4fda-9f45-51dcccdf2546",
+      "name": "Sort status to different output nodes"
+    },
+    {
+      "parameters": {
+        "content": "# HTTP Request Error Manager\n## SWF018\n\n### Purpose\nDetermine based on the error status or the error code if there should be a retry of the HTTP Request.\n\n### Input\n* status\n    * The error status\n* code\n    * The error code\n* E429_wait_seconds\n    * The amount of time to wait for a 429 status error; default: 5.01\n* E500_wait_seconds\n    * The amount of time to wait for a 500 series status error; default: 60\n\n### Output\n* retry\n    * Boolean\n* status\n    * The entered status",
+        "height": 608,
+        "width": 512
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -608,
+        -240
+      ],
+      "id": "6c083727-f301-4302-9dae-f6539bb01d0a",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        96
+      ],
+      "id": "013d25eb-01fe-402b-8e86-3df58cf53db7",
+      "name": "Return Data"
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Normalize inputs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Return Retry true": {
+      "main": [
+        [
+          {
+            "node": "Return Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Return Retry false": {
+      "main": [
+        [
+          {
+            "node": "Return Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "E429 Wait": {
+      "main": [
+        [
+          {
+            "node": "Return Retry true",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "E500 Wait": {
+      "main": [
+        [
+          {
+            "node": "Return Retry true",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize inputs": {
+      "main": [
+        [
+          {
+            "node": "Sort status to different output nodes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort status to different output nodes": {
+      "main": [
+        [
+          {
+            "node": "E429 Wait",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "E500 Wait",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Return Retry false",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "E429 Wait",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "E429 Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Start": [
+      {
+        "status": 500,
+        "code": "ERR_BAD_RESPONSE",
+        "E429_wait_seconds": 5.01,
+        "E500_wait_seconds": 30
+      }
+    ]
+  },
+  "meta": {
+    "instanceId": "37fe6d8c3b2aaeda95afa9d59c8cbc7c79e8171e6cc2a68043e239f8403c390e"
+  }
+}

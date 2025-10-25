@@ -1,0 +1,869 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "8a396738-ac41-482d-b874-c72ccb7e7329",
+              "leftValue": "={{ $json.image_prompts }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -640,
+        672
+      ],
+      "id": "9b7ca8f8-a99d-4873-8ec1-39894faf5e06",
+      "name": "If image_prompts empty"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "image_prompts",
+        "options": {
+          "destinationFieldName": "image_prompt"
+        }
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -416,
+        768
+      ],
+      "id": "7959070d-8878-493d-bc32-548ea42f33cd",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $getWorkflowStaticData('node');\n\nif (typeof data.count === 'undefined' || \n    data.timestamp !== $(\"Set defaults\").first().json.timestamp \n   )\n  {\n    data.count = 0;\n    data.timestamp = $(\"Set defaults\").first().json.timestamp;\n  }\n\nif (data.count < $(\"Set defaults\").first().json.number_of_images) {\n  return {\"image_prompt\": $(\"Split Out\").all()[data.count++].json.image_prompt,\n          \"timestamp\": $(\"Set defaults\").first().json.timestamp,\n          \"number_of_images\": $(\"Set defaults\").first().json.number_of_images,\n          \"width\": $(\"Set defaults\").first().json.width,\n          \"height\": $(\"Set defaults\").first().json.height,\n          \"model\": $(\"Set defaults\").first().json.model,\n          \"genre\": $(\"Set defaults\").first().json.genre,\n          \"style\": $(\"Set defaults\").first().json.style,\n          \"vibrancy\": $(\"Set defaults\").first().json.vibrancy,\n          \"detail_level\": $(\"Set defaults\").first().json.detail_level,\n          \"composition\": $(\"Set defaults\").first().json.composition,\n          \"mood\": $(\"Set defaults\").first().json.mood,\n          \"lighting\": $(\"Set defaults\").first().json.lighting,\n          \"texture\": $(\"Set defaults\").first().json.texture,\n          \"camera_angle\": $(\"Set defaults\").first().json.camera_angle,\n          \"resolution\": $(\"Set defaults\").first().json.resolution,\n          \"artistic_influence\": $(\"Set defaults\").first().json.artistic_influence,\n         };\n} else {\n  return {\"image_prompt\": \"\",\n          \"timestamp\": $(\"Set defaults\").first().json.timestamp,\n          \"number_of_images\": $(\"Set defaults\").first().json.number_of_images,\n          \"width\": $(\"Set defaults\").first().json.width,\n          \"height\": $(\"Set defaults\").first().json.height,\n          \"model\": $(\"Set defaults\").first().json.model,\n          \"genre\": $(\"Set defaults\").first().json.genre,\n          \"style\": $(\"Set defaults\").first().json.style,\n          \"vibrancy\": $(\"Set defaults\").first().json.vibrancy,\n          \"detail_level\": $(\"Set defaults\").first().json.detail_level,\n          \"composition\": $(\"Set defaults\").first().json.composition,\n          \"mood\": $(\"Set defaults\").first().json.mood,\n          \"lighting\": $(\"Set defaults\").first().json.lighting,\n          \"texture\": $(\"Set defaults\").first().json.texture,\n          \"camera_angle\": $(\"Set defaults\").first().json.camera_angle,\n          \"resolution\": $(\"Set defaults\").first().json.resolution,\n          \"artistic_influence\": $(\"Set defaults\").first().json.artistic_influence,\n         };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -192,
+        768
+      ],
+      "id": "5aa7b5de-f636-4010-aa5e-f25708825ca9",
+      "name": "Return incremented prompt data"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $getWorkflowStaticData('global');\nif (typeof data.image_urls === 'undefined' || data.timestamp !== $(\"Set defaults\").first().json.timestamp) {\n  data.timestamp = $(\"Set defaults\").first().json.timestamp;\n  data.image_urls = [];\n}\n\ndata.image_urls.push($input.first().json.fileUrl);\n\nreturn data"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        528
+      ],
+      "id": "c91f0096-7549-4dd4-b532-64a1a318cbf0",
+      "name": "Store URL"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9a27a9c5-a7c8-4b7f-910a-4d0f8afee1df",
+              "leftValue": "={{ $json.image_prompt }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -16,
+        832
+      ],
+      "id": "d03b9f2d-05ec-4c66-bc34-bbab3bbb81e9",
+      "name": "If we have image_prompt"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $getWorkflowStaticData('global');\nconst image_urls = data.image_urls;\ndata.image_urls = [];\nreturn {'image_urls': image_urls};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        848
+      ],
+      "id": "eefd098d-d1ad-4375-a4e6-7394966dc3b1",
+      "name": "Return URLs"
+    },
+    {
+      "parameters": {
+        "content": "# Generate Images\n## SWF011\n### Purpose\nBased on the input generate a number of images that are then returned as an array. The images can be used for the Generate Slideshow input.\n### Input\n* number_of_images\n    * default: 1\n* width\n    * default: 1280\n* height\n    * default: 720\n* model\n    * default: flux\n* image_prompts []\n    * required\n* genre\n    * default: science-friction\n* style\n    * default: digital art\n* vibrancy\n    * default: vibrant and colorful\n* detail_level\n    * default: clean lines and simple shapes\n* composition\n    * default: dynamic composition\n* mood\n    * default: expressive and atmospheric\n* lighting\n    * default: dramatic lighting\n* texture\n    * default: smooth surfaces\n* camera_angle\n    * default: medium shot\n* resolution\n    * default: 4K\n* artistic_influence\n    * default: contemporary digital art\n### Output\n* image_urls []",
+        "height": 1072,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1696,
+        80
+      ],
+      "id": "1fb19da7-b206-423e-bc6d-e924e70a7d31",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fefded6e-aaa3-40d5-b29a-33f465199ed3",
+              "name": "timestamp",
+              "value": "={{ $now }}",
+              "type": "string"
+            },
+            {
+              "id": "b1e2aacb-6d47-4d46-8dc9-432cac6b75e0",
+              "name": "number_of_images",
+              "value": "={{ $ifEmpty($json.number_of_images, 1) }}",
+              "type": "number"
+            },
+            {
+              "id": "7b27d76d-5416-4c52-8289-964d9c827c02",
+              "name": "width",
+              "value": "={{ $ifEmpty($json.width, 1280) }}",
+              "type": "number"
+            },
+            {
+              "id": "0eefac3d-785c-46a8-b8a8-a212cf27f7c6",
+              "name": "height",
+              "value": "={{ $ifEmpty($json.height, 720) }}",
+              "type": "number"
+            },
+            {
+              "id": "ba8bdc51-5d15-4188-af68-3bf4178bb539",
+              "name": "model",
+              "value": "={{ $ifEmpty($json.model, 'flux') }}",
+              "type": "string"
+            },
+            {
+              "id": "b9feb755-671d-43ce-bf6e-e5d3a06320b9",
+              "name": "image_prompts",
+              "value": "={{ $json.image_prompts }}",
+              "type": "array"
+            },
+            {
+              "id": "a057fb6e-b896-4845-b93a-9f751edfed6d",
+              "name": "genre",
+              "value": "={{ $ifEmpty($json.genre, 'science-fiction') }}",
+              "type": "string"
+            },
+            {
+              "id": "ec75bcb3-a3e4-4374-9c99-4df1cd50c1f2",
+              "name": "style",
+              "value": "={{ $ifEmpty($json.style, 'digital art') }}",
+              "type": "string"
+            },
+            {
+              "id": "8f0d6139-6ab8-4186-bfaa-6d6865d02e9f",
+              "name": "vibrancy",
+              "value": "={{ $ifEmpty($json.vibrancy, 'vibrant and colorful') }}",
+              "type": "string"
+            },
+            {
+              "id": "32d08d04-b135-4fc6-a2ae-a60bc3dfaa8b",
+              "name": "detail_level",
+              "value": "={{ $json.detail_level || 'clean lines and simple shapes' }}",
+              "type": "string"
+            },
+            {
+              "id": "215bbe9d-190e-4462-baef-7ae54ac697b4",
+              "name": "composition",
+              "value": "={{ $json.composition || 'dynamic composition' }}",
+              "type": "string"
+            },
+            {
+              "id": "70d3c072-f2bf-4dde-88f9-985518ea7b12",
+              "name": "mood",
+              "value": "={{ $json.mood || 'expressive and atmospheric' }}",
+              "type": "string"
+            },
+            {
+              "id": "6646a4db-023b-4070-b5bd-c7b4206719b6",
+              "name": "lighting",
+              "value": "={{ $json.lighting || 'dramatic lighting' }}",
+              "type": "string"
+            },
+            {
+              "id": "ecc95222-292c-40b7-93a7-f15fb6e3ed64",
+              "name": "texture",
+              "value": "={{ $json.texture || 'smooth surfaces' }}",
+              "type": "string"
+            },
+            {
+              "id": "c3332110-74c1-4e22-93f0-32e38ff321e7",
+              "name": "camera_angle",
+              "value": "={{ $json.camera_angle || 'medium shot' }}",
+              "type": "string"
+            },
+            {
+              "id": "1b6c44d0-d67a-49bc-80d2-0d8a37772edd",
+              "name": "resolution",
+              "value": "={{ $json.resolution || '4K' }}",
+              "type": "string"
+            },
+            {
+              "id": "0bd123be-c754-49f0-a21c-236f1a21df74",
+              "name": "artistic_influence",
+              "value": "={{ $json.artistic_influence || 'contemporary digital art' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -864,
+        672
+      ],
+      "id": "ad0790e6-f7f9-4939-961a-9bc9f0b4ca86",
+      "name": "Set defaults"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "number_of_images",
+              "type": "number"
+            },
+            {
+              "name": "width",
+              "type": "number"
+            },
+            {
+              "name": "height",
+              "type": "number"
+            },
+            {
+              "name": "model"
+            },
+            {
+              "name": "image_prompts",
+              "type": "any"
+            },
+            {
+              "name": "genre"
+            },
+            {
+              "name": "style"
+            },
+            {
+              "name": "vibrancy"
+            },
+            {
+              "name": "detail_level"
+            },
+            {
+              "name": "composition"
+            },
+            {
+              "name": "mood"
+            },
+            {
+              "name": "lighting"
+            },
+            {
+              "name": "texture"
+            },
+            {
+              "name": "camera_angle"
+            },
+            {
+              "name": "resolution"
+            },
+            {
+              "name": "artistic_influence"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1088,
+        672
+      ],
+      "id": "3cc30bc3-88c0-450e-ae3c-f8fc26e815db",
+      "name": "Start"
+    },
+    {
+      "parameters": {
+        "errorMessage": "The image_prompts field is required but found empty."
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -416,
+        576
+      ],
+      "id": "e8ebf74b-cd5d-4b14-8375-1b75d4466e9e",
+      "name": "image_prompts Required"
+    },
+    {
+      "parameters": {
+        "amount": 5.01
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1312,
+        528
+      ],
+      "id": "6cdaa516-e855-4f03-9750-9cdcba9e4249",
+      "name": "Wait 5.01s",
+      "webhookId": "1d20e26d-6b79-46ab-a57b-dc14145db3b5"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "Zy23SQ1NqBBCmVwM",
+          "mode": "list",
+          "cachedResultName": "SWF018 - HTTP Request Error Management"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "={{ $json.error.status }}",
+            "code": "={{ $json.error.code }}",
+            "E429_wait_seconds": 5.01,
+            "E500_wait_seconds": 30
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "code",
+              "displayName": "code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "E429_wait_seconds",
+              "displayName": "E429_wait_seconds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "E500_wait_seconds",
+              "displayName": "E500_wait_seconds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1104,
+        768
+      ],
+      "id": "81a213d9-f893-4afb-9472-091056894fb9",
+      "name": "HTTP Request Error Manager"
+    },
+    {
+      "parameters": {
+        "errorMessage": "Unknown API Error"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1552,
+        800
+      ],
+      "id": "6c51dd1e-4a20-45de-8673-67dd97846cf6",
+      "name": "Unknown API Error"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4be61e5e-fb9a-48eb-90c5-e17b38f82e12",
+              "leftValue": "={{ $json.retry }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1328,
+        800
+      ],
+      "id": "045b81e8-05df-4041-b118-0986b269e5b8",
+      "name": "If Retry"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.zero2launch.com/download-image/url",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "height",
+              "value": "={{ $('Set defaults').first().json.height }}"
+            },
+            {
+              "name": "model",
+              "value": "={{ $('Set defaults').first().json.model }}"
+            },
+            {
+              "name": "prompt",
+              "value": "={{ $json.image_prompt }}\n{{ $('Set defaults').first().json.genre }}, \n{{ $('Set defaults').first().json.style }} style. \n{{ $('Set defaults').first().json.vibrancy }} colors, characterized by \n{{ $('Set defaults').first().json.detail_level }} that create \n{{ $('Set defaults').first().json.composition }} with \n{{ $('Set defaults').first().json.mood }} qualities. Shot with \n{{ $('Set defaults').first().json.lighting }} and \n{{ $('Set defaults').first().json.texture }}, \n{{ $('Set defaults').first().json.camera_angle }}, \n{{ $('Set defaults').first().json.resolution }}, \n{{ $('Set defaults').first().json.artistic_influence }}.\n"
+            },
+            {
+              "name": "width",
+              "value": "={{ $('Set defaults').first().json.width }}"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 5005
+            }
+          },
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        560
+      ],
+      "id": "0a7a8db6-cdb1-4890-bfe2-41f79f26564c",
+      "name": "Generate Image",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "lymWqGQ67PUobVpS",
+          "name": "Header Auth Z2L"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "bcc0167c-1d98-4485-a001-b10125ee1f64",
+              "leftValue": "={{ $json.image_serve_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        544
+      ],
+      "id": "acb33764-cf49-4045-9af0-6f7464135a01",
+      "name": "If image_server_url is not empty"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "Hqnsn7sEwrc1XeHG",
+          "mode": "list",
+          "cachedResultName": "SWF030 - Download And Save"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "download_url": "={{$input.first().json.image_serve_url}}",
+            "filename": "={{ $input.first().json.image_serve_url.split('/').last() }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "download_url",
+              "displayName": "download_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "filename",
+              "displayName": "filename",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        848,
+        528
+      ],
+      "id": "11d8886b-b1bf-4161-85fe-a7487d7d0a26",
+      "name": "Download and Save"
+    },
+    {
+      "parameters": {
+        "amount": 5.01
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        672,
+        592
+      ],
+      "id": "afe3fb43-0e1d-414e-91ed-216e89d61e36",
+      "name": "Wait 5s",
+      "webhookId": "f9d8a24a-41dc-43aa-b202-5a871e039231"
+    }
+  ],
+  "connections": {
+    "If image_prompts empty": {
+      "main": [
+        [
+          {
+            "node": "image_prompts Required",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Return incremented prompt data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Return incremented prompt data": {
+      "main": [
+        [
+          {
+            "node": "If we have image_prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store URL": {
+      "main": [
+        [
+          {
+            "node": "Wait 5.01s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If we have image_prompt": {
+      "main": [
+        [
+          {
+            "node": "Generate Image",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Return URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set defaults": {
+      "main": [
+        [
+          {
+            "node": "If image_prompts empty",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Set defaults",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 5.01s": {
+      "main": [
+        [
+          {
+            "node": "Return incremented prompt data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request Error Manager": {
+      "main": [
+        [
+          {
+            "node": "If Retry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Retry": {
+      "main": [
+        [
+          {
+            "node": "Generate Image",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Unknown API Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Image": {
+      "main": [
+        [
+          {
+            "node": "If image_server_url is not empty",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request Error Manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If image_server_url is not empty": {
+      "main": [
+        [
+          {
+            "node": "Download and Save",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 5s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download and Save": {
+      "main": [
+        [
+          {
+            "node": "Store URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 5s": {
+      "main": [
+        [
+          {
+            "node": "Generate Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Start": [
+      {
+        "number_of_images": 28,
+        "width": 1280,
+        "height": 720,
+        "model": "flux",
+        "image_prompts": [
+          "A sprawling, futuristic transit terminal in chaos, as commuters float and tumble through the air, their faces contorted in terror. The harsh, flickering fluorescent lights cast an eerie glow on the scene, illuminating the grimy tiles and the grimacing faces of the people. The terminal's steel support beams creak and groan under the strain, while the air is filled with the soft, ominous hum of machinery, a stark contrast to the screams of panic. The terminal's digital displays flicker and glitch, casting distorted reflections on the cold, hard surfaces. In the foreground, a lone figure clings to a support column, his knuckles white with effort, as the world around him defies the laws of physics. The color palette is a sickly mix of cold blues, harsh whites, and the stark, unnatural glow of the malfunctioning technology.",
+          "A grimy, neon-lit transit station at dusk, where a ragged crowd of augmented drifters huddle under the flickering glow of malfunctioning holographic signs. A lone figure, Lyn, stands out with a visor reflecting the chaotic, reversed holograms of departure schedules. Her grease-stained clothes and mismatched augment plates blend with the decay, but her eyes hold a chilling, predatory calm. Beside her, Kael watches as a hybrid mind, a man with a face contorted by the expressions of multiple identities, stumbles into view, his eyes wild and unfocused. The air is thick with the scent of ozone and the distant hum of failing machinery, casting an eerie, electric glow over the scene.",
+          "A neon-lit, rain-soaked alleyway at night, where a man's face flickers between two identities, his eyes glowing with an eerie, otherworldly light. Behind him, a towering, decaying cityscape looms, its skyscrapers adorned with flickering holographic billboards and pulsating with an unsettling, pulsating energy. The air is thick with a toxic, electric mist, and the ground is slick with oily, iridescent puddles. In the shadows, a woman watches, her eyes reflecting the chaotic scene, a sinister smile playing on her lips. The color palette is a sickly mix of purples, greens, and blues, with stark contrasts of bright, artificial light and deep, inky blacks.",
+          "A dimly lit, neon-drenched cyberpunk alley, rain-soaked and reflecting the cold glow of holographic billboards advertising memory augmentation services. A lone figure, Kael, stands at the entrance of a hidden, pulsating underground market, his reflection in a puddle revealing fractured, ghostly echoes of his own face. Surrounding him, shadowy figures in tattered cloaks huddle over steaming vats of neural fluid, while above, a flickering hologram of a human brain is being dissected by mechanical tendrils, revealing shards of stolen memories that drift like spectral butterflies in the smoky air. The color palette is a grimy mix of deep blues, purples, and sickly greens, with occasional bursts of neon highlighting the eerie, otherworldly technology at play.",
+          "A grimy, neon-lit alleyway in a cyberpunk metropolis, rain-soaked and reflecting the cold glow of holographic advertisements. A lone figure in a tattered, reflective jacket stands frozen, their face obscured by a cracked, visor. They stare down a disheveled, desperate man clutching a flickering data chip, the air between them charged with tension. Behind them, a shattered ticket gate flickers with static, and the alley's shadows seem to twist and writhe with unseen, malevolent energy. The color palette is a grim mix of deep blues, purples, and the harsh, artificial light of failing neon signs.",
+          "A dimly lit, ancient stone chamber, damp and cold, with flickering candlelight casting eerie, dancing shadows on the rough-hewn walls. A lone figure stands trembling before an ornate altar, their hand reaching out to grasp a pulsating, brass key adorned with glowing, arcane symbols. Behind them, a hooded figure lurks in the shadows of the doorway, their eyes reflecting the faint, otherworldly light emanating from the key. The air is thick with tension and the scent of old magic, as the chamber seems to hum with an unseen, malevolent energy.",
+          "A dimly lit, ancient chamber filled with an oppressive, swirling mist, where a lone woman stands before a brass key embedded in a stone pedestal. Her fingers tremble as they grasp the cold metal, while eerie, whispered syllables slither through the air, manifesting as ghostly, serpentine tendrils that writhe and coil around her. The chamber's walls are adorned with faded, arcane symbols that pulse with an otherworldly light, casting elongated, dancing shadows that seem to move with a life of their own. The air is thick with tension and the weight of unseen forces, as a weary, gaunt-faced man watches from the shadows, his eyes reflecting the chamber's eerie glow.",
+          "A dimly lit, ancient stone chamber, illuminated by the eerie glow of a pulsating, otherworldly key clutched in a woman's trembling hand. Her face contorted in a mix of pain and determination, veins of light snaking up her arm, as a hulking, shadowy figure looms in the doorway, his eyes reflecting the key's malevolent radiance. The air thick with tension, the cold stone floor streaked with faded, arcane symbols, and the faint, ominous hum of a power long forgotten.",
+          "A dimly lit, ancient corridor, illuminated by flickering torches casting eerie shadows on crumbling stone walls. The air is thick with tension and the faint scent of decay. At the far end, a monstrous figure emerges from the darkness, its eyes glowing with an otherworldly light. The ground trembles slightly, and the faint sound of distant, ominous footsteps echoes through the chamber. The scene is bathed in a cold, moody blue and purple hue, with the only source of warmth coming from the dying embers of a nearby brazier. The figure's silhouette is distorted by the flickering light, adding to the sense of dread and foreboding. The corridor is littered with the remnants of a long-forgotten battle, including broken weapons and shattered armor, all covered in a thick layer of dust and cobwebs. The atmosphere is thick with the sense of impending doom, as if the very air is heavy with the weight of ancient curses and forgotten secrets.",
+          "A dense, moonlit forest shrouded in a thick, oppressive fog, where a lone lantern casts eerie, flickering shadows on the gnarled trees. A young woman clutches the lantern, her eyes wide with terror as she scans the darkness, while a stern, unblinking man grips her arm, his gaze fixed on the menacing silhouettes lurking just beyond the light's reach. The air is thick with tension and the faint, chilling whisper of rain, as the faint glow of the lantern illuminates the damp, moss-covered ground and the twisted, bare branches that seem to reach out like skeletal fingers.",
+          "A moonless night in a twisted, ancient forest, where the gnarled, leafless trees cast eerie shadows that dance macabrely in the faint, cold glow of distant, spectral lights. The air is thick with an oppressive, choking mist that clings to the ground, obscuring the uneven terrain littered with rotting branches and jagged, half-buried stones. At the forest's edge, a narrow, moss-covered stone passage opens into a small, desolate clearing, where the night seems to press in from all sides, suffocating and alive with an unseen, malevolent presence. A faint, barely perceptible silhouette, like a sliver of darkness given form, slips between the twisted trunks, vanishing into the inky blackness, leaving only the haunting, eerie silence of a place where the very air seems to whisper secrets of ancient, forgotten horrors.",
+          "A lone lantern casts a faint, flickering glow on a muddy path, illuminating the silhouette of a tall, gaunt figure in a tattered, mud-streaked coat. The figure's face is obscured by shadows, except for two piercing, glass-like eyes that reflect the dim light with an eerie intensity. Behind the figure, a dense, twisted forest stretches out, the gnarled trees contorted in unnatural shapes, their bare branches reaching out like skeletal fingers. The sky above is a roiling mass of dark, stormy clouds, though no rain falls, and the air is thick with an oppressive, otherworldly hum that seems to pulse through the very ground. The scene is bathed in a cold, moody color palette of deep blues, purples, and blacks, with the only source of light coming from the lantern and the figure's unsettling eyes.",
+          "A lone figure stands on a desolate ridge, a twisted, mist-laden blade in hand, as the cold light of a full moon casts eerie shadows across a barren landscape. The man's eyes glow with an unsettling calm, his smile a chilling rictus as he faces off against a tense, defensive figure, the wind whipping around them, carrying with it the faint, distant howls of unseen creatures. The air is thick with tension and the promise of violence, the stark contrast of the moonlit night and the dark, ominous figures creating a sense of foreboding and dread.",
+          "A dimly lit, rain-soaked forest clearing, where a menacing figure in tattered, blood-stained robes stands, his face obscured by a tattered hood. He brandishes a wickedly curved blade, its edge glinting menacingly in the faint, eerie moonlight filtering through the dense canopy above. Behind him, the charred remnants of trees and the faint, smoldering ruins of a small village stretch out, the air thick with the acrid scent of smoke and the faint, unsettling hum of distant, otherworldly whispers. Two figures stand before him, one trembling with fear, the other tense and protective, as the rain pours down in cold, relentless sheets, casting an ethereal glow over the entire scene.",
+          "A lone figure in a worn, dusty trench coat stands in a desolate, windswept canyon at dusk, the setting sun casting an eerie, blood-red glow across the rugged landscape. The stranger's face is obscured by the shadow of a tattered, wide-brimmed hat, revealing only the cold, unsettling glint of his eyes. His cracked, parched lips curl into a sinister, knowing smirk as he takes a deliberate step forward, the faint creak of aged leather echoing through the silence. Behind him, the distant, haunting howl of a lone coyote pierces the air, as the figure's hand slowly drifts to the concealed weapon beneath his coat. The scene is bathed in the harsh, contrasting colors of the dying light, casting long, ominous shadows that dance macabrely across the barren, red-rock terrain.",
+          "A dimly lit, abandoned marketplace at dusk, where elongated shadows dance macabrely across cobblestones slick with rain. A menacing figure stands poised, muscles taut, eyes gleaming with a predatory hunger, as a young man, Elias, backs away, his gaze flicking nervously towards a narrow, lantern-lit alley. The air is thick with tension and the faint, metallic scent of blood, while the distant slam of a door echoes ominously, shattering the eerie silence. The scene is bathed in a cold, eerie blue and purple hue, with flickering lanterns casting long, dancing shadows, and the faint glow of a blood-red moon peeking through the clouds.",
+          "A grimy, rain-soaked alleyway at dusk, where the flickering light of a distant gas lamp casts eerie, elongated shadows. The cobblestones glisten with a sickly sheen, reflecting the cold, metallic glint of a polished dagger held by a menacing figure in a long, tattered coat. The figure's face is obscured by a wide-brimmed hat, leaving only a thin, cruel smile visible. The alley is flanked by crumbling buildings, their windows like empty, accusing eyes, as a chilling wind whips through, carrying with it the faint, ominous echo of distant footsteps.",
+          "A dimly lit, rain-soaked alleyway, cobblestones glistening under flickering lanterns, casting eerie, elongated shadows. Two figures stand tense and ready, one with a sinister smirk, the other with a determined glare. The air is thick with anticipation, the silence broken only by the distant drip of water and the faint, ominous hum of a lurking danger. The stranger's shadow dances menacingly behind him, while the hero's stance speaks of a quiet, deadly resolve. The scene is bathed in a cold, moody palette of deep blues, purples, and the warm, deceptive glow of the lanterns, creating a stark contrast between the tranquil setting and the impending violence.",
+          "A lone figure stands atop a windswept ridge, the faint glow of an ancient ruin illuminating the cold stone and desolate landscape below. The sky is a tumultuous mix of dark clouds and faint moonlight, casting an eerie blue and purple hue over the scene. The figure, clad in tattered, weather-beaten clothes, grips a worn, leather-bound journal, their eyes reflecting the distant glow with a mix of determination and dread. The wind howls, whipping their hair and cloak around them, as the first drops of rain begin to fall, tracing glistening paths down the rugged terrain. In the distance, the ruin's crumbling walls and shattered pillars loom, their shadows dancing macabrely in the faint light, hinting at the secrets and horrors that lie within.",
+          "A crumbling ancient ruin bathed in an eerie, ethereal glow, the fractured walls emitting a spectral light that casts elongated, dancing shadows. The air is thick with tension and the faint scent of decay, as two weary explorers stand at the precipice, their faces illuminated by the otherworldly luminescence. The entrance yawns like a monstrous maw, beckoning them into the unknown, while the remnants of a once-great civilization lie in ruin around them, shrouded in a veil of mist and mystery. The color palette is a haunting blend of cold blues, purples, and the faintest hint of blood-red, accentuated by the stark contrast of the explorers' determined yet fearful expressions.",
+          "A desolate, ancient ruin shrouded in a perpetual mist, the crumbling walls adorned with eerie, luminescent carvings that seem to pulse with an otherworldly energy. The entrance is a colossal, weathered arch, its intricate patterns casting twisted shadows in the dim, ethereal light filtering through the dense canopy above. The ground is slick with rain, reflecting the cold, muted hues of the overcast sky, as a lone figure stands at the threshold, their breath visible in the chilling air, surrounded by the oppressive silence of a long-forgotten civilization.",
+          "A dimly lit, ancient chamber filled with an oppressive atmosphere, where silver-veined pillars cast eerie, elongated shadows on the cold stone walls. At the chamber's heart, a black marble pedestal, impossibly smooth, supports a gold-banded box adorned with faintly glowing, arcane symbols. The air is thick with dread, and the faint, unsettling hum of an unseen presence fills the silence. The chamber is illuminated by an otherworldly, pulsating light that seems to emanate from the very symbols on the box, casting an unsettling glow on the trembling hands of a figure reaching out to touch it.",
+          "A dimly lit, ancient chamber filled with an eerie, dry wind, where a mysterious, silver-bound Codex rests on a stone pedestal. The Codex's pages shimmer with intricate, glowing patterns that dance and shift in the faint light, casting eerie shadows on the cold stone walls. The air is thick with tension and the faint scent of decay, as a lone figure stands over the Codex, their fingers tracing the enigmatic symbols, while another figure looms in the shadows, eyes fixed on the glowing pages. The chamber is bathed in a cold, ethereal blue light, with flickering torches casting long, dancing shadows, and the faint, distant sound of whispers echoing through the chamber.",
+          "A dimly lit, ancient chamber pulsates with an eerie, rhythmic glow from the walls, casting elongated, dancing shadows. The air hums with a malevolent energy, as a massive, levitating tome radiates an otherworldly light, its silver pages shifting and rearranging on their own. The chamber's heart beats in sync with the hum, as a sinister, pulsating orb floats above the tome, its surface swirling with chaotic, vivid colors. The orb's light illuminates the chamber, revealing intricate, arcane symbols etched into the stone floor, which seem to twist and contort in the flickering light. The chamber's atmosphere is thick with tension and foreboding, as if the very air is alive with malevolent intent.",
+          "A dimly lit, ancient chamber filled with the eerie glow of flickering torches, revealing the crumbling walls adorned with arcane symbols. A heavy, ornate stone door stands ajar, revealing a glimpse of a raging storm outside, lightning striking the distant hills. In the center, a weathered, leather-bound tome lies open on a pedestal, its yellowed pages illuminated by an ethereal light. Two figures stand in tense silence, their faces illuminated by the eerie glow, one hand hovering over the Codex, the other clutching a rusted dagger, as the air crackles with the impending storm and the weight of their decision.",
+          "A desolate, rain-soaked ridge at dusk, where two weary figures ascend, their silhouettes stark against the gloomy sky. The path behind them descends into a yawning chasm, its depths shrouded in an eerie, fading glow. The air is thick with mist and the scent of damp earth, as the last remnants of light struggle to pierce the encroaching darkness. The ridge is littered with twisted, gnarled trees, their bare branches reaching out like skeletal fingers, while the distant howl of an unseen creature echoes through the desolate landscape. The figures' faces are etched with determination and fear, as they clutch a hidden, ancient artifact, unaware of the impending doom that lurks in the shadows.",
+          "A desolate, windswept ridge at dusk, where two weary figures trudge downwards, their silhouettes stark against the bruised, stormy sky. The first jagged bolt of lightning illuminates the scene, casting an eerie glow on the barren landscape. The air is thick with tension and the promise of an impending, relentless pursuit. The color palette is a grim mix of deep blues, purples, and the cold, harsh white of the lightning, with the faint, ominous glow of a distant, dying sun on the horizon. The figures' faces are obscured, their identities swallowed by the encroaching darkness and the howling wind.",
+          "A lone figure stands defiant in the eye of a raging storm, the wind whipping around a crumbling ancient library filled with floating, glowing parchments. The air is thick with an eerie green mist, and the only light comes from the flickering embers of a dying fire, casting long, dancing shadows across the weathered stone walls. The figure's eyes burn with determination as they clutch a heavy, leather-bound tome, its pages rustling with a life of their own, while the storm rages on outside, the dark clouds illuminated by distant, ominous lightning strikes."
+        ],
+        "genre": null,
+        "style": null,
+        "vibrancy": null,
+        "detail_level": null,
+        "composition": null,
+        "mood": null,
+        "lighting": null,
+        "texture": null,
+        "camera_angle": null,
+        "resolution": null,
+        "artistic_influence": null
+      }
+    ]
+  },
+  "meta": {
+    "instanceId": "37fe6d8c3b2aaeda95afa9d59c8cbc7c79e8171e6cc2a68043e239f8403c390e"
+  }
+}

@@ -1,0 +1,260 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "// Get the filename directly from the URL parameter :filename\n// This is the most reliable method.\nconst filename = $json.params.filename;\n\n// Security validation - only allow safe filenames (SHA256 hash + extension)\nconst safeFilenamePattern = /^[a-fA-F0-9]{64}\\.[a-zA-Z0-9]{1,10}$/;\n\n// Trim the filename to remove any potential whitespace before testing\nif (!filename || !safeFilenamePattern.test(filename.trim())) {\n  return [{\n    json: {\n      error: \"Invalid filename format\",\n      status: 400,\n      validRequest: false\n    }\n  }];\n}\n\nconst tempDir = '/tmp/n8n-files';\n// Use the trimmed filename to construct the path\nconst filePath = `${tempDir}/${filename.trim()}`;\n\nreturn [{\n  json: {\n    requestedFile: filename.trim(),\n    filePath: filePath,\n    validRequest: true\n  }\n}];"
+      },
+      "id": "93a037b6-ec00-4631-a510-d21602929a95",
+      "name": "Extract Filename",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1376,
+        -304
+      ]
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $('Extract Filename').item.json.filePath }}",
+        "options": {
+          "dataPropertyName": "data"
+        }
+      },
+      "id": "afd58e67-6b57-44bc-a248-ce08108ef070",
+      "name": "Read File",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -704,
+        -416
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "binary",
+        "options": {}
+      },
+      "id": "1acb8b86-0748-44d1-810c-83fd9a727223",
+      "name": "Serve File",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        -416
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=File does not exist",
+        "options": {
+          "responseCode": 404
+        }
+      },
+      "id": "60db3109-f7ff-4123-941d-c0d5ca037377",
+      "name": "Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        -704,
+        -208
+      ]
+    },
+    {
+      "parameters": {
+        "path": "/file/:filename",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1600,
+        -304
+      ],
+      "id": "9bdd052d-6f28-4996-9fd7-888d96822cf5",
+      "name": "Webhook",
+      "webhookId": "a60c3f68-7bcf-4504-a087-0fb9c7a3fce0"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9456bca7-67c6-48ac-ac18-a007ed940070",
+              "leftValue": "={{ $json.validRequest }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1152,
+        -304
+      ],
+      "id": "4158ed3c-fe25-4d3b-8227-476a6c9b8993",
+      "name": "If Valid Req"
+    },
+    {
+      "parameters": {
+        "content": "# Webhook File Server\n## WF003\n### Purpose\nServe file binary data via a web URL.\n### Input\n* GET web URL\n### Output\n* data\n     * Binary file data",
+        "height": 320,
+        "width": 416
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2064,
+        -352
+      ],
+      "id": "5862a618-1319-4216-964e-57659b35eb83",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "command": "=ls {{ $json.filePath }}"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -928,
+        -368
+      ],
+      "id": "c03b5b26-75d6-4a41-a477-dbe937b44d8e",
+      "name": "Check if file exists",
+      "onError": "continueErrorOutput"
+    }
+  ],
+  "connections": {
+    "Extract Filename": {
+      "main": [
+        [
+          {
+            "node": "If Valid Req",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read File": {
+      "main": [
+        [
+          {
+            "node": "Serve File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Filename",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Valid Req": {
+      "main": [
+        [
+          {
+            "node": "Check if file exists",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check if file exists": {
+      "main": [
+        [
+          {
+            "node": "Read File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Webhook": [
+      {
+        "headers": {
+          "host": "n8n.connectcircuits.com",
+          "x-forwarded-scheme": "https",
+          "x-forwarded-proto": "https",
+          "x-forwarded-for": "65.60.193.72",
+          "x-real-ip": "65.60.193.72",
+          "sec-ch-ua": "\"Not;A=Brand\";v=\"99\", \"Google Chrome\";v=\"139\", \"Chromium\";v=\"139\"",
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Chrome OS\"",
+          "upgrade-insecure-requests": "1",
+          "user-agent": "Mozilla/5.0 (X11; CrOS x86_64 14541.0.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+          "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+          "sec-fetch-site": "none",
+          "sec-fetch-mode": "navigate",
+          "sec-fetch-user": "?1",
+          "sec-fetch-dest": "document",
+          "accept-encoding": "gzip, deflate, br, zstd",
+          "accept-language": "en-US,en;q=0.9,ru;q=0.8",
+          "priority": "u=0, i",
+          "cookie": "rl_page_init_referrer=RudderEncrypt%3AU2FsdGVkX1%2FQ4yMiRUrkDufG3sHKEw0%2FLnxteFft2kU%3D; rl_page_init_referring_domain=RudderEncrypt%3AU2FsdGVkX1%2BYkIY8WYQxCOAOa6xDUEm%2BJUWrDrCM224%3D; rl_anonymous_id=RudderEncrypt%3AU2FsdGVkX19TFbZ9WCqRQ2qZcZQZIyLEwvOXnqGyfvfCLnXtXjXiWR%2BkOYxFoNE6Px7pRQytIku40wqr1JI8tQ%3D%3D; rl_user_id=RudderEncrypt%3AU2FsdGVkX1%2BpeNGvMTxMHyCbtAATHX4cSDZ4RgAUfIbWF9OgiS2HW1pnp9QAMw3WJMDBhmb1uJoDJVRnJJSHNTlwSZVrziiad18%2B7RQ3U6OsW9wjD5VdhzmaQNRrqDzhLoEJ%2BWZ6PzLQHSFPZwKFocUlmby8Nn5mQVQ2RjQ2UCU%3D; rl_trait=RudderEncrypt%3AU2FsdGVkX1%2BvLAtpyzr0vFfdHv%2BEOKTUMzWO%2Fxaum1sJTAT0%2FiBmEKlJDHmlvAc2rtqOcxwvHRqyXOO98oWdQ5baaFxKU01MmNe1En5BTpAzl4GDLhA8IR9Jte59K0NzZ2qWAjsekA96Mp0ZW3WrRA%3D%3D; ph_phc_4URIAm1uYfJO7j8kWSe0J8lc8IqnstRLS7Jx8NcakHo_posthog=%7B%22distinct_id%22%3A%2237fe6d8c3b2aaeda95afa9d59c8cbc7c79e8171e6cc2a68043e239f8403c390e%23b5123662-0886-4c32-a2cf-084c7a02de9e%22%2C%22%24sesid%22%3A%5B1758328108838%2C%2201996485-b727-7a20-9eef-be72aaab1ecf%22%2C1758328108838%5D%2C%22%24epp%22%3Atrue%2C%22%24initial_person_info%22%3A%7B%22r%22%3A%22%24direct%22%2C%22u%22%3A%22https%3A%2F%2Fn8n.connectcircuits.com%2Fsignin%3Fredirect%3D%25252Fsettings%25252Fusage%25253Fkey%25253De2f25f2a-8bb1-4b0a-89e9-4b93fb0a9604%22%7D%7D; rl_session=RudderEncrypt%3AU2FsdGVkX180y6uXy4fqPiHxhEwFx53fhkgL5GqJLCpf4gDfVXsYlbLkrW47Uz9JNF6sxgULzpAJLnHwgECJ1arld9yKF%2B6b90t%2FKuVVxr7xBKURbdHol2vdSonoSZ0CK83XlwhqrhbZK5rHUWYe5A%3D%3D"
+        },
+        "params": {
+          "filename": "bf7567ff6ab76dbf1cac26f39b846332f9e961d6cff7d0a9cd9fedcee03275e3.jpg"
+        },
+        "query": {},
+        "body": {},
+        "webhookUrl": "https://n8n.connectcircuits.com/webhook/a60c3f68-7bcf-4504-a087-0fb9c7a3fce0/file/:filename",
+        "executionMode": "production"
+      }
+    ]
+  },
+  "meta": {
+    "instanceId": "37fe6d8c3b2aaeda95afa9d59c8cbc7c79e8171e6cc2a68043e239f8403c390e"
+  }
+}

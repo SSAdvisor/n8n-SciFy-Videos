@@ -1,0 +1,975 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "amount": 20
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1184,
+        240
+      ],
+      "id": "06ce2716-81a3-4af4-99df-e719c7888090",
+      "name": "Wait 20s",
+      "webhookId": "b75594a3-83fb-46db-a872-78e9d6050635"
+    },
+    {
+      "parameters": {
+        "amount": 6
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1632,
+        800
+      ],
+      "id": "daf8331a-02f9-4e13-ba67-4e110e01d945",
+      "name": "Wait 6s",
+      "webhookId": "88d60e5d-89ac-4da8-9cff-5681a7b30c48"
+    },
+    {
+      "parameters": {
+        "jsCode": "const urls = $('Start').first().json.image_urls;\nconst texts = $('Start').first().json.image_texts;\nlet slides = [];\n\nif (urls.length !== texts.length) {\n  throw new Error('Number of URL and Text elements must match!')\n}\n\nfor (let i = 0; i < urls.length; i++) {\n  slides.push({\"image_url\": urls[i], \"text\": texts[i]});\n}\n\nreturn {\"slides\": slides}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -144,
+        896
+      ],
+      "id": "db0ddcfa-b396-4e9a-8ee9-53a315be64ab",
+      "name": "Format the body for the HTTP Request"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.zero2launch.com/create-slideshow",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "slides",
+              "value": "={{ $json.slides }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        80,
+        800
+      ],
+      "id": "b3276a38-6ecb-442f-a97c-d45b7c970869",
+      "name": "Generate Slideshow",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "lymWqGQ67PUobVpS",
+          "name": "Header Auth Z2L"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.zero2launch.com/create-slideshow/status/{{ $('Generate Slideshow').item.json.job_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "*/*"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        304,
+        416
+      ],
+      "id": "8f5308e9-ece4-4821-a0d1-f47187a12fa6",
+      "name": "Check Slideshow Status",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "lymWqGQ67PUobVpS",
+          "name": "Header Auth Z2L"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get node-specific static data (persists across workflow runs)\nconst data = $getWorkflowStaticData('node');\n\n// Initialize attempt if it doesn't exist\nif (typeof data.attempt === 'undefined' || data.job_id !== $input.first().json.job_id) {\n  data.attempt = 0;\n  data.job_id = $input.first().json.job_id\n}\n\n// Increment attempt\ndata.attempt += 1;\n\n// Return the current attempt count\nreturn [{ json: { attempts: data.attempt, status: $('Check Slideshow Status').first().json.status, result: $(\"Check Slideshow Status\").first().json.result } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        0
+      ],
+      "id": "d3871411-06b7-4a63-96ec-06a2b1b6e836",
+      "name": "Check Slideshow Status Attempts Increment",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "errorMessage": "=Unknown error checking video status\n\n{{ $json.error.message }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1184,
+        432
+      ],
+      "id": "a1bad872-3167-4604-afe8-5cfccb3574ff",
+      "name": "Unknown Error"
+    },
+    {
+      "parameters": {
+        "errorMessage": "API Failure"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1632,
+        -96
+      ],
+      "id": "ee6832c9-5c9f-416d-b595-6efbabcb8d17",
+      "name": "API Failure"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ea952eb9-b09f-469b-97c9-c7e1b6b9c087",
+              "leftValue": "={{ $runIndex }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1232,
+        16
+      ],
+      "id": "d04c7f0f-5b2a-4bc3-9fcd-c7f352a0df8f",
+      "name": "If Regenerate Slideshow Attempts Count > 1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "SUCCESS",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "2159bd79-d7cf-4d6d-b2bb-1be3ca3fa54a"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "SUCCESS"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "2ca5be36-4ead-4796-bd28-1636fbb2eec7",
+                    "leftValue": "={{ $json.attempts }}",
+                    "rightValue": 2500,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gt"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "STOP"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "ac4127ae-1760-4b0d-b606-2fe306ba7304",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "FAILURE",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "FAILURE"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "7262353b-6d26-4108-b2f3-0f87f6e8120d",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "STARTED",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "STARTED"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "e8cd44bb-0f2a-48ee-9a13-44727d127949",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "PENDING",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "PENDING"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c62dbf03-caed-4e30-a3d9-20fe3123327a",
+                    "leftValue": "={{ $('Check Slideshow Status').item.json.error_details }}",
+                    "rightValue": "tmpfiles.org",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "tmpfiles.org"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        752,
+        -48
+      ],
+      "id": "f8add1b1-6d03-4d4b-abd6-87b7ccc89ad1",
+      "name": "Filter Slideshow Status"
+    },
+    {
+      "parameters": {
+        "content": "# Generate Slideshow\n## SWF012\n### Purpose\nGenerate a slideshow based on the given image_urls and image_texts given.\n### Input\n* image_urls [...]\n* image_texts [...]\n### Output\n* attempts\n* status\n* result [job_id, status, video_url]",
+        "height": 384,
+        "width": 448
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -736,
+        208
+      ],
+      "id": "b1564d7e-16b4-45cc-9d74-57500d07df65",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1568,
+        -256
+      ],
+      "id": "d93f7e0f-17c0-482f-94ec-168473bbbd78",
+      "name": "Return Video URL"
+    },
+    {
+      "parameters": {
+        "errorMessage": "={{ $json.error.message }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        960,
+        704
+      ],
+      "id": "4dfa5c52-ac44-4aa8-87aa-61d7dfdabf66",
+      "name": "API Error"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "image_urls",
+              "type": "array"
+            },
+            {
+              "name": "image_texts",
+              "type": "array"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -368,
+        896
+      ],
+      "id": "9aeb196b-dd72-46f0-84a9-0a54dbfc2043",
+      "name": "Start"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "Zy23SQ1NqBBCmVwM",
+          "mode": "list",
+          "cachedResultName": "SWF018 - HTTP Request Error Management"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "={{ $json.error.status }}",
+            "code": "={{ $json.error.code }}",
+            "E429_wait_seconds": 5.01,
+            "E500_wait_seconds": 30
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "code",
+              "displayName": "code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "E429_wait_seconds",
+              "displayName": "E429_wait_seconds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "E500_wait_seconds",
+              "displayName": "E500_wait_seconds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        304,
+        704
+      ],
+      "id": "c2e6b3e6-35a2-4e1c-b447-71f70677c46b",
+      "name": "HTTP Request Error Management"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "Zy23SQ1NqBBCmVwM",
+          "mode": "list",
+          "cachedResultName": "SWF018 - HTTP Request Error Management"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "={{ $json.error.status }}",
+            "code": "={{ $json.error.code }}",
+            "E429_wait_seconds": 5.01,
+            "E500_wait_seconds": 30
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "code",
+              "displayName": "code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "E429_wait_seconds",
+              "displayName": "E429_wait_seconds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "E500_wait_seconds",
+              "displayName": "E500_wait_seconds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        528,
+        416
+      ],
+      "id": "8ca703d9-fb84-4e6a-83c3-64bb781a4846",
+      "name": "HTTP Request Error Management1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "dac29445-1472-4f4b-b9ec-2d8530c37910",
+              "leftValue": "={{ $json.retry && ($runIndex < 35) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        528,
+        704
+      ],
+      "id": "1a97f244-511e-437e-9cc8-5519b6fcaa3b",
+      "name": "If Retry and attempts < 35 #1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "16c18deb-3ce1-4ecc-ba8a-a602a0040a76",
+              "leftValue": "={{ $json.retry && ($runIndex < 35) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        416
+      ],
+      "id": "6404f61f-3687-4c52-bd53-db298ab7e29c",
+      "name": "If Retry and attempts < 35 #2"
+    },
+    {
+      "parameters": {
+        "content": "## 2025-09-30\n* Add HTTP Request Error Management",
+        "width": 448,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -752,
+        672
+      ],
+      "id": "1130b44c-d7da-4904-aa32-6a500c299a45",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "Kw0WIJ9MGPamlMW4",
+          "mode": "list",
+          "cachedResultName": "SWF052 - Download And Save Temporarily"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "file_url": "={{ $json.result.video_url }}"
+          },
+          "matchingColumns": [
+            "file_url"
+          ],
+          "schema": [
+            {
+              "id": "file_url",
+              "displayName": "file_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        960,
+        -272
+      ],
+      "id": "85d2e20d-8781-4527-8a8a-18bb1f290905",
+      "name": "Download and Save Temporarily"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0cdfbbb7-6113-4835-84ef-c39cd98b5081",
+              "name": "result",
+              "value": "={{ { video_url: $json.fileUrl } }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1168,
+        -272
+      ],
+      "id": "e87ed3b0-36ec-42cb-a639-e06c2804ef8b",
+      "name": "Format result.video_url object"
+    }
+  ],
+  "connections": {
+    "Wait 20s": {
+      "main": [
+        [
+          {
+            "node": "Check Slideshow Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 6s": {
+      "main": [
+        [
+          {
+            "node": "Generate Slideshow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format the body for the HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Generate Slideshow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Slideshow": {
+      "main": [
+        [
+          {
+            "node": "Check Slideshow Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request Error Management",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Slideshow Status": {
+      "main": [
+        [
+          {
+            "node": "Check Slideshow Status Attempts Increment",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request Error Management1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Slideshow Status Attempts Increment": {
+      "main": [
+        [
+          {
+            "node": "Filter Slideshow Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Regenerate Slideshow Attempts Count > 1": {
+      "main": [
+        [
+          {
+            "node": "API Failure",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 6s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Slideshow Status": {
+      "main": [
+        [
+          {
+            "node": "Download and Save Temporarily",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If Regenerate Slideshow Attempts Count > 1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "API Failure",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 20s",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 20s",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format the body for the HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Format the body for the HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request Error Management": {
+      "main": [
+        [
+          {
+            "node": "If Retry and attempts < 35 #1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request Error Management1": {
+      "main": [
+        [
+          {
+            "node": "If Retry and attempts < 35 #2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Retry and attempts < 35 #1": {
+      "main": [
+        [
+          {
+            "node": "Format the body for the HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "API Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Retry and attempts < 35 #2": {
+      "main": [
+        [
+          {
+            "node": "Check Slideshow Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Unknown Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download and Save Temporarily": {
+      "main": [
+        [
+          {
+            "node": "Format result.video_url object",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format result.video_url object": {
+      "main": [
+        [
+          {
+            "node": "Return Video URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Start": [
+      {
+        "image_urls": [
+          "https://n8n.connectcircuits.com/webhook/a60c3f68-7bcf-4504-a087-0fb9c7a3fce0/file/e9922db0ab86b09b9235a83c8f0e9d7b7294aa1d2c01999f332d7d153d1105a9.jpg",
+          "https://n8n.connectcircuits.com/webhook/a60c3f68-7bcf-4504-a087-0fb9c7a3fce0/file/7acdaaad90fe971929aa7915b1c30a36d86a0baeef774c7c02fb6d0a78dfc702.jpg",
+          "https://n8n.connectcircuits.com/webhook/a60c3f68-7bcf-4504-a087-0fb9c7a3fce0/file/e7ba5e5fffd4153d2b5d5dbd573efa22b0bf2053fe478dbaebcb2d8ad1937a14.jpg",
+          "https://n8n.connectcircuits.com/webhook/a60c3f68-7bcf-4504-a087-0fb9c7a3fce0/file/932df8fca5fe91e7b6c3546f2cae8fa51c020bd018062dc74dc4129d3561c42c.jpg",
+          "https://n8n.connectcircuits.com/webhook/a60c3f68-7bcf-4504-a087-0fb9c7a3fce0/file/57f9865f72ab708c5d1377696e615471d5c62a5b8c2ec4ec444aa86fedce7175.jpg",
+          "https://n8n.connectcircuits.com/webhook/a60c3f68-7bcf-4504-a087-0fb9c7a3fce0/file/044510a7a31352db121791f171ac9ffe3e574e4c71d462f7c91c39377ec7158f.jpg",
+          "https://n8n.connectcircuits.com/webhook/a60c3f68-7bcf-4504-a087-0fb9c7a3fce0/file/430aaddb816c06b68cb0290a419976428e6accf74706e87f3764f899df218822.jpg",
+          "https://n8n.connectcircuits.com/webhook/a60c3f68-7bcf-4504-a087-0fb9c7a3fce0/file/8e0ba8e3fae690e6a069a4cff26b9ed04f0be256f1b001906b236827d7addc4c.jpg",
+          "https://n8n.connectcircuits.com/webhook/a60c3f68-7bcf-4504-a087-0fb9c7a3fce0/file/8bedc3fdbcca1d57cc11454b51fc918add494e51301f833e504e35795f685abb.jpg",
+          "https://n8n.connectcircuits.com/webhook/a60c3f68-7bcf-4504-a087-0fb9c7a3fce0/file/f93bd8c1fa26f24ac7eb14460ea4f6e330d3f5aa9ec12fd42ff5d19ee6e80835.jpg",
+          "https://n8n.connectcircuits.com/webhook/a60c3f68-7bcf-4504-a087-0fb9c7a3fce0/file/47e3f2bbfa337f4623faee77e1a0ddecafeb06fb4f3d3446659048ecbaffbfd2.jpg"
+        ],
+        "image_texts": [
+          "The paper trembled slightly in Alex’s hand, though the humid Florida air had more to do with the sweat gathering on his palm than nerves—at least at first He had barely stepped off the porch when he’d noticed the envelope tucked under his doormat, stamped with the tasteful but oddly menacing crest of the homeowners’ association Opening it felt like peeling back the skin of something unpleasant. \n\n**NOTICE OF VIOLATION** — bold, impersonal typeface. \n\"Governing Bylaw 8.4: No changes altering community aesthetics may be made without prior written approval,\" it read, with an attached fine that made Alex blink once, then twice One hundred dollars Per day The letter stated this had already been accruing for twenty-two days Two thousand, two hundred dollars",
+          "For a mailbox He glanced at the mailbox from where he stood—dark bronze, curved top, accented with a wrought-iron flourish he'd thought was charming, dignified even The kind of touch that made a long block of identical houses feel a little more human Apparently, it also made him a criminal in the eyes of his own community His stomach tightened as he carried the paper inside, each step ringing against the tile Sunlight caught corners of the letter and made the ink seem sharper, the words more absurd He sat down at the kitchen table next to the HOA binder—the thick, three-ring monstrosity they’d handed out to every new resident, bristling with tabs",
+          "He pulled it close, cracking the stiff binding, and began flipping pages in quick, surgical motions The cited clause was as vague as the notice: no “changes altering community aesthetics,” with nothing—nothing—listing what counted as an alteration Another section, buried in a later article, seemed to contradict the first, allowing “reasonable decorative enhancements” so long as they did not obstruct “standard functional use” of property He read it twice, tracing the words with a finger, hearing in his mind the creak of neighbors’ wind chimes, the sight of pastel welcome signs hung beside front doors He dug deeper There were definitions for “nuisance,” “hazard,” even “permitted holiday décor,” but “alteration” Absent Unwritten He felt a spark of pressure in his chest—anger edging toward disbelief",
+          "The ceiling fan spun lazily above as he rolled his chair back, opened his laptop, and began typing search terms in a focused rhythm: *Florida HOA bylaws enforcement rules*, *vague covenant fines legal precedent*, *property rights mailbox modification* As windows opened and statutes loaded, the language shifted from polite HOA jargon to the cold precision of law Florida Statutes Chapter 720—there it was: governing homeowners’ associations He scrolled, eyes narrowing at the requirement for “clear, specific, and reasonably defined rules” in order for any penalty to be enforceable A clause requiring that violations must be tied to written standards recognized and accessible to members The HOA’s wording wasn’t just unclear—it might be legally hollow",
+          "The numbers on the violation notice glared up at him from the table, like an accelerating clock Each day cost him, but each day might also be building his case He imagined the HOA board frowning at their own documents under a fluorescent meeting light, realizing they had built their authority on shakier ground than they thought The more he read, the less the fine felt like a personal defeat and more like a puzzle He began jotting notes on a yellow legal pad: dates, bylaw references, Florida statutes Pieces of ammunition Heat from the window warmed the side of his face, making the air feel close, charged—like something about to break loose",
+          "Alex didn’t know yet if he could win, but he knew he was no longer just a target He was a witness And witnesses keep receipts The living room hummed with the low murmur of voices, neighbors shifting in their chairs and on the worn couch Alex had pushed against the wall to make space The air smelled faintly of coffee and the sharp tang of printer ink from the stacks of letters spread out on the table—HOA notices, all in the same sterile font, all citing the same vaguely worded bylaws. \n\n\"I thought it was just me,\" Janet from two doors down said, gripping her violation notice like it might crumble in her hands. \"They fined me for changing my porch light",
+          "A porch light.\" \n\nAcross the room, an older man shook his head. \"They came after my daughter for planting roses Said it ‘disrupted uniformity.’ No one even complained.\" \n\nVoices grew louder in bursts, each story braided with the same bitterness—fines issued without explanation, threats of liens, the hollow phrase *community aesthetics* wielded like a weapon Alex felt that pressure again in his chest, but this time it sharpened into resolve He spread the yellow legal pad on the table, showing the citations he’d found, the statutes spelling out the need for clear, enforceable standards. \n\n\"We’re not powerless,\" he said, leaning forward. \"Florida law says these rules have to be specific Ours aren’t—yet they’re fining us anyway If we stand together, we can challenge it",
+          "Not just one person fighting alone.\" \n\nHeads nodded, some tentative but growing steadier By the time the coffee pot sputtered its last drop, they had agreed: collective action Alex would consult an attorney, but they would all bring their documents, all stand behind one case Two days later, Alex sat across from Marisol Vega, a real estate attorney whose office held the smell of polished wood and faint cologne She spoke with the careful precision of someone who had faced enough HOA boards to strip the fear from their titles. \"You have statutory backing,\" she said, tapping the statute number he’d scrawled in his notes. \"We’ll file a formal challenge against the fines, citing lack of enforceable clarity",
+          "With multiple plaintiffs, it’s harder for them to dismiss this.\" \n\nBy the end of the week, the paperwork was filed And then—unexpectedly—the story traveled A neighbor’s cousin wrote for the *Sun Herald* A photograph of Alex standing beside the infamous bronze mailbox appeared online, under the headline: **Homeowners Challenge HOA Over Vague Rules, Mount Collective Legal Fight.** The comments lit up, equal parts outrage and encouragement At the next HOA meeting, the board members sat stiff-backed under the fluorescent lights, faces tight as a local TV crew set up in the back The president avoided Alex’s gaze entirely",
+          "The murmurs outside the meeting hall grew thick—neighbors who had never bothered to attend now pressing for answers, small cameras catching every flicker of discomfort at the dais Weeks later, the judgment arrived The court ruled the fines invalid, citing that the governing documents contained \"insufficient specificity to inform members of proscribed conduct in a manner consistent with Florida law.\" The HOA was ordered to reimburse every dollar, plus interest The decision read like a line in the sand Word spread through the subdivision faster than any violation notice could travel On a breezy Saturday evening, the neighborhood gathered again—this time in celebration Laughter carried down the sidewalks, kids weaving between adults holding paper plates of food",
+          "Janet lifted her glass toward Alex, her eyes bright. \"You didn’t just fight for yourself You fought for everyone here.\" \n\nA week later, the HOA sent out a revision packet—bylaws rewritten to comply with state statutes, definitions spelled out in plainer language It felt strange, almost surreal, to see the same binder Alex had once loathed now holding rules that could actually be understood In quiet moments, Alex would pass the bronze mailbox and run a hand over the curve of its top, the iron flourish casting a shadow across the grass It stood there unchanged, a small piece of defiance turned into proof—proof that when the rules are unjust, the real strength comes from standing together"
+        ]
+      }
+    ]
+  },
+  "meta": {
+    "instanceId": "37fe6d8c3b2aaeda95afa9d59c8cbc7c79e8171e6cc2a68043e239f8403c390e"
+  }
+}

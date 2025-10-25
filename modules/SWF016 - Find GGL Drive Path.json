@@ -1,0 +1,753 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "which_credentials"
+            },
+            {
+              "name": "file_path"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -2368,
+        288
+      ],
+      "id": "c5432c9f-c205-4191-b427-ac9fde15705e",
+      "name": "Start"
+    },
+    {
+      "parameters": {
+        "jsCode": "const directories = $input.first().json.file_path.split('/');\nconst drive_paths = ['root'];\nfor (const path of directories) {\n  if (path) {drive_paths.push(path)}\n}\nreturn {\n  which_credentials: $input.first().json.which_credentials,\n  drive_paths: drive_paths, \n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2144,
+        288
+      ],
+      "id": "3d849965-8c28-43bb-8553-276d63174903",
+      "name": "Normalize Input Data"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.all();\nfor (const item of data) {\n  if (item.json.name === $(\"Loop over paths\").first().json.path) {\n    return {parentPath: item.json.id, drive_paths: $(\"Normalize Input Data\").first().json.drive_paths}\n  }\n  console.log({item: item})\n}\nconsole.log( { data: data})"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -128,
+        432
+      ],
+      "id": "3627573c-d655-4243-a7ca-a0e33ce4edcc",
+      "name": "Find matching folder name"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $getWorkflowStaticData('node');\n\n//let parentPath = 'root';\nlet parentPath = '';\n\nif (typeof data.count === 'undefined') {\n  data.count = 0;\n}\n\nif (data.count === 0) {\n  data.paths = $input.first().json.drive_paths;\n}\n\nif (data.count < data.paths.length - 1) {\n  if ( 0 === data.count ) {\n    data.parentPath = data.paths[0];\n  } else {\n    data.parentPath = $input.first().json.parentPath\n  }\n  return {parentPath: data.parentPath, count: data.count, path: data.paths[++data.count], folder_id: null}\n}\n\ndata.count = 0;\ndata.paths = null;\ndata.parentPath = null;\nreturn {folder_id: $input.first().json.parentPath}\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1696,
+        384
+      ],
+      "id": "7b691fb9-1dd7-4776-ad09-d66407cf3774",
+      "name": "Loop over paths"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d851f17c-1d6c-4e66-91e5-9948824a0c48",
+              "leftValue": "={{ $json.folder_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1472,
+        304
+      ],
+      "id": "efeb5e2c-9c88-44d0-a2e8-df6328fb8c72",
+      "name": "Have we found the final path?"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -1248,
+        112
+      ],
+      "id": "c394ac5a-6b60-46ff-bf8e-46b6abe3536e",
+      "name": "Return folder_id"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f9b726c6-75fb-4fae-afeb-517d9f8739e2",
+              "leftValue": "={{ $json.drive_paths.length }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "263cc94e-4c41-4144-839a-c0aba65bc8c6",
+              "leftValue": "={{ $json.drive_paths[0] }}",
+              "rightValue": "root",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1920,
+        288
+      ],
+      "id": "c20ed0f4-0931-4d50-9575-4ab8f6347937",
+      "name": "If we only have root"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "af28a896-e191-4d08-ad6f-f08831e7bb74",
+              "name": "folder_id",
+              "value": "root",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1472,
+        64
+      ],
+      "id": "37cba6b0-92c1-42dc-8424-54ef8f094d38",
+      "name": "Set folder_id = root"
+    },
+    {
+      "parameters": {
+        "content": "# Find GGL Drive Path\n## SWF016\n### Purpose\nReturn the Google Drive folder ID of the last item of path.\n### Input Field\n* file_path\n### Output Field\n* folder_id\n### Examples:\n* file_path / returns folder_id = root\n* file_path /path1 returns Google Drive's folder_id (will create path1 in the root folder if it doesn't exist and return the created folder_id.\n* file_path /path1/path2 returns Google Drive's folder_id of path2. If path2 doesn't exist in path1 then it will be created and if path1 doesn't exist in root it will be created.",
+        "height": 440,
+        "width": 540
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2400,
+        -224
+      ],
+      "id": "6d337c93-1c82-4f18-9f3e-9fe497c1339e",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Start').first().json.which_credentials.toUpperCase() }}",
+                    "rightValue": "SSADVISOR",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "94406720-74bd-42fe-877c-ae4182236e81"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "SSADVISOR"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "f8288dbd-52e5-4760-bbdd-2e4836e4f9fd",
+                    "leftValue": "={{ $('Start').first().json.which_credentials.toUpperCase() }}",
+                    "rightValue": "EBOYD53",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "EBOYD53"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -1248,
+        352
+      ],
+      "id": "ff2856dd-8063-4144-aa18-0a92c167edbf",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ $json.path }}",
+        "returnAll": true,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "={{ $json.parentPath }}",
+            "mode": "id"
+          },
+          "whatToSearch": "folders"
+        },
+        "options": {
+          "fields": [
+            "id",
+            "name"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1024,
+        208
+      ],
+      "id": "0cde07b4-5e43-4946-9c9e-10d3030220ab",
+      "name": "Find SSADVISOR Google Drive Path",
+      "executeOnce": false,
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "EmOx2Vwbkitjzmsa",
+          "name": "GGL Drive seasonedsolutionsadvisor"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $('Loop over paths').first().json.path }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Loop over paths').first().json.parentPath}}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -352,
+        144
+      ],
+      "id": "f5ea662f-ba05-446a-a627-f95af3d757b2",
+      "name": "Create SSADVISOR Google Drive Path",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "EmOx2Vwbkitjzmsa",
+          "name": "GGL Drive seasonedsolutionsadvisor"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4b6ed6fc-993d-4496-9f8f-9f9d0ed5cfa8",
+              "leftValue": "={{ $json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -576,
+        208
+      ],
+      "id": "224f7032-894b-4943-9688-5dd2c3cccb35",
+      "name": "No SSADVISOR folder found"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ $json.path }}",
+        "returnAll": true,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "={{ $json.parentPath }}",
+            "mode": "id"
+          },
+          "whatToSearch": "folders"
+        },
+        "options": {
+          "fields": [
+            "id",
+            "name"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1024,
+        496
+      ],
+      "id": "bf8c1c78-bb47-45f2-bb06-7a0e26091f76",
+      "name": "Find EBOYD53 Google Drive Path1",
+      "executeOnce": false,
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "ddbrnr2ZeNfJZGtt",
+          "name": "Google Drive EBOYD53"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4b6ed6fc-993d-4496-9f8f-9f9d0ed5cfa8",
+              "leftValue": "={{ $json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -576,
+        496
+      ],
+      "id": "7de8f406-c770-46c7-957b-8a56792e5346",
+      "name": "No EBOYD53 folder found1"
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $('Loop over paths').first().json.path }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Loop over paths').first().json.parentPath}}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -352,
+        432
+      ],
+      "id": "a8264f99-d91f-41f2-b229-9b11c4c535aa",
+      "name": "Create EBOYD53 Google Drive Path1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "ddbrnr2ZeNfJZGtt",
+          "name": "Google Drive EBOYD53"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d87d48f3-5e92-4050-b905-44aae9d50edd",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "={{ $('Loop over paths').item.json.path }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -800,
+        496
+      ],
+      "id": "8ff9f53c-4e06-4fcf-8c39-448b9acba601",
+      "name": "Filter EBOYD53 Paths",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d87d48f3-5e92-4050-b905-44aae9d50edd",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "={{ $('Loop over paths').item.json.path }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -800,
+        208
+      ],
+      "id": "5454f7e7-92df-4903-907f-27ad7bbcd77f",
+      "name": "Filter SSADVISOR Paths",
+      "alwaysOutputData": true
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Normalize Input Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Input Data": {
+      "main": [
+        [
+          {
+            "node": "If we only have root",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find matching folder name": {
+      "main": [
+        [
+          {
+            "node": "Loop over paths",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop over paths": {
+      "main": [
+        [
+          {
+            "node": "Have we found the final path?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Have we found the final path?": {
+      "main": [
+        [
+          {
+            "node": "Return folder_id",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If we only have root": {
+      "main": [
+        [
+          {
+            "node": "Set folder_id = root",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop over paths",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set folder_id = root": {
+      "main": [
+        [
+          {
+            "node": "Return folder_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Find SSADVISOR Google Drive Path",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Find EBOYD53 Google Drive Path1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find SSADVISOR Google Drive Path": {
+      "main": [
+        [
+          {
+            "node": "Filter SSADVISOR Paths",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create SSADVISOR Google Drive Path": {
+      "main": [
+        [
+          {
+            "node": "Find matching folder name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No SSADVISOR folder found": {
+      "main": [
+        [
+          {
+            "node": "Create SSADVISOR Google Drive Path",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Find matching folder name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find EBOYD53 Google Drive Path1": {
+      "main": [
+        [
+          {
+            "node": "Filter EBOYD53 Paths",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No EBOYD53 folder found1": {
+      "main": [
+        [
+          {
+            "node": "Create EBOYD53 Google Drive Path1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Find matching folder name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create EBOYD53 Google Drive Path1": {
+      "main": [
+        [
+          {
+            "node": "Find matching folder name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter EBOYD53 Paths": {
+      "main": [
+        [
+          {
+            "node": "No EBOYD53 folder found1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter SSADVISOR Paths": {
+      "main": [
+        [
+          {
+            "node": "No SSADVISOR folder found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Start": [
+      {
+        "which_credentials": "SSADVISOR",
+        "file_path": "/NEWS/GOVERNMENTAL"
+      }
+    ]
+  },
+  "meta": {
+    "instanceId": "37fe6d8c3b2aaeda95afa9d59c8cbc7c79e8171e6cc2a68043e239f8403c390e"
+  }
+}
