@@ -1,0 +1,2317 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1f09afa6-2210-4cc5-b581-ea1526628bbc",
+              "name": "list",
+              "value": "\n[\n      {\n        \"chan\": \"HOA_NIGHTMARES\",\n        \"path\": \"HOA_Nightmares\",\n        \"schd\": {\"morn\": \"6:00\", \"evng\": \"18:00\"}\n      },\n      {\n        \"chan\": \"RELATIONSHIP_HORROR\",\n        \"path\": \"Relationship_Horrors\",\n        \"schd\": {\"morn\": \"7:00\", \"evng\": \"19:00\"}\n      },\n      {\n        \"chan\": \"COURTROOM DEFENDANT DRAMA\",\n        \"path\": \"courtroom_defendant_drama\",\n        \"schd\": {\"morn\": \"8:00\", \"evng\": \"20:00\"}\n      },\n      {\n        \"chan\": \"SCIFY\",\n        \"path\": \"/ConnectCircuits/SciFy\",\n        \"schd\": {\"morn\": \"5:00\", \"evng\": \"17:00\"}\n      }\n]\n",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        112,
+        816
+      ],
+      "id": "6efad8b1-1d6b-4f0e-87b1-8c04dd63a74d",
+      "name": "Workflow Control"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1008,
+        816
+      ],
+      "id": "960fb235-fa48-47e2-95d9-79f23cf05347",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.chan }}",
+                    "rightValue": "HOA_NIGHTMARES",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "d2b07d3e-8bcc-42b0-aae3-1db043549ef7"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "HOA_NIGHTMARES"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "5ad00034-1a5f-488b-83fe-7639f46eca06",
+                    "leftValue": "={{ $json.chan }}",
+                    "rightValue": "RELATIONSHIP_HORROR",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "RELATIONSHIP_HORROR"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "772cba1e-7bc8-459c-a680-639f7d764e83",
+                    "leftValue": "={{ $json.chan }}",
+                    "rightValue": "COURTROOM DEFENDANT DRAMA",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "COURTROOM DEFENDANT DRAMA"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b4682259-1d6d-400a-b4e1-97cf1b44211b",
+                    "leftValue": "={{ $json.chan }}",
+                    "rightValue": "SCIFY",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "SCIFY"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1456,
+        64
+      ],
+      "id": "5204ed2e-82da-4238-b078-b6f9922f7b21",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "update",
+        "videoId": "={{ $('Prepare HOA Nightmare schedule').all()[$runIndex].json.vidId }}",
+        "title": "={{ $('Prepare HOA Nightmare schedule').all()[$runIndex].json.vidTitle }}",
+        "regionCode": "US",
+        "categoryId": "={{ $('Prepare HOA Nightmare schedule').all()[$runIndex].json.vidCategory }}",
+        "updateFields": {
+          "privacyStatus": "private",
+          "publishAt": "={{ $('Prepare HOA Nightmare schedule').all()[$runIndex].json.scheduleDate }}"
+        }
+      },
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        2800,
+        -456
+      ],
+      "id": "365e31ed-3ea5-4200-a006-99659a9ea362",
+      "name": "Update a video",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "F5MGgk3BNaXDwnmM",
+          "name": "YouTube HOA Nightmares"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Switch').item.json.file.id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "YouTube",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "scheduled": "={{ $ifEmpty($json.status.publishAt, $json.snippet.publishedAt) }}",
+            "status": "={{ $('Get HOA Nightmares video').item.json.status.privacyStatus }}",
+            "row_number": "={{ $('Switch').item.json.row.row_number }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "upload_timestamp",
+              "displayName": "upload_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "videoId",
+              "displayName": "videoId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "youtubeLink",
+              "displayName": "youtubeLink",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "scheduled",
+              "displayName": "scheduled",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2128,
+        -576
+      ],
+      "id": "1a4ee4e9-3e73-44ae-8713-c61d5c54c754",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "sBSUvpbcf6G35DbF",
+          "name": "Google Sheets EBOYD53"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ddaec02e-3148-43bb-8032-818e403114bd",
+              "leftValue": "={{ $json.status.privacyStatus }}",
+              "rightValue": "private",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "5bd84c3f-dde3-47de-ba6a-1426462dc099",
+              "leftValue": "={{ $json.status.publishAt }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1904,
+        -528
+      ],
+      "id": "c7da91a3-cbb4-40a3-ada0-d1ba1e602553",
+      "name": "If privacyStatus is not equal private"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6a28dae1-da1d-4d9e-915f-694006198b0f",
+              "leftValue": "={{ $json.status.privacyStatus }}",
+              "rightValue": "private",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "c3815ea2-ee0a-4293-8f9a-03427ea76015",
+              "leftValue": "={{ $json.status.publishAt }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1904,
+        -144
+      ],
+      "id": "0f37d5a9-7616-4bc7-b411-6a4618c754ec",
+      "name": "If privacyStatus is not equal private1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ee7f8f58-6abf-411c-bd11-f5fc112c98fd",
+              "leftValue": "={{ $json.status.privacyStatus }}",
+              "rightValue": "private",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "58d25b64-977e-417c-89dc-0d8178cd9c6d",
+              "leftValue": "={{ $json.status.publishAt }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1904,
+        240
+      ],
+      "id": "0331a71a-0c95-417f-90ff-4182c02842d8",
+      "name": "If privacyStatus is not equal private2"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Switch').item.json.file.id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "YouTube",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Switch').item.json.row.row_number }}",
+            "scheduled": "={{ $ifEmpty($json.status.publishAt, $json.snippet.publishedAt) }}",
+            "status": "={{ $json.status.privacyStatus }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "upload_timestamp",
+              "displayName": "upload_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "videoId",
+              "displayName": "videoId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "youtubeLink",
+              "displayName": "youtubeLink",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "scheduled",
+              "displayName": "scheduled",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2128,
+        -192
+      ],
+      "id": "bef99003-06ad-400e-8176-1bb239da79b3",
+      "name": "Update row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "sBSUvpbcf6G35DbF",
+          "name": "Google Sheets EBOYD53"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Switch').item.json.file.id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "YouTube",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Switch').item.json.row.row_number }}",
+            "scheduled": "={{ $ifEmpty($json.status.publishAt, $json.snippet.publishedAt) }}",
+            "status": "={{ $json.status.privacyStatus }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "upload_timestamp",
+              "displayName": "upload_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "videoId",
+              "displayName": "videoId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "youtubeLink",
+              "displayName": "youtubeLink",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "scheduled",
+              "displayName": "scheduled",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2128,
+        192
+      ],
+      "id": "193ca35d-0a9b-4377-ab14-1b501edc911e",
+      "name": "Update row in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "sBSUvpbcf6G35DbF",
+          "name": "Google Sheets EBOYD53"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Prepare HOA Nightmare schedule').all()[$runIndex].json.sheetId }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "ScheduleControl",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": 2,
+            "Date": "={{ $('Prepare HOA Nightmare schedule').all()[$runIndex].json.nextDate }}",
+            "TimeCtl": "={{ $('Prepare HOA Nightmare schedule').all()[$runIndex].json.nextTimeCtl }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "TimeCtl",
+              "displayName": "TimeCtl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "TimeAM",
+              "displayName": "TimeAM",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "TimePM",
+              "displayName": "TimePM",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3024,
+        -384
+      ],
+      "id": "6420d763-f233-4579-8928-214ca6409061",
+      "name": "Update row in sheet3",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "sBSUvpbcf6G35DbF",
+          "name": "Google Sheets EBOYD53"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2576,
+        -384
+      ],
+      "id": "a88043f0-28af-4abb-a913-92daedeea19d",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "update",
+        "videoId": "={{ $('Preparce RELATIONSHIP_HORROR schedule').all()[$runIndex].json.vidId }}",
+        "title": "={{ $('Preparce RELATIONSHIP_HORROR schedule').all()[$runIndex].json.vidTitle }}",
+        "regionCode": "US",
+        "categoryId": "={{ $('Preparce RELATIONSHIP_HORROR schedule').all()[$runIndex].json.vidCategory }}",
+        "updateFields": {
+          "privacyStatus": "private",
+          "publishAt": "={{ $('Preparce RELATIONSHIP_HORROR schedule').all()[$runIndex].json.scheduleDate }}"
+        }
+      },
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        2800,
+        -120
+      ],
+      "id": "1a18ca1e-afbf-467b-82fd-ce5cdc580317",
+      "name": "Update a video1",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "14camdMaIZvZvsbF",
+          "name": "YouTube RELATIONSHIP_HORROR"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Preparce RELATIONSHIP_HORROR schedule').all()[$runIndex].json.sheetId }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "ScheduleControl",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": 2,
+            "Date": "={{ $('Preparce RELATIONSHIP_HORROR schedule').all()[$runIndex].json.nextDate }}",
+            "TimeCtl": "={{ $('Preparce RELATIONSHIP_HORROR schedule').all()[$runIndex].json.nextTimeCtl }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "TimeCtl",
+              "displayName": "TimeCtl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "TimeAM",
+              "displayName": "TimeAM",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "TimePM",
+              "displayName": "TimePM",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3024,
+        0
+      ],
+      "id": "dfd65ea5-11c0-46ad-8746-5e70b14e81dc",
+      "name": "Update row in sheet4",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "sBSUvpbcf6G35DbF",
+          "name": "Google Sheets EBOYD53"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2576,
+        0
+      ],
+      "id": "6dd79a28-3510-479b-8124-b9101fa75013",
+      "name": "Loop Over Items2"
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "update",
+        "videoId": "={{ $('Prepare Courtroom Drama Video schedule').all()[$runIndex].json.vidId }}",
+        "title": "={{ $('Prepare Courtroom Drama Video schedule').all()[$runIndex].json.vidTitle }}",
+        "regionCode": "US",
+        "categoryId": "={{ $('Prepare Courtroom Drama Video schedule').all()[$runIndex].json.vidCategory }}",
+        "updateFields": {
+          "privacyStatus": "private",
+          "publishAt": "={{ $('Prepare Courtroom Drama Video schedule').all()[$runIndex].json.scheduleDate }}"
+        }
+      },
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        2800,
+        264
+      ],
+      "id": "d355be13-c399-4478-8ca8-934ba19f3ef2",
+      "name": "Update a video2",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "zF4lGRtk635RstcM",
+          "name": "YouTube Courtroom Defendant Drama"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Prepare Courtroom Drama Video schedule').all()[$runIndex].json.sheetId }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "ScheduleControl",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": 2,
+            "Date": "={{ $('Prepare Courtroom Drama Video schedule').all()[$runIndex].json.nextDate }}",
+            "TimeCtl": "={{ $('Prepare Courtroom Drama Video schedule').all()[$runIndex].json.nextTimeCtl }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "TimeCtl",
+              "displayName": "TimeCtl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "TimeAM",
+              "displayName": "TimeAM",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "TimePM",
+              "displayName": "TimePM",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3024,
+        384
+      ],
+      "id": "93b8c414-5f54-42e3-aa07-c65491814722",
+      "name": "Update row in sheet5",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "sBSUvpbcf6G35DbF",
+          "name": "Google Sheets EBOYD53"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2576,
+        384
+      ],
+      "id": "73626e9c-05ce-402a-b5e1-1ba161520bd6",
+      "name": "Loop Over Items3"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 20
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -112,
+        816
+      ],
+      "id": "6b5a1089-0a0c-4e1b-abf5-ec3575fc8180",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "content": "# YouTube Scheduler\n\n## WF020\n\n### Purpose\nSchedule YouTube videos recently uploaded based on the video_ledger spreadsheet data.\n\n### Schedule\n* Once a day at 8:00 PM.\n\n### Workflow Control\n* list\n    * An array of objects with this schema:\n    {\"chan\": \"CHANNEL\", \"path\": \"GOOGLE SPREADSHEET PATH\", \"schd\": {\"morn\": \"HH:MM\", \"evng\": \"HH:MM\"}}\n\n",
+        "height": 576,
+        "width": 816
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        -272
+      ],
+      "id": "a33de1dd-c558-4d46-b791-7e1d9aada5ea",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ $json.path }}",
+        "returnAll": true,
+        "filter": {
+          "folderId": {
+            "mode": "list",
+            "value": "root",
+            "cachedResultName": "/ (Root folder)"
+          },
+          "whatToSearch": "folders"
+        },
+        "options": {
+          "fields": [
+            "id",
+            "name"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        560,
+        816
+      ],
+      "id": "8b44373d-ba3c-492c-9fff-6ee47b572691",
+      "name": "Search for the given path",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "ddbrnr2ZeNfJZGtt",
+          "name": "Google Drive EBOYD53"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "video_ledger",
+        "returnAll": true,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "={{ $json.id }}",
+            "mode": "id"
+          },
+          "whatToSearch": "files",
+          "fileTypes": [
+            "application/vnd.google-apps.spreadsheet"
+          ]
+        },
+        "options": {
+          "fields": [
+            "id",
+            "name"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        784,
+        816
+      ],
+      "id": "8803ca38-fa35-4a25-826e-c9a200b4fcb0",
+      "name": "Search for video_ledger spreadsheet",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "ddbrnr2ZeNfJZGtt",
+          "name": "Google Drive EBOYD53"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Search for video_ledger spreadsheet').all()[$runIndex].json.id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "ScheduleControl",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1232,
+        816
+      ],
+      "id": "261d7b3e-2421-4c0c-a86c-b60df2cb8c63",
+      "name": "Get the ScheduleControl data",
+      "executeOnce": false,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "sBSUvpbcf6G35DbF",
+          "name": "Google Sheets EBOYD53"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Loop Over Items').item.json.id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "YouTube",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1456,
+        816
+      ],
+      "id": "1d98bb05-bd72-48f6-9a55-0af30410bab9",
+      "name": "Get the YouTube data",
+      "executeOnce": false,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "sBSUvpbcf6G35DbF",
+          "name": "Google Sheets EBOYD53"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const chan = $('Split Out list array').all()[$runIndex].json.chan;\nconst path = $(\"Search for the given path\").all()[$runIndex].json;\nconst file = $(\"Search for video_ledger spreadsheet\").all()[$runIndex].json;\nconst raw = $(\"Get the YouTube data\").all();\nconst ctl = $(\"Get the ScheduleControl data\").first().json;\nconst rtrn = [];\n\nfor (let idx in raw) {\n  rtrn.push({chan: chan, path: path, file: file, ctl: ctl, row: raw[idx].json});\n}\n\nreturn {data: rtrn}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1680,
+        888
+      ],
+      "id": "785c9313-d052-495e-b219-8978d8cad276",
+      "name": "Combine data previous nodes data"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "list",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        336,
+        816
+      ],
+      "id": "580b5531-92b6-4564-b6a9-254ed56734d2",
+      "name": "Split Out list array"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1232,
+        96
+      ],
+      "id": "acb98f63-19d3-4c69-9a3f-10bcdc9285a0",
+      "name": "Split Out combined data"
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "get",
+        "videoId": "={{ $json.row.videoId }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        -528
+      ],
+      "id": "1389df94-5b6c-43d5-92b2-2a7bb3d7d3a3",
+      "name": "Get HOA Nightmares video",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "F5MGgk3BNaXDwnmM",
+          "name": "YouTube HOA Nightmares"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "get",
+        "videoId": "={{ $json.row.videoId }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        -144
+      ],
+      "id": "209c0c77-4525-44ed-85f0-ef9b6175f4ef",
+      "name": "Get RELATIONSHIP_HORROR video",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "14camdMaIZvZvsbF",
+          "name": "YouTube RELATIONSHIP_HORROR"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "get",
+        "videoId": "={{ $json.row.videoId }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        240
+      ],
+      "id": "2a0fd2d3-b398-4ea9-bca6-6d2d28d383b4",
+      "name": "Get Courtroom Defendant Drama video",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "zF4lGRtk635RstcM",
+          "name": "YouTube Courtroom Defendant Drama"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7fe43ab1-830c-43a2-ab35-4b9a657e91ea",
+              "leftValue": "={{ $json.status.publishAt }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        2128,
+        -384
+      ],
+      "id": "51c72411-a25a-40d9-bb37-ee1ea8814e38",
+      "name": "Filter status.publishAt is empty"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7fe43ab1-830c-43a2-ab35-4b9a657e91ea",
+              "leftValue": "={{ $json.status.publishAt }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        2128,
+        0
+      ],
+      "id": "1dd69b34-af33-4a42-9fa6-1467641b6dff",
+      "name": "Filter status.publishAt is empty1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7fe43ab1-830c-43a2-ab35-4b9a657e91ea",
+              "leftValue": "={{ $json.status.publishAt }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        2128,
+        384
+      ],
+      "id": "86016489-9a82-4fd8-a06f-1b4b3d461d63",
+      "name": "Filter status.publishAt is empty2"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const raw = $(\"Switch\").item.json.ctl\nconst vidId = $(\"Get HOA Nightmares video\").item.json.id\nconst vidTitle = $(\"Get HOA Nightmares video\").item.json.snippet.title\nconst vidCategory = $(\"Get HOA Nightmares video\").item.json.snippet.categoryId\nconst sheetId = $(\"Search for video_ledger spreadsheet\").first().json.id\n\nconst node = $getWorkflowStaticData('node');\n\nif (typeof node.tctl === 'undefined') {\n  node.tctl = raw.TimeCtl + $runIndex\n  node.date = raw.Date\n}\nif (node.tctl > 2) {\n  node.tctl = 1\n}\n\nif (node.tctl == 2) {\n  node.scheduleDate = DateTime.fromISO(node.date).plus({days: 1}).plus({hour: raw.TimeAM.split(':')[0]}).toISO({ suppressMilliseconds: true })\n  node.nextTimeCtl = 1\n  node.nextDate = DateTime.fromISO(node.scheduleDate).toFormat('yyyy-MM-dd')\n} else {\n  node.scheduleDate = DateTime.fromISO(node.date).plus({hour: raw.TimePM.split(':')[0]}).toISO({ suppressMilliseconds: true })\n  node.nextTimeCtl = 2\n  node.nextDate = DateTime.fromISO(node.scheduleDate).toFormat('yyyy-MM-dd')\n}\n\nnode.tctl += 1\nnode.date = node.nextDate\nreturn {vidId, vidTitle, vidCategory, sheetId, rawDate: raw.Date, rawCtl: raw.TimeCtl, scheduleDate: node.scheduleDate, nextDate: node.nextDate, nextTimeCtl: node.nextTimeCtl, tctl: node.tctl}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2352,
+        -384
+      ],
+      "id": "a100b75a-7e13-4917-8305-8c1832fdddd4",
+      "name": "Prepare HOA Nightmare schedule"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const raw = $(\"Switch\").item.json.ctl\nconst vidId = $(\"Get RELATIONSHIP_HORROR video\").item.json.id\nconst vidTitle = $(\"Get RELATIONSHIP_HORROR video\").item.json.snippet.title\nconst vidCategory = $(\"Get RELATIONSHIP_HORROR video\").item.json.snippet.categoryId\nconst sheetId = $(\"Search for video_ledger spreadsheet\").all()[1].json.id\n\nconst node = $getWorkflowStaticData('node');\n\nif (typeof node.tctl === 'undefined') {\n  node.tctl = raw.TimeCtl + $runIndex\n  node.date = raw.Date\n}\nif (node.tctl > 2) {\n  node.tctl = 1\n}\n\nif (node.tctl == 2) {\n  node.scheduleDate = DateTime.fromISO(node.date).plus({days: 1}).plus({hour: raw.TimeAM.split(':')[0]}).toISO({ suppressMilliseconds: true })\n  node.nextTimeCtl = 1\n  node.nextDate = DateTime.fromISO(node.scheduleDate).toFormat('yyyy-MM-dd')\n} else {\n  node.scheduleDate = DateTime.fromISO(node.date).plus({hour: raw.TimePM.split(':')[0]}).toISO({ suppressMilliseconds: true })\n  node.nextTimeCtl = 2\n  node.nextDate = DateTime.fromISO(node.scheduleDate).toFormat('yyyy-MM-dd')\n}\n\nnode.tctl += 1\nnode.date = node.nextDate\nreturn {vidId, vidTitle, vidCategory, sheetId, rawDate: raw.Date, rawCtl: raw.TimeCtl, scheduleDate: node.scheduleDate, nextDate: node.nextDate, nextTimeCtl: node.nextTimeCtl, tctl: node.tctl}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2352,
+        0
+      ],
+      "id": "994563f5-cdbb-44eb-8e25-796804a629db",
+      "name": "Preparce RELATIONSHIP_HORROR schedule"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const raw = $(\"Switch\").item.json.ctl\nconst vidId = $(\"Get Courtroom Defendant Drama video\").item.json.id\nconst vidTitle = $(\"Get Courtroom Defendant Drama video\").item.json.snippet.title\nconst vidCategory = $(\"Get Courtroom Defendant Drama video\").item.json.snippet.categoryId\nconst sheetId = $(\"Search for video_ledger spreadsheet\").all()[2].json.id\n\nconst node = $getWorkflowStaticData('node');\n\nif (typeof node.tctl === 'undefined') {\n  node.tctl = raw.TimeCtl + $runIndex\n  node.date = raw.Date\n}\nif (node.tctl > 2) {\n  node.tctl = 1\n}\n\nif (node.tctl == 2) {\n  node.scheduleDate = DateTime.fromISO(node.date).plus({days: 1}).plus({hour: raw.TimeAM.split(':')[0]}).toISO({ suppressMilliseconds: true })\n  node.nextTimeCtl = 1\n  node.nextDate = DateTime.fromISO(node.scheduleDate).toFormat('yyyy-MM-dd')\n} else {\n  node.scheduleDate = DateTime.fromISO(node.date).plus({hour: raw.TimePM.split(':')[0]}).toISO({ suppressMilliseconds: true })\n  node.nextTimeCtl = 2\n  node.nextDate = DateTime.fromISO(node.scheduleDate).toFormat('yyyy-MM-dd')\n}\n\nnode.tctl += 1\nnode.date = node.nextDate\nreturn {vidId, vidTitle, vidCategory, sheetId, rawDate: raw.Date, rawCtl: raw.TimeCtl, scheduleDate: node.scheduleDate, nextDate: node.nextDate, nextTimeCtl: node.nextTimeCtl, tctl: node.tctl}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2352,
+        384
+      ],
+      "id": "445aaa01-9627-49a4-8d5d-9042303c612e",
+      "name": "Prepare Courtroom Drama Video schedule"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ee7f8f58-6abf-411c-bd11-f5fc112c98fd",
+              "leftValue": "={{ $json.status.privacyStatus }}",
+              "rightValue": "private",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "58d25b64-977e-417c-89dc-0d8178cd9c6d",
+              "leftValue": "={{ $json.status.publishAt }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1904,
+        624
+      ],
+      "id": "07067182-bb6a-4ae5-9e53-519625bb6962",
+      "name": "If privacyStatus is not equal private3"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Switch').item.json.file.id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "YouTube",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Switch').item.json.row.row_number }}",
+            "scheduled": "={{ $ifEmpty($json.status.publishAt, $json.snippet.publishedAt) }}",
+            "status": "={{ $json.status.privacyStatus }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "upload_timestamp",
+              "displayName": "upload_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "videoId",
+              "displayName": "videoId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "youtubeLink",
+              "displayName": "youtubeLink",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "scheduled",
+              "displayName": "scheduled",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2128,
+        576
+      ],
+      "id": "5850124e-2fbe-4f8f-a0dd-2f99d7362703",
+      "name": "Update row in sheet6",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "sBSUvpbcf6G35DbF",
+          "name": "Google Sheets EBOYD53"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "update",
+        "videoId": "={{ $('Prepare SciFy Shorts Video schedule').all()[$runIndex].json.vidId }}",
+        "title": "={{ $('Prepare SciFy Shorts Video schedule').all()[$runIndex].json.vidTitle }}",
+        "regionCode": "US",
+        "categoryId": "={{ $('Prepare SciFy Shorts Video schedule').all()[$runIndex].json.vidCategory }}",
+        "updateFields": {
+          "privacyStatus": "private",
+          "publishAt": "={{ $('Prepare SciFy Shorts Video schedule').all()[$runIndex].json.scheduleDate }}"
+        }
+      },
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        2800,
+        648
+      ],
+      "id": "63bad7f4-b2fa-48b0-93ff-c4c2a1440f69",
+      "name": "Update a video3",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "BZ9Fs3JUBqqw4uTB",
+          "name": "YouTube SciFy-Shorts Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Prepare SciFy Shorts Video schedule').all()[$runIndex].json.sheetId }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "ScheduleControl",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": 2,
+            "Date": "={{ $('Prepare SciFy Shorts Video schedule').all()[$runIndex].json.nextDate }}",
+            "TimeCtl": "={{ $('Prepare SciFy Shorts Video schedule').all()[$runIndex].json.nextTimeCtl }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "TimeCtl",
+              "displayName": "TimeCtl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "TimeAM",
+              "displayName": "TimeAM",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "TimePM",
+              "displayName": "TimePM",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3024,
+        768
+      ],
+      "id": "4befa4c2-ea41-4b5d-be66-33f86084a2ff",
+      "name": "Update row in sheet7",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "sBSUvpbcf6G35DbF",
+          "name": "Google Sheets EBOYD53"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2576,
+        768
+      ],
+      "id": "44f6ad63-3ab6-44c7-a23a-6ccb64463669",
+      "name": "Loop Over Items4"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7fe43ab1-830c-43a2-ab35-4b9a657e91ea",
+              "leftValue": "={{ $json.status.publishAt }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        2128,
+        768
+      ],
+      "id": "8b62e072-92fb-4d3d-9bfc-3a37041171fb",
+      "name": "Filter status.publishAt is empty3"
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "get",
+        "videoId": "={{ $json.row.videoId }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        624
+      ],
+      "id": "b23cac0f-c04c-4baa-8392-312e11448df4",
+      "name": "Get SciFy Shorts video",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "BZ9Fs3JUBqqw4uTB",
+          "name": "YouTube SciFy-Shorts Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const raw = $(\"Switch\").item.json.ctl\nconst vidId = $(\"Get SciFy Shorts video\").item.json.id\nconst vidTitle = $(\"Get SciFy Shorts video\").item.json.snippet.title\nconst vidCategory = $(\"Get SciFy Shorts video\").item.json.snippet.categoryId\nconst sheetId = $(\"Search for video_ledger spreadsheet\").all()[2].json.id\n\nconst node = $getWorkflowStaticData('node');\n\nif (typeof node.tctl === 'undefined') {\n  node.tctl = raw.TimeCtl + $runIndex\n  node.date = raw.Date\n}\nif (node.tctl > 2) {\n  node.tctl = 1\n}\n\nif (node.tctl == 2) {\n  node.scheduleDate = DateTime.fromISO(node.date).plus({days: 1}).plus({hour: raw.TimeAM.split(':')[0]}).toISO({ suppressMilliseconds: true })\n  node.nextTimeCtl = 1\n  node.nextDate = DateTime.fromISO(node.scheduleDate).toFormat('yyyy-MM-dd')\n} else {\n  node.scheduleDate = DateTime.fromISO(node.date).plus({hour: raw.TimePM.split(':')[0]}).toISO({ suppressMilliseconds: true })\n  node.nextTimeCtl = 2\n  node.nextDate = DateTime.fromISO(node.scheduleDate).toFormat('yyyy-MM-dd')\n}\n\nnode.tctl += 1\nnode.date = node.nextDate\nreturn {vidId, vidTitle, vidCategory, sheetId, rawDate: raw.Date, rawCtl: raw.TimeCtl, scheduleDate: node.scheduleDate, nextDate: node.nextDate, nextTimeCtl: node.nextTimeCtl, tctl: node.tctl}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2352,
+        768
+      ],
+      "id": "70732669-deb4-44e7-b772-58ba412a3eb6",
+      "name": "Prepare SciFy Shorts Video schedule"
+    }
+  ],
+  "connections": {
+    "Workflow Control": {
+      "main": [
+        [
+          {
+            "node": "Split Out list array",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Split Out combined data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get the ScheduleControl data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Get HOA Nightmares video",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get RELATIONSHIP_HORROR video",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Courtroom Defendant Drama video",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get SciFy Shorts video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a video": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If privacyStatus is not equal private": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Filter status.publishAt is empty",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If privacyStatus is not equal private1": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Filter status.publishAt is empty1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If privacyStatus is not equal private2": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Filter status.publishAt is empty2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet2": {
+      "main": [
+        []
+      ]
+    },
+    "Update row in sheet3": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Update a video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a video1": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet4": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items2": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Update a video1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a video2": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet5": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items3": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Update a video2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Workflow Control",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search for the given path": {
+      "main": [
+        [
+          {
+            "node": "Search for video_ledger spreadsheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search for video_ledger spreadsheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get the ScheduleControl data": {
+      "main": [
+        [
+          {
+            "node": "Get the YouTube data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get the YouTube data": {
+      "main": [
+        [
+          {
+            "node": "Combine data previous nodes data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine data previous nodes data": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out list array": {
+      "main": [
+        [
+          {
+            "node": "Search for the given path",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out combined data": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get HOA Nightmares video": {
+      "main": [
+        [
+          {
+            "node": "If privacyStatus is not equal private",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get RELATIONSHIP_HORROR video": {
+      "main": [
+        [
+          {
+            "node": "If privacyStatus is not equal private1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Courtroom Defendant Drama video": {
+      "main": [
+        [
+          {
+            "node": "If privacyStatus is not equal private2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter status.publishAt is empty": {
+      "main": [
+        [
+          {
+            "node": "Prepare HOA Nightmare schedule",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter status.publishAt is empty1": {
+      "main": [
+        [
+          {
+            "node": "Preparce RELATIONSHIP_HORROR schedule",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter status.publishAt is empty2": {
+      "main": [
+        [
+          {
+            "node": "Prepare Courtroom Drama Video schedule",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare HOA Nightmare schedule": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparce RELATIONSHIP_HORROR schedule": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Courtroom Drama Video schedule": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If privacyStatus is not equal private3": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet6",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Filter status.publishAt is empty3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a video3": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet7": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items4": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Update a video3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter status.publishAt is empty3": {
+      "main": [
+        [
+          {
+            "node": "Prepare SciFy Shorts Video schedule",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get SciFy Shorts video": {
+      "main": [
+        [
+          {
+            "node": "If privacyStatus is not equal private3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare SciFy Shorts Video schedule": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "37fe6d8c3b2aaeda95afa9d59c8cbc7c79e8171e6cc2a68043e239f8403c390e"
+  }
+}

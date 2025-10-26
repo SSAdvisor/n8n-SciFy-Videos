@@ -1,0 +1,1086 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 12
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1104,
+        448
+      ],
+      "id": "8274b469-3ba6-4ca2-b0bb-ad63efbfc2cd",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d0b86b9a-45cb-4ecf-a108-83d8cecbbcbe",
+              "name": "yt_upload",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "4deb887e-9825-4f2a-9b88-c0103695447d",
+              "name": "yt_credentials",
+              "value": "EBOYD53",
+              "type": "string"
+            },
+            {
+              "id": "21748881-c426-4f15-b41a-df4d4d87c96f",
+              "name": "yt_privacy",
+              "value": "private",
+              "type": "string"
+            },
+            {
+              "id": "930d3213-06a8-4ca9-b6e1-d7dad50765db",
+              "name": "ggl_upload",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "612af66d-2e95-413d-bcac-0c29923ad345",
+              "name": "ggl_credentials",
+              "value": "EBOYD53",
+              "type": "string"
+            },
+            {
+              "id": "18b27391-f7af-4eb9-af4f-5a2998725817",
+              "name": "ggl_spreadsheet_path",
+              "value": "/ConnectCircuits/SciFy",
+              "type": "string"
+            },
+            {
+              "id": "de6ad564-2e58-436b-964a-e21a352d75cc",
+              "name": "ggl_spreadsheet_name",
+              "value": "video_ledger",
+              "type": "string"
+            },
+            {
+              "id": "49f2f246-ee40-477d-90f3-4901ef805a69",
+              "name": "llm_model",
+              "value": "openai-large",
+              "type": "string"
+            },
+            {
+              "id": "ae81d1bd-11f8-4c16-bcae-bbb32df0f40a",
+              "name": "story_word_count",
+              "value": 5000,
+              "type": "number"
+            },
+            {
+              "id": "aec5a3c3-4495-4bfc-8200-88e96ac952e0",
+              "name": "story_genre",
+              "value": "science fiction",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -880,
+        448
+      ],
+      "id": "71b42685-bfd5-4171-8813-bea3c4161704",
+      "name": "Workflow Controls"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $json.id }}\n",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "YouTubeShorts",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "longform_created"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -208,
+        448
+      ],
+      "id": "15a17dcb-076b-4904-871f-2ded256bcb94",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "sBSUvpbcf6G35DbF",
+          "name": "Google Sheets EBOYD53"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ $('Workflow Controls').item.json.ggl_spreadsheet_name }}",
+        "returnAll": true,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "={{ $json.folder_id }}",
+            "mode": "id"
+          },
+          "whatToSearch": "files",
+          "fileTypes": [
+            "application/vnd.google-apps.spreadsheet"
+          ]
+        },
+        "options": {
+          "fields": [
+            "id",
+            "name",
+            "kind"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -432,
+        448
+      ],
+      "id": "c315c610-57b2-4414-b6a0-3fbb1402c1cc",
+      "name": "Find Given Filename",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "ddbrnr2ZeNfJZGtt",
+          "name": "Google Drive EBOYD53"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "da7bdc1e-1028-455e-a169-93609de99b45",
+              "leftValue": "={{ $json.longform_created }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        16,
+        448
+      ],
+      "id": "fa4ae128-3e88-467e-9322-9fde460c98a9",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "type": "random"
+      },
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        240,
+        448
+      ],
+      "id": "1dc7789e-afd1-45d0-a292-5034598664a9",
+      "name": "Sort"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        464,
+        448
+      ],
+      "id": "7c61dc87-2766-4f52-8d19-9a8ac2753b58",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "ufM90UdskwrMH84u",
+          "mode": "list",
+          "cachedResultName": "SWF016 - Find GGL Drive Path PR2"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "which_credentials": "={{ $json.ggl_credentials }}",
+            "file_path": "={{ $json.ggl_spreadsheet_path }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "which_credentials",
+              "displayName": "which_credentials",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "file_path",
+              "displayName": "file_path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        -656,
+        448
+      ],
+      "id": "51829506-6cc5-42c7-be96-ffaeddc846bd",
+      "name": "Find GGL Directory Path"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "ZSw212AOu9pZMUKf",
+          "mode": "list",
+          "cachedResultName": "SWF053 - Long Story Video Generation V2"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "story_prompt": "={{ $json.story_lines }}",
+            "word_count": "={{ $('Workflow Controls').first().json.story_word_count }}",
+            "story_model": "={{ $('Workflow Controls').first().json.llm_model }}",
+            "story_genre": "={{ $('Workflow Controls').first().json.story_genre }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "story_prompt",
+              "displayName": "story_prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "story_genre",
+              "displayName": "story_genre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "story_model",
+              "displayName": "story_model",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "word_count",
+              "displayName": "word_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        688,
+        448
+      ],
+      "id": "4281ce38-5b0d-4a62-a16d-0485fcff3fd2",
+      "name": "Generate Long Story Video"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "D0IeVjPeNeNd0Kkk",
+          "mode": "list",
+          "cachedResultName": "SWF003 - Generate Video Metadata PR2"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "system_prompt": "=You are a highly skilled YouTube SEO specialist and professional copywriter, tasked with creating compelling metadata for a {{ $('Workflow Controls').first().json.story_genre }} story (the user's prompt is the voice-over script). Your goal is to maximize visibility, click-through rates, and viewer retention on YouTube while optimizing for the platform's 2025 algorithm priorities.\n\nCRITICAL ALGORITHM UNDERSTANDING: YouTube has officially stated that tags play a \"minimal role\" in video discovery and are primarily useful for common misspellings. The algorithm prioritizes watch time, engagement metrics, titles, and descriptions over tags. Focus optimization efforts accordingly.\n\nYour response must be a single JSON object with exactly these keys:\n\n\"title\": A compelling, keyword-rich title (70-80 characters maximum for optimal display). Place your primary keyword within the first 60 characters. Avoid em dashes (—); use colons (:), semicolons (;), or other punctuation. Prioritize click-worthiness over keyword stuffing while maintaining search relevance. IMPORTANT: \"title\" MUST BE no more than 80 characters long!\n\n\"description\": A comprehensive, keyword-dense description (2000-3000 characters) written in first-person (\"I\"). Begin with a compelling 180-200 character hook that incorporates your primary keyword 2-3 times naturally. Structure with clear paragraphs detailing the story's emotional journey. Include relevant keywords naturally throughout without appearing spammy. Avoid em dashes (—); use alternative punctuation. End with a strong call-to-action encouraging likes, shares, and subscriptions.\n\n\"hashtags\": A space-separated string of 3-5 highly relevant hashtags focusing on broad, discoverable terms that align with your primary keywords. Prioritize hashtags that match actual search behavior rather than attempting to game trending topics. (e.g., \"#breakingnews #politics #investigation #corruption #justice\")\n\n\"tags\": A comma-separated string of 8-12 strategically chosen tags totaling approximately 200-300 characters (optimal range per research). CRITICAL TAG OPTIMIZATION:\n\nDue to YouTube's space character counting issue (spaces consume 3 characters each), minimize multi-word tags\n\nUse underscores for compound concepts when logical (e.g., \"breaking_news\" instead of \"breaking news\")\n\nInclude your primary keyword as the first tag\n\nAdd common misspellings of key terms\n\nInclude single-word variations and synonyms\n\nAvoid keyword stuffing; focus on relevance over quantity\n\nExample format: \"politics,corruption,investigation,government_scandal,news_analysis,political_drama,accountability,whistleblower,ethics_violation,transparency,public_interest,democracy\"\n\n\"top_text\": A dramatically compelling 3-4 sentence statement (in all caps, minimum 30 words) for thumbnail top text. Create immediate tension by highlighting the core conflict or betrayal. Avoid generic LLM phrases; craft human-like, visceral headlines that demand attention.\n\n\"bottom_text\": One powerful, intriguing sentence (in all caps) for thumbnail bottom text. Tease the resolution, twist, or ultimate outcome with maximum emotional impact while maintaining curiosity.\n\nOPTIMIZATION PRIORITIES (in order of algorithm importance):\n\nTitle optimization (highest impact on discovery)\n\nThumbnail effectiveness (drives CTR)\n\nDescription keyword density (supports algorithm understanding)\n\nHashtag relevance (moderate discovery benefit)\n\nTag efficiency (minimal impact, optimize for character economy)\n\nCHARACTER EFFICIENCY RULES:\n\nTags: Target 200-300 total characters for optimal performance\n\nPrioritize single words and underscore-connected compounds\n\nEvery character must serve SEO purpose\n\nTest tag variations that balance searchability with character economy\n\nRemember: YouTube's 2025 algorithm prioritizes content quality, engagement, and viewer satisfaction over metadata manipulation. Your optimization should support authentic content discovery rather than attempt to game the system.\n\nRespond with only the JSON object—no markdown, code fences, or extra text.",
+            "video_script": "={{ $json.story }}",
+            "model": "roblox-rp",
+            "user_prompt": "=Here is the transcript:\n{{ $json.story }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "video_script",
+              "displayName": "video_script",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "system_prompt",
+              "displayName": "system_prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "user_prompt",
+              "displayName": "user_prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "model",
+              "displayName": "model",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        896,
+        448
+      ],
+      "id": "ba66f126-5405-436c-bb29-0bc55b97cc67",
+      "name": "Generate Video Metadata"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "h8sMg9kumrvlDSNe",
+          "mode": "list",
+          "cachedResultName": "SWF015 - Generate Thumbnail PR5"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "execution_timestamp": "={{ $now }}",
+            "top_text": "={{ $json.thumbnail_top_text }}",
+            "bottom_text": "={{ $json.thumbnail_bottom_text }}",
+            "temporary_storage_filename": "{{ \"SciFy-LongStory-\" +$now.toMillis() +\".jpg\" }}",
+            "avatar_width": "={{ 384 }}",
+            "avatar_height": "={{ 720 }}",
+            "avatar_model": "flux",
+            "avatar_prompt": "=\"Portrait of a person portraying the [DESCRIPTION] looking directly at camera, with eyes befitting the [DESCRIPTION], an expression befitting the [DESCRIPTION], mouth position befitting the [DESCRIPTION], hand positions and gestures befitting the [DESCRIPTION], dramatic lighting, high contrast, professional photography style, clean background\"\n\n[DESCRIPTION]\n{{ $json.description }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "execution_timestamp",
+              "displayName": "execution_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "top_text",
+              "displayName": "top_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "bottom_text",
+              "displayName": "bottom_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "avatar_prompt",
+              "displayName": "avatar_prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "avatar_width",
+              "displayName": "avatar_width",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "avatar_height",
+              "displayName": "avatar_height",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "avatar_model",
+              "displayName": "avatar_model",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "temporary_storage_filename",
+              "displayName": "temporary_storage_filename",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1104,
+        448
+      ],
+      "id": "a3594f3a-785a-4ae6-b4a9-55f112ad14ad",
+      "name": "Generate Thumbnail"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "UKwiPykk0RAeYSgb",
+          "mode": "list",
+          "cachedResultName": "SWF021 - Upload Video PR5"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "upload_to_YT": "={{ $('Workflow Controls').first().json.yt_upload }}",
+            "upload_to_GGL": "={{ $('Workflow Controls').first().json.ggl_upload }}",
+            "title": "={{ $('Generate Video Metadata').item.json.title }}",
+            "description": "={{ $('Generate Video Metadata').item.json.description }}",
+            "hashtags": "={{ $('Generate Video Metadata').item.json.hashtags }}",
+            "tags": "={{ $('Generate Video Metadata').item.json.tags }}",
+            "attribution": "=Copyright (C) {{ $now.year }} SEASONED SOLUTIONS ADVISOR LLC",
+            "video_url": "={{ $('Generate Long Story Video').item.json.fileUrl }}",
+            "thumbnail_url": "={{ $json.thumbnail_url }}",
+            "YT_privacy_status": "={{ $('Workflow Controls').first().json.yt_privacy }}",
+            "WHICH_YT_CHANNEL": "={{ $('Workflow Controls').first().json.yt_credentials }}",
+            "WHICH_GGL_ACCOUNT": "={{ $('Workflow Controls').first().json.ggl_credentials }}",
+            "GGL_base_path": "={{ $('Workflow Controls').first().json.ggl_spreadsheet_path }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "upload_to_YT",
+              "displayName": "upload_to_YT",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "boolean"
+            },
+            {
+              "id": "WHICH_YT_CHANNEL",
+              "displayName": "WHICH_YT_CHANNEL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "hashtags",
+              "displayName": "hashtags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "attribution",
+              "displayName": "attribution",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "tags",
+              "displayName": "tags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "YT_privacy_status",
+              "displayName": "YT_privacy_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "video_url",
+              "displayName": "video_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "thumbnail_url",
+              "displayName": "thumbnail_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "channel_playlists",
+              "displayName": "channel_playlists",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array"
+            },
+            {
+              "id": "upload_to_GGL",
+              "displayName": "upload_to_GGL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "boolean"
+            },
+            {
+              "id": "WHICH_GGL_ACCOUNT",
+              "displayName": "WHICH_GGL_ACCOUNT",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "GGL_base_path",
+              "displayName": "GGL_base_path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "audio_url",
+              "displayName": "audio_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "avatar_url",
+              "displayName": "avatar_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1312,
+        448
+      ],
+      "id": "f0380cd1-235a-43f5-9b6b-fd81211aee3b",
+      "name": "Upload Video"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "MLGu9hqVLJmGFCaK",
+          "mode": "list",
+          "cachedResultName": "SWF022 - Update Video Ledger Spreadsheet"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "which_credentials": "EBOYD53",
+            "drive_file_path": "/ConnectCircuits/SciFy",
+            "spreadsheet_document_name": "video_ledger",
+            "spreadsheet_sheet_name": "YouTubeLong",
+            "spreadsheet_fields_to_update": "=[\n  {\n    \"upload_timestamp\": \"{{ $now.toString() }}\",\n    \"title\": \"{{ $('Generate Video Metadata').first().json.title }}\", \n    \"videoId\": \"{{ $('Upload Video').first().json.YT_Video_ID }}\",\n    \"status\": \"private\", \n    \"youtubeLink\": \"https://youtu.be/{{ $('Upload Video').first().json.YT_Video_ID }}\",\n    \"scheduled\": \"\"\n  }\n]\n"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "which_credentials",
+              "displayName": "which_credentials",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "drive_file_path",
+              "displayName": "drive_file_path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "spreadsheet_document_name",
+              "displayName": "spreadsheet_document_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "spreadsheet_sheet_name",
+              "displayName": "spreadsheet_sheet_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "spreadsheet_fields_to_update",
+              "displayName": "spreadsheet_fields_to_update",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1728,
+        448
+      ],
+      "id": "84935247-d11c-4448-b495-803c1bc93360",
+      "name": "Update Video Ledger YouTubeLong"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Find Given Filename').item.json.id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "YouTubeShorts",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "longform_created": "={{ $now }}",
+            "row_number": "={{ $('Limit').item.json.row_number }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "upload_timestamp",
+              "displayName": "upload_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "videoId",
+              "displayName": "videoId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "youtubeLink",
+              "displayName": "youtubeLink",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "story_lines",
+              "displayName": "story_lines",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "longform_created",
+              "displayName": "longform_created",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1520,
+        448
+      ],
+      "id": "f00812fe-3acb-49fa-baa4-bdd4793f896e",
+      "name": "Update when Long Form was uploaded",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "sBSUvpbcf6G35DbF",
+          "name": "Google Sheets EBOYD53"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Workflow Controls",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Controls": {
+      "main": [
+        [
+          {
+            "node": "Find GGL Directory Path",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Given Filename": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Sort",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Generate Long Story Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find GGL Directory Path": {
+      "main": [
+        [
+          {
+            "node": "Find Given Filename",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Long Story Video": {
+      "main": [
+        [
+          {
+            "node": "Generate Video Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Video Metadata": {
+      "main": [
+        [
+          {
+            "node": "Generate Thumbnail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Thumbnail": {
+      "main": [
+        [
+          {
+            "node": "Upload Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Video": {
+      "main": [
+        [
+          {
+            "node": "Update when Long Form was uploaded",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Video Ledger YouTubeLong": {
+      "main": [
+        []
+      ]
+    },
+    "Update when Long Form was uploaded": {
+      "main": [
+        [
+          {
+            "node": "Update Video Ledger YouTubeLong",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Schedule Trigger": [
+      {
+        "timestamp": "2025-07-23T00:00:52.030+00:00",
+        "Readable date": "July 23rd 2025, 12:00:52 am",
+        "Readable time": "12:00:52 am",
+        "Day of week": "Wednesday",
+        "Year": "2025",
+        "Month": "July",
+        "Day of month": "23",
+        "Hour": "00",
+        "Minute": "00",
+        "Second": "52",
+        "Timezone": "UTC (UTC+00:00)"
+      }
+    ]
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "37fe6d8c3b2aaeda95afa9d59c8cbc7c79e8171e6cc2a68043e239f8403c390e"
+  }
+}

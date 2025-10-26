@@ -1,0 +1,966 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "// n8n Code Node - Split text into dynamic segments for 120-second audio chunks\nconst items = $('Generate Long Story').all();\n\nreturn items.map(item => {\n  // Get the story text from the \"Select random story row\" node\n  const text = $('Generate Long Story').first().json.story;\n  \n  if (!text || typeof text !== 'string') {\n    return {\n      story: [],\n      error: 'No story text found from Select random story row node'\n    };\n  }\n  \n  // Function to count words in text\n  function countWords(str) {\n    return str.trim().split(/\\s+/).filter(word => word.length > 0).length;\n  }\n  \n  // Function to estimate audio duration in seconds\n  // Based on average speech rate of 150 words per minute (2.5 words per second)\n  function estimateAudioDuration(wordCount) {\n    const wordsPerSecond = 2.5; // Conservative estimate for clear speech\n    return wordCount / wordsPerSecond;\n  }\n  \n  // Split text into sentences using multiple sentence boundary markers\n  function splitIntoSentences(text) {\n    // Handle common abbreviations that shouldn't split sentences\n    const abbreviations = [\n      'Mr', 'Mrs', 'Dr', 'Prof', 'Sr', 'Jr', 'vs', 'etc', 'Inc', 'Ltd', \n      'Co', 'Corp', 'Ave', 'St', 'Rd', 'Blvd', 'Ph.D', 'M.D', 'B.A', \n      'M.A', 'U.S', 'U.K', 'E.U', 'i.e', 'e.g', 'a.m', 'p.m'\n    ];\n    \n    // Create regex pattern for abbreviations\n    const abbrPattern = '(?:' + abbreviations.join('|') + ')';\n    \n    // Split on sentence boundaries while preserving abbreviations\n    const sentenceRegex = new RegExp(\n      `(?<!\\\\b${abbrPattern})[.!?]+(?=\\\\s+[A-Z]|\\\\s*$)`,\n      'g'\n    );\n    \n    let sentences = text.split(sentenceRegex)\n      .map(s => s.trim())\n      .filter(s => s.length > 0);\n    \n    return sentences;\n  }\n  \n  // Split text into sentences\n  let sentences = splitIntoSentences(text);\n  \n  if (sentences.length === 0) {\n    return {\n      story: [text]\n    };\n  }\n  \n  // Create story segments based on 120-second audio limit\n  const maxAudioSeconds = 50;\n  const storyArray = [];\n  let currentSegment = '';\n  let currentWordCount = 0;\n  \n  for (let i = 0; i < sentences.length; i++) {\n    const sentence = sentences[i];\n    const sentenceWordCount = countWords(sentence);\n    const potentialWordCount = currentWordCount + sentenceWordCount;\n    const potentialDuration = estimateAudioDuration(potentialWordCount);\n    \n    // If adding this sentence would exceed 120 seconds, start a new segment\n    if (potentialDuration > maxAudioSeconds && currentSegment !== '') {\n      // Save current segment\n      storyArray.push(currentSegment.trim());\n      \n      // Start new segment with current sentence\n      currentSegment = sentence;\n      currentWordCount = sentenceWordCount;\n    } else {\n      // Add sentence to current segment\n      if (currentSegment === '') {\n        currentSegment = sentence;\n      } else {\n        currentSegment += ' ' + sentence;\n      }\n      currentWordCount = potentialWordCount;\n    }\n    \n    // Handle case where a single sentence exceeds 120 seconds\n    if (estimateAudioDuration(sentenceWordCount) > maxAudioSeconds) {\n      // Split long sentence by words if necessary\n      const words = sentence.split(/\\s+/);\n      let tempSegment = '';\n      let tempWordCount = 0;\n      \n      for (const word of words) {\n        tempWordCount++;\n        const tempDuration = estimateAudioDuration(tempWordCount);\n        \n        if (tempDuration > maxAudioSeconds && tempSegment !== '') {\n          storyArray.push(tempSegment.trim());\n          tempSegment = word;\n          tempWordCount = 1;\n        } else {\n          if (tempSegment === '') {\n            tempSegment = word;\n          } else {\n            tempSegment += ' ' + word;\n          }\n        }\n      }\n      \n      // Update current segment to the remaining part\n      currentSegment = tempSegment;\n      currentWordCount = tempWordCount;\n    }\n  }\n  \n  // Add the last segment if it exists\n  if (currentSegment.trim() !== '') {\n    storyArray.push(currentSegment.trim());\n  }\n  \n  return {\n    slidesNeeded: storyArray.length,\n    story: storyArray\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "1df0ba98-ecdf-49e6-ba9a-0f75a3130458",
+      "name": "Split story into parts"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "10744d10-9e8c-49b7-bc13-5a2b1d98aa08",
+              "name": "system_prompt",
+              "value": "=You are an AI tasked with converting a {{ $('Start').first().json.story_genre }} story transcript into a single, cinematic image prompt for AI art generators like Flux.\n\t1.\tAbsorb the entire transcript.\n\t2.\tIdentify the scene with the strongest visual impact and peak tension.\n\t3.\tCompose one evocative, atmosphere-dripping prompt that brings that moment to life.\n\t4.\tFocus on setting, light, color palette, and eerie details.\n\t5.\tExclude any direct quotes or narrative snippets.\n\t6.\tReturn only the final image prompt—no code, labels, or commentary.\n\nExample:\nA decrepit Gothic cathedral under a blood-red sky, its shattered stained-glass windows glowing from within as ghostly silhouettes drift among toppled pews.",
+              "type": "string"
+            },
+            {
+              "id": "b91856e5-5550-4a7c-b5fe-cf14f88730af",
+              "name": "user_prompt",
+              "value": "={{ $json.story }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        896,
+        0
+      ],
+      "id": "05c4b38d-2e44-4c21-ad33-822fce282e3c",
+      "name": "System and User Prompts for Image Prompt Generator"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "story",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        672,
+        0
+      ],
+      "id": "9fece80f-159d-476b-9f27-7cd8a9357db8",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "nlewIQWnXuZEMvCt",
+          "mode": "list",
+          "cachedResultName": "SWF014 - Generate Script PR5"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "System_Prompt": "={{ $json.system_prompt }}",
+            "User_Prompt": "={{ $json.user_prompt }}",
+            "Model": "evil"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "System_Prompt",
+              "displayName": "System_Prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "User_Prompt",
+              "displayName": "User_Prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "Model",
+              "displayName": "Model",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1120,
+        0
+      ],
+      "id": "ca49b26e-e8f1-4701-b594-1b73a12a69c8",
+      "name": "Image Prompt Generation"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "une4qMZLy8b4Fhum",
+          "mode": "list",
+          "cachedResultName": "SWF011 - Generate Images"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "image_prompts": "={{ $json.output }}",
+            "number_of_images": "={{ $('Split story into parts').first().json.slidesNeeded }}",
+            "model": "flux",
+            "width": 1280,
+            "height": 720
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "number_of_images",
+              "displayName": "number_of_images",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "width",
+              "displayName": "width",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "height",
+              "displayName": "height",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "model",
+              "displayName": "model",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "image_prompts",
+              "displayName": "image_prompts",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "genre",
+              "displayName": "genre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "style",
+              "displayName": "style",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "vibrancy",
+              "displayName": "vibrancy",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "detail_level",
+              "displayName": "detail_level",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "composition",
+              "displayName": "composition",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "mood",
+              "displayName": "mood",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "lighting",
+              "displayName": "lighting",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "texture",
+              "displayName": "texture",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "camera_angle",
+              "displayName": "camera_angle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "resolution",
+              "displayName": "resolution",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "artistic_influence",
+              "displayName": "artistic_influence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1568,
+        0
+      ],
+      "id": "63b0d201-dd9d-4acb-8766-2c6ae28f8835",
+      "name": "Images Generation"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.all();\nconst output = [];\nfor (item in raw) {\n  output.push(raw[item].json.generated_text.output)\n}\nreturn {output}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        0
+      ],
+      "id": "4eb07a39-a8cf-42b3-a06c-d0a44a79ae68",
+      "name": "Accumulate Prompts into an Array"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "image_urls",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1792,
+        0
+      ],
+      "id": "de1a23f5-64cb-4e52-8fe7-47cee3fd6110",
+      "name": "Split Out1"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "dlSJyYVEWEMlaB96",
+          "mode": "list",
+          "cachedResultName": "SWF012 - Generate Slideshow"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "image_urls": "={{ $json.image_urls }}",
+            "image_texts": "={{ $json.image_texts }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "image_urls",
+              "displayName": "image_urls",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array"
+            },
+            {
+              "id": "image_texts",
+              "displayName": "image_texts",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        2240,
+        0
+      ],
+      "id": "4e45f943-af57-4c6a-9bf4-22b0c7a1e926",
+      "name": "Slideshow Generation"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "KmZF0xQ3elFLOKso",
+          "mode": "list",
+          "cachedResultName": "SWF013 - Add Slideshow Captions V2"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "style_font_bold": true,
+            "style_effects_all_caps": false,
+            "video_url": "={{ $json.result.video_url }}",
+            "style_type": "highlight",
+            "style_font_family": "DejaVu Sans",
+            "style_font_size": 60,
+            "style_colors_line": "#FFFFFF",
+            "style_colors_word": "#FFFF00",
+            "style_colors_outline": "#000000",
+            "style_colors_box": "#000000A0",
+            "style_effects_outline_width": 2,
+            "style_effects_border_style": 1,
+            "style_positioning_position": "middle_center",
+            "style_positioning_alignment": "center",
+            "style_margin_l": 30,
+            "style_margin_r": 30,
+            "style_margin_v": 30,
+            "style_max_words_per_line": 8
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "video_url",
+              "displayName": "video_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "captions",
+              "displayName": "captions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "style_type",
+              "displayName": "style_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "style_font_family",
+              "displayName": "style_font_family",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "style_font_size",
+              "displayName": "style_font_size",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "style_font_bold",
+              "displayName": "style_font_bold",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "boolean"
+            },
+            {
+              "id": "style_colors_line",
+              "displayName": "style_colors_line",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "style_colors_word",
+              "displayName": "style_colors_word",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "style_colors_outline",
+              "displayName": "style_colors_outline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "style_colors_box",
+              "displayName": "style_colors_box",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "style_effects_outline_width",
+              "displayName": "style_effects_outline_width",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "style_effects_border_style",
+              "displayName": "style_effects_border_style",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "style_effects_all_caps",
+              "displayName": "style_effects_all_caps",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "boolean"
+            },
+            {
+              "id": "style_positioning_position",
+              "displayName": "style_positioning_position",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "style_positioning_alignment",
+              "displayName": "style_positioning_alignment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "style_positioning_x",
+              "displayName": "style_positioning_x",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "style_positioning_y",
+              "displayName": "style_positioning_y",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "style_margin_l",
+              "displayName": "style_margin_l",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "style_margin_r",
+              "displayName": "style_margin_r",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "style_margin_v",
+              "displayName": "style_margin_v",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "style_max_words_per_line",
+              "displayName": "style_max_words_per_line",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "replacements_find",
+              "displayName": "replacements_find",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "replacements_replace",
+              "displayName": "replacements_replace",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        2464,
+        0
+      ],
+      "id": "b8635c9e-001c-451e-b8e2-a6808da84dbc",
+      "name": "Slideshow Caption"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "story_prompt"
+            },
+            {
+              "name": "story_genre"
+            },
+            {
+              "name": "story_model"
+            },
+            {
+              "name": "word_count",
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c8a208f4-7f54-4735-bed9-f6897438633c",
+      "name": "Start"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "Kw0WIJ9MGPamlMW4",
+          "mode": "list",
+          "cachedResultName": "SWF052 - Download And Save Temporarily"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "file_url": "={{ $json.final_video_url }}"
+          },
+          "matchingColumns": [
+            "file_url"
+          ],
+          "schema": [
+            {
+              "id": "file_url",
+              "displayName": "file_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        2688,
+        0
+      ],
+      "id": "7a1b2bd6-c92a-463a-b645-9e22684b4004",
+      "name": "Download And Save final_video_url Temporarily",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "57ff4b9d-0355-4d62-a22c-3858f18d44cf",
+              "name": "story",
+              "value": "={{ $('Generate Long Story').first().json.story }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2912,
+        0
+      ],
+      "id": "86633e05-00cd-4c92-bfcd-5fd192772fb8",
+      "name": "Return Data"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "hQi55HpnUYkgUERp",
+          "mode": "list",
+          "cachedResultName": "SWF051 - Generate Long Story V2"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "prompt": "={{ $json.story_prompt }}",
+            "model": "={{ $json.story_model }}",
+            "word_count": "={{ $json.word_count }}",
+            "story_genre": "={{ $json.story_genre }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "prompt",
+              "displayName": "prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "model",
+              "displayName": "model",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "word_count",
+              "displayName": "word_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "story_genre",
+              "displayName": "story_genre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "5086c9d3-e958-4be7-9ea9-db4f8c97d28f",
+      "name": "Generate Long Story"
+    },
+    {
+      "parameters": {
+        "jsCode": "const image_urls = [];\nconst stories = $('Split story into parts').first();\nconst texts = [];\n\nconst slidesNeeded = $('Split story into parts').first().json.slidesNeeded;\n\nfor (let i = 0; i < slidesNeeded; i++) {\n\n  image_urls.push($input.all()[i].json.image_urls);\n  texts.push(stories.json.story[i]);\n  \n}\n\n// 👇 Return a SINGLE item with array of URLs\nreturn [{\n  json: {\n    image_urls,\n    image_texts: texts\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2016,
+        0
+      ],
+      "id": "9586af35-da9e-4ab0-a58e-48cd7ea6c540",
+      "name": "Combine image URL and image text"
+    }
+  ],
+  "connections": {
+    "Split story into parts": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "System and User Prompts for Image Prompt Generator": {
+      "main": [
+        [
+          {
+            "node": "Image Prompt Generation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "System and User Prompts for Image Prompt Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image Prompt Generation": {
+      "main": [
+        [
+          {
+            "node": "Accumulate Prompts into an Array",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Images Generation": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Accumulate Prompts into an Array": {
+      "main": [
+        [
+          {
+            "node": "Images Generation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "Combine image URL and image text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slideshow Generation": {
+      "main": [
+        [
+          {
+            "node": "Slideshow Caption",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slideshow Caption": {
+      "main": [
+        [
+          {
+            "node": "Download And Save final_video_url Temporarily",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Generate Long Story",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download And Save final_video_url Temporarily": {
+      "main": [
+        [
+          {
+            "node": "Return Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Long Story": {
+      "main": [
+        [
+          {
+            "node": "Split story into parts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine image URL and image text": {
+      "main": [
+        [
+          {
+            "node": "Slideshow Generation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Start": [
+      {
+        "story_prompt": "Mid-commute, gravity in the station pulses backward for three seconds.,A reality engineer travels with a consciousness thief disguised as an augmented outcast.,Quantum entanglement experiments start merging strangers’ identities into unstable hybrid minds.,The engineer learns the thief sold fragments of their shared mind to an underground memory market.,They must choose between restoring themselves or preventing a city-wide reality fracture.,Human identity becomes a tradable commodity, rewriting the definition of self.,Enjoyed this mind-bending moment? Subscribe, like, comment and share.",
+        "story_genre": "science fiction",
+        "story_model": "openai",
+        "word_count": 20000
+      }
+    ]
+  },
+  "meta": {
+    "instanceId": "37fe6d8c3b2aaeda95afa9d59c8cbc7c79e8171e6cc2a68043e239f8403c390e"
+  }
+}

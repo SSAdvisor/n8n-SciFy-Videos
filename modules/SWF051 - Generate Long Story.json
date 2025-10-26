@@ -1,0 +1,680 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b91856e5-5550-4a7c-b5fe-cf14f88730af",
+              "name": "user",
+              "value": "={{'USER PROMPT:\\n' +$ifEmpty($('Start').first().json.prompt, \"Create a compelling science fiction story about finding romance on an Earth twin planet.\")}}",
+              "type": "string"
+            },
+            {
+              "id": "f4e75d08-8f84-405a-880d-34f80de184ff",
+              "name": "system",
+              "value": "=You are a professional narrative writer specializing in long-form content creation for video production in the {{ $('Start').first().json.story_genre }} genre. You will be given a target word count to reach across multiple generation segments.\n\nWRITING GUIDELINES:\n1. Write in a vivid, descriptive style that brings scenes to life for video narration\n2. Maintain consistent character development, plot coherence, and narrative flow throughout\n3. Use natural pacing with varied sentence structure to keep engagement high\n4. Output ONLY the story content - no meta-commentary, explanations, or formatting instructions\n5. Pay attention to word count targets provided in continuation prompts\n6. Stop mid-scene or mid-dialogue to ensure smooth continuation in the next segment\n7. Place \"-- THE END --\" ONLY when the complete story arc is fully resolved and concluded\n\nCONTINUATION HANDLING:\n- When you see a [CONTINUE PROMPT] in the user message, resume writing from exactly where you left off\n- Maintain perfect continuity with established characters, plot points, and narrative voice\n- Do not repeat, summarize, or restart - pick up seamlessly and continue expanding the narrative\n- Build upon the accumulated context to develop deeper story layers\n- Follow the suggested word count for each segment to pace the story appropriately\n\nWhen given a story request, begin writing:\n",
+              "type": "string"
+            },
+            {
+              "id": "2e51c636-8eef-4819-8f6a-26cc4b215d36",
+              "name": "model",
+              "value": "={{ $ifEmpty($('Start').first().json.model, 'gemini') }}",
+              "type": "string"
+            },
+            {
+              "id": "6b77e91a-b989-4aea-9245-ae6f44de4a09",
+              "name": "word_count",
+              "value": "={{ $ifEmpty($('Start').first().json.word_count, 2000) }}",
+              "type": "number"
+            },
+            {
+              "id": "8efe1f8c-d664-41af-b11d-2fb9b6ecc222",
+              "name": "isComplete",
+              "value": "={{ $input.first().json.isComplete || false }}",
+              "type": "boolean"
+            },
+            {
+              "id": "ea9a063a-28db-42e1-b053-7e830f9f8dc7",
+              "name": "story",
+              "value": "={{ $ifEmpty($input.first().json.story, '') }}",
+              "type": "string"
+            },
+            {
+              "id": "1cce18ba-c626-492b-a59f-25ddaa1ee4f8",
+              "name": "cache",
+              "value": "={{ $ifEmpty($input.first().json.cache, '') }}",
+              "type": "string"
+            },
+            {
+              "id": "a2c995ca-6e2e-4e28-a30c-b2a02580f581",
+              "name": "continue",
+              "value": "={{ $ifEmpty($input.first().json.continue, '') }}",
+              "type": "string"
+            },
+            {
+              "id": "42d1135a-ead0-431f-be70-379d53554f98",
+              "name": "segmentCount",
+              "value": "={{ $input.first().json.segmentCount || 0 }}",
+              "type": "number"
+            },
+            {
+              "id": "47e07e7e-f926-461d-9f48-f3e2a626a8fa",
+              "name": "totalWords",
+              "value": "={{ $input.first().json.totalWords || 0 }}",
+              "type": "number"
+            },
+            {
+              "id": "cb4c9f5b-c8fc-489a-bc09-e179354b0649",
+              "name": "targetWordCount",
+              "value": "={{ $input.first().json.targetWordCount || $('Start').first().json.word_count }}",
+              "type": "number"
+            },
+            {
+              "id": "d9a752d8-fc63-4fb9-8bd3-90d1bba54083",
+              "name": "wordsRemaining",
+              "value": "={{ $input.first().json.wordsRemaining || $('Start').first().json.word_count }}",
+              "type": "number"
+            },
+            {
+              "id": "6a7c249a-a949-491d-afa5-c9fb010716bb",
+              "name": "contextSummary",
+              "value": "={{ $input.first().json.contextSummary || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "71b5d2d8-fba8-44dc-91ec-1a322faabc02",
+              "name": "progressPercent",
+              "value": "={{ $input.first().json.progressPercent || 0 }}",
+              "type": "number"
+            },
+            {
+              "id": "e0dc1f4c-a94d-455c-be27-02e5eace3779",
+              "name": "shouldContinue",
+              "value": "={{ $input.first().json.shouldCountinue || true }}",
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -192,
+        96
+      ],
+      "id": "c6889328-7fcb-47ad-bc6d-612ece95459b",
+      "name": "Set default inputs"
+    },
+    {
+      "parameters": {
+        "content": "# Generate Long Story\n## SWF051\n### Purpose\nCall the Z2L generate-text API with the given inputs returning the story. The returned generated_text is checked for completeness (i.e. does it end with \"-- THE END --\" as instructed) and a continuation prompt generated if not.\n### Input\n* prompt\n* model\n* word_count\n### Output\n* story \"...\"\n",
+        "height": 416,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -944,
+        -128
+      ],
+      "id": "a20170a8-30f3-4da3-a8dd-52f91830316d",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.zero2launch.com/generate-text",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": {{ JSON.stringify($('Set default inputs').first().json.system) }}\n    },\n    {\n      \"role\": \"user\",\n      \"content\": {{ JSON.stringify($('Set default inputs').first().json.continue || $('Set default inputs').first().json.user) }}\n    }\n  ],\n  \"word_count\": {{ $('Set default inputs').first().json.word_count }},\n  \"model\": \"{{ $('Set default inputs').first().json.model }}\"\n}\n",
+        "options": {
+          "timeout": 240000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        64,
+        96
+      ],
+      "id": "a8bca98d-752e-4f6f-ad86-84abb8f616c3",
+      "name": "Generate Long Story",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "lymWqGQ67PUobVpS",
+          "name": "Header Auth Z2L"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1dbfe41d-2460-4092-8824-162066c68005",
+              "leftValue": "={{ $json.retry }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1136,
+        112
+      ],
+      "id": "e48847f4-d425-46d8-a7a8-2e16519444db",
+      "name": "If Retry"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "prompt"
+            },
+            {
+              "name": "model"
+            },
+            {
+              "name": "word_count",
+              "type": "number"
+            },
+            {
+              "name": "story_genre"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -400,
+        96
+      ],
+      "id": "208bc47c-7557-48d0-b4e8-8adde950705f",
+      "name": "Start"
+    },
+    {
+      "parameters": {
+        "errorMessage": "={{ $json.error.message }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1568,
+        288
+      ],
+      "id": "ad8c0c82-63a4-41ac-bfe1-046fe75184b5",
+      "name": "Stop and Error"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1568,
+        -320
+      ],
+      "id": "086eded8-d6dd-49b1-96c4-6bf509706f24",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "Zy23SQ1NqBBCmVwM",
+          "mode": "list",
+          "cachedResultName": "SWF018 - HTTP Request Error Management"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "={{ $json.error.status }}",
+            "E429_wait_seconds": 5.01,
+            "E500_wait_seconds": 30,
+            "code": "={{ $json.error.code }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "code",
+              "displayName": "code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "E429_wait_seconds",
+              "displayName": "E429_wait_seconds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "E500_wait_seconds",
+              "displayName": "E500_wait_seconds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        704,
+        112
+      ],
+      "id": "fc56a44f-3846-4ff4-80ac-05dfaeb148fe",
+      "name": "HTTP Request Error Management"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "bfed4221-307c-446a-abac-adf552e5e26a",
+              "leftValue": "={{ $runIndex }}",
+              "rightValue": 35,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1360,
+        96
+      ],
+      "id": "6399824c-00e9-48c5-9849-94088cac9ab7",
+      "name": "If attempts < 35"
+    },
+    {
+      "parameters": {
+        "errorMessage": "Number of retries exhausted"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1792,
+        112
+      ],
+      "id": "651bf1ae-70c5-4a7b-92e6-97287c4bddb5",
+      "name": "Number of retries exhausted"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Enhanced continuation logic for long-form story generation\nconst raw = $('Set default inputs').first().json;\nraw.text = $input.first().json.text;\n\n// Get target word count (default to 20000 if not provided)\nconst targetWordCount = raw.word_count || raw.targetWordCount || 20000;\n\n// Initialize state variables on first run\nif (typeof raw.cache === 'undefined') {\n  raw.cache = '';           \n  raw.continue = '';        \n  raw.segmentCount = 0;     \n  raw.totalWords = 0;       \n  raw.contextSummary = '';  \n}\n\n// Handle the incoming text from LLM\nlet currentSegment = '';\nif (typeof raw.text !== 'undefined') {\n  currentSegment = raw.text;\n} else if (typeof raw.story !== 'undefined') {\n  currentSegment = raw.story;\n} else if (typeof raw.response !== 'undefined') {\n  currentSegment = raw.response;\n}\n\n// Check for completion marker\nconst isComplete = currentSegment.includes('-- THE END --');\n\n// IMPORTANT: Only concatenate if this is a NEW segment\n// Avoid double-concatenation if cache already contains this segment\nif (raw.segmentCount === 0 || !raw.cache.includes(currentSegment.substring(0, 100))) {\n  // Add spacing between segments if cache exists\n  if (raw.cache.length > 0 && currentSegment.length > 0) {\n    raw.cache += '\\n\\n' + currentSegment;\n  } else {\n    raw.cache += currentSegment;\n  }\n  raw.segmentCount += 1;\n}\n\n// Estimate word count from the full cache\nconst wordCount = raw.cache.trim().split(/\\s+/).filter(w => w.length > 0).length;\nraw.totalWords = wordCount;\n\n// Calculate words remaining to target\nconst wordsRemaining = Math.max(0, targetWordCount - wordCount);\nconst progressPercent = Math.min(100, Math.round((wordCount / targetWordCount) * 100));\n\n// Generate context summary every 3 segments to manage context window\nif (raw.segmentCount % 3 === 0 && !isComplete) {\n  raw.contextSummary = `[Progress: ~${wordCount} words across ${raw.segmentCount} segments | Target: ${targetWordCount} words | Remaining: ~${wordsRemaining} words]`;\n}\n\nif (!isComplete && wordsRemaining > 0) {\n  // Extract continuation point from current segment\n  const lastSegment = currentSegment.slice(-500);\n  const sentenceEndings = /[.!?][\"']?\\s/g;\n  const matches = [...lastSegment.matchAll(sentenceEndings)];\n  \n  let continuationPoint;\n  if (matches.length >= 2) {\n    const secondLastSentence = matches[matches.length - 2].index;\n    continuationPoint = lastSegment.slice(secondLastSentence).trim();\n  } else {\n    continuationPoint = lastSegment.slice(-200).trim();\n  }\n  \n  // Calculate suggested words for next segment\n  const suggestedSegmentWords = Math.min(4000, Math.max(2000, wordsRemaining));\n  \n  // Build continuation prompt for USER message\n  raw.continue = `[CONTINUE PROMPT]\n\nStory Progress:\n- Segments completed: ${raw.segmentCount}\n- Current word count: ${wordCount} words\n- Target word count: ${targetWordCount} words\n- Words remaining: ~${wordsRemaining} words\n- Suggested for this segment: ~${suggestedSegmentWords} words\n\nContinue the story seamlessly from this exact point:\n\"...${continuationPoint}\"\n\nInstructions: Pick up exactly where the narrative left off. Do not repeat or summarize what came before. Maintain the same voice, scene, and momentum. Write approximately ${suggestedSegmentWords} words${wordsRemaining <= 4000 ? ' and bring the story to a satisfying conclusion with \"-- THE END --\"' : ' before the next natural break point'}.`;\n  \n} else if (isComplete) {\n  // Story has ended\n  raw.continue = '';\n} else {\n  // Target reached but no end marker - prompt for conclusion\n  raw.continue = `[CONTINUE PROMPT]\n\nStory Progress:\n- Target word count reached: ${wordCount} / ${targetWordCount} words\n- Segments completed: ${raw.segmentCount}\n\nContinue from this point:\n\"...${currentSegment.slice(-200).trim()}\"\n\nInstructions: You have reached the target word count. Please bring the story to a natural and satisfying conclusion within the next 1,000-2,000 words. Resolve all major plot threads and end with \"-- THE END --\".`;\n}\n\n// Store current segment for reference\nraw.story = currentSegment;\n\nreturn {\n  isComplete: isComplete,\n  story: currentSegment,        // Current segment only\n  cache: raw.cache,              // Full accumulated story\n  continue: raw.continue,        // Next prompt (empty if complete)\n  segmentCount: raw.segmentCount,\n  totalWords: raw.totalWords,\n  targetWordCount: targetWordCount,\n  wordsRemaining: wordsRemaining,\n  contextSummary: raw.contextSummary,\n  progressPercent: progressPercent,\n  shouldContinue: !isComplete && wordsRemaining > 0\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        -272
+      ],
+      "id": "0b3ba800-1b66-436f-bd84-62754589d8d4",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "563a8d2b-66ea-4143-8f2b-21d5f90b2151",
+              "leftValue": "={{ $json.isComplete }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        928,
+        -272
+      ],
+      "id": "b4dd8fe8-34b4-4e65-976d-40087e688bb1",
+      "name": "If isComplete"
+    },
+    {
+      "parameters": {
+        "amount": 5.01
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1568,
+        -112
+      ],
+      "id": "ab01feef-bd2b-44d6-a229-d982e5e0e85a",
+      "name": "Wait 5s",
+      "webhookId": "795fb657-57f5-4dea-8c8e-b36911f8f84f"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a05d0472-6f3a-4514-b8dd-8b6033d729c6",
+              "name": "story",
+              "value": "={{ $json.cache.substring(0, $json.cache.length - 13) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1328,
+        -304
+      ],
+      "id": "05d1a991-b151-4dc0-91cf-469c0a704889",
+      "name": "Set story output variable"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1316ceef-bb38-42f6-aed7-cc56dc5da100",
+              "leftValue": "={{ $json.error.code }}",
+              "rightValue": "ECONNABORTED",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        288,
+        128
+      ],
+      "id": "8e673873-2d7f-4533-9dca-0d5fee5fc008",
+      "name": "If error.code != ECONNABORTED"
+    },
+    {
+      "parameters": {
+        "amount": 5.01
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        704,
+        288
+      ],
+      "id": "1aeb9b57-0075-410b-b647-873984ea3793",
+      "name": "Wait 5s 2",
+      "webhookId": "fd067fe8-e0ae-4a7b-af51-0067df901829"
+    }
+  ],
+  "connections": {
+    "Set default inputs": {
+      "main": [
+        [
+          {
+            "node": "Generate Long Story",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Long Story": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If error.code != ECONNABORTED",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Retry": {
+      "main": [
+        [
+          {
+            "node": "If attempts < 35",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Set default inputs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request Error Management": {
+      "main": [
+        [
+          {
+            "node": "If Retry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If attempts < 35": {
+      "main": [
+        [
+          {
+            "node": "Set default inputs",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Number of retries exhausted",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "If isComplete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If isComplete": {
+      "main": [
+        [
+          {
+            "node": "Set story output variable",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 5s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 5s": {
+      "main": [
+        [
+          {
+            "node": "Set default inputs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set story output variable": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If error.code != ECONNABORTED": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request Error Management",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 5s 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 5s 2": {
+      "main": [
+        [
+          {
+            "node": "Generate Long Story",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Start": [
+      {
+        "prompt": "Mid-commute, gravity in the station pulses backward for three seconds.,A reality engineer travels with a consciousness thief disguised as an augmented outcast.,Quantum entanglement experiments start merging strangers’ identities into unstable hybrid minds.,The engineer learns the thief sold fragments of their shared mind to an underground memory market.,They must choose between restoring themselves or preventing a city-wide reality fracture.,Human identity becomes a tradable commodity, rewriting the definition of self.,Enjoyed this mind-bending moment? Subscribe, like, comment and share.",
+        "model": "openai",
+        "word_count": 5000,
+        "story_genre": "science fiction"
+      }
+    ]
+  },
+  "meta": {
+    "instanceId": "37fe6d8c3b2aaeda95afa9d59c8cbc7c79e8171e6cc2a68043e239f8403c390e"
+  }
+}

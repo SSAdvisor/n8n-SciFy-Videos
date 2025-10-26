@@ -1,0 +1,667 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.zero2launch.com/generate-text",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  model: $('Workflow Control').item.json.model,\n  messages: [\n    {\n      role: \"system\",\n      content: $('Workflow Control').item.json.system_prompt\n    },\n    {\n      role: \"user\",\n      content: $('Workflow Control').item.json.user_prompt\n    }\n  ]\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3056,
+        576
+      ],
+      "id": "a56ac67b-57b0-4a7b-a971-7ace2ac8e1d6",
+      "name": "YouTube Metadata Generator",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "lymWqGQ67PUobVpS",
+          "name": "Header Auth Z2L"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// This code node extracts metadata (title, description, tags, hashtags, etc.) from an input string\n// that is expected to contain a JSON object.\n\n// Get the raw text input from the first item in the input data.\nconst rawInputString = $input.first().json.text;\n\n/**\n * Attempts to extract and \"fix\" a valid JSON string from potentially malformed or\n * truncated input, especially common LLM output issues like missing closing\n * quotes or braces at the very end.\n * WARNING: This is a highly speculative and brittle approach. The best solution\n * is always to ensure valid JSON generation upstream via responseSchema.\n * @param {string} str The input string.\n * @returns {string} The cleaned string, ideally a valid JSON.\n */\nfunction extractValidJsonAggressive(str) {\n  let cleanedStr = str.trim();\n\n  // Find the first opening curly brace and the last closing curly brace\n  const firstBrace = cleanedStr.indexOf('{');\n  let lastBrace = cleanedStr.lastIndexOf('}');\n\n  if (firstBrace === -1) {\n    // No opening brace found, cannot parse as JSON object\n    return cleanedStr;\n  }\n\n  // If there's an opening brace but no closing brace, or closing brace is before opening\n  if (lastBrace === -1 || lastBrace < firstBrace) {\n    // Assume truncation and try to append missing characters\n    cleanedStr = cleanedStr.substring(firstBrace); // Start from the first brace\n\n    // Aggressive attempts to close common truncation errors at the end\n    // (e.g., if the LLM stopped mid-field or before the final brace)\n    if (!cleanedStr.endsWith('\"') && cleanedStr.includes(':')) { // Heuristic: if it looks like a key-value pair and missing closing quote\n      cleanedStr += '\"';\n    }\n    if (!cleanedStr.endsWith('}')) {\n      cleanedStr += '}'; // Assume missing closing brace\n    }\n    // Re-check for trailing comma before the *newly added* closing brace\n    if (cleanedStr.endsWith(',}')) {\n      cleanedStr = cleanedStr.substring(0, cleanedStr.length - 2) + '}';\n    }\n    \n    // Attempt to parse this \"fixed\" string to get an actual lastBrace if it was missing\n    try {\n      JSON.parse(cleanedStr);\n      lastBrace = cleanedStr.lastIndexOf('}'); // Update lastBrace if successful\n    } catch (e) {\n      // Still invalid, proceed with the string as is for now.\n    }\n  }\n\n  // Re-extract based on potentially fixed braces, or original if no fix applied\n  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace >= firstBrace) {\n    cleanedStr = cleanedStr.substring(firstBrace, lastBrace + 1);\n    // Final check for trailing comma before the absolute last brace\n    if (cleanedStr.endsWith(',}')) {\n      cleanedStr = cleanedStr.substring(0, cleanedStr.length - 2) + '}';\n    }\n  }\n\n\n  // Final check to see if it's parseable after aggressive attempts\n  try {\n    JSON.parse(cleanedStr);\n    return cleanedStr;\n  } catch (e) {\n    // Even after aggressive fixing, it's not valid JSON.\n    // Log the error and the problematic string for debugging upstream.\n    console.warn(\"Aggressive JSON fix failed:\", e.message, \"Attempted JSON:\", cleanedStr);\n    return str; // Fallback to original, let JSON.parse in main block fail\n  }\n}\n\nlet parsedData;\nlet outputTitle = '';\nlet outputDescription = '';\nlet outputTags = '';\nlet outputHashtags = ''; // New variable for hashtags\nlet outputTopText = '';\nlet outputBottomText = '';\n\ntry {\n  // Use the aggressive extraction function\n  const cleanedJsonString = extractValidJsonAggressive(rawInputString);\n\n  // Attempt to parse the cleaned string. If it's still malformed, this will throw an error.\n  parsedData = JSON.parse(cleanedJsonString);\n\n  // Check if the parsed result is a valid object.\n  if (typeof parsedData === 'object' && parsedData !== null) {\n    // Assign values, defaulting to empty string if a property is missing.\n    outputTitle = parsedData.title || '';\n    outputDescription = parsedData.description || '';\n\n    // Tags might be an array or string; handle both if possible, or force string.\n    if (Array.isArray(parsedData.tags)) {\n      outputTags = parsedData.tags.join(','); // Join array elements with commas\n    } else {\n      outputTags = parsedData.tags || '';\n    }\n    \n    // Handle hashtags, assuming it's a string, or array if AI might generate it as such.\n    if (Array.isArray(parsedData.hashtags)) {\n      // Join array elements with spaces, and ensure each hashtag starts with '#'\n      outputHashtags = parsedData.hashtags.map(tag => tag.startsWith('#') ? tag : '#' + tag).join(' ');\n    } else if (typeof parsedData.hashtags === 'string') {\n      // If it's a string, ensure all space-separated words are prefixed with #\n      outputHashtags = parsedData.hashtags.split(' ').map(tag => tag.startsWith('#') ? tag : '#' + tag).join(' ');\n    } else {\n      outputHashtags = '';\n    }\n\n    outputTopText = parsedData.top_text || '';\n    outputBottomText = parsedData.bottom_text || '';\n  } else {\n    // If parsing succeeded but result is not an object (e.g., just \"null\" or \"true\"),\n    // treat it as an error to ensure structured output.\n    throw new Error('Parsed JSON is not a valid object');\n  }\n} catch (e) {\n  // If any error occurs during parsing or extraction,\n  // we default to putting the raw input into the description\n  // and logging the error to help debugging upstream.\n  console.error(\"JSON parsing error (main block):\", e.message);\n  outputDescription = rawInputString; // Fallback: put raw input into description\n}\n\n// Return the structured output.\nreturn [{\n  json: {\n    output: {\n      title: outputTitle,\n      description: outputDescription,\n      tags: outputTags,\n      hashtags: outputHashtags, // Include hashtags in the output\n      top_text: outputTopText,\n      bottom_text: outputBottomText\n    }\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3504,
+        384
+      ],
+      "id": "01b70cad-ddfc-4c88-9c12-09f6d5d10234",
+      "name": "YouTube Metadata Generator Cleaned"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "83c36fbc-8584-47ce-a9f8-1cd6c6caa004",
+              "name": "title",
+              "value": "={{ $('YouTube Metadata Generator Cleaned').item.json.output.title }}",
+              "type": "string"
+            },
+            {
+              "id": "a87023c1-38aa-4e08-bd2a-14473b536528",
+              "name": "description",
+              "value": "={{ $('YouTube Metadata Generator Cleaned').item.json.output.description }}",
+              "type": "string"
+            },
+            {
+              "id": "a4cc00f1-0075-45c0-93d3-be4f9efb1e05",
+              "name": "hashtags",
+              "value": "={{ $('YouTube Metadata Generator Cleaned').item.json.output.hashtags }}",
+              "type": "string"
+            },
+            {
+              "id": "ae57bcae-15fc-4cc0-9639-c74485741b1d",
+              "name": "tags",
+              "value": "={{ $('YouTube Metadata Generator Cleaned').item.json.output.tags }}",
+              "type": "string"
+            },
+            {
+              "id": "99e455c2-6dfc-4730-9cf1-1c56c376bc9b",
+              "name": "thumbnail_top_text",
+              "value": "={{ $('YouTube Metadata Generator Cleaned').item.json.output.top_text }}",
+              "type": "string"
+            },
+            {
+              "id": "a28ae384-c0ee-4b64-8018-1ee7cc77a8f7",
+              "name": "thumbnail_bottom_text",
+              "value": "={{ $('YouTube Metadata Generator Cleaned').item.json.output.bottom_text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3952,
+        576
+      ],
+      "id": "482ee617-fed8-4eb3-81ce-598121ade229",
+      "name": "Return"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "video_script"
+            },
+            {
+              "name": "system_prompt"
+            },
+            {
+              "name": "user_prompt"
+            },
+            {
+              "name": "model"
+            }
+          ]
+        }
+      },
+      "id": "e5bf7e08-df15-44d2-a166-d299ba7ddeaf",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        2384,
+        704
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "40bfb62e-8b24-477e-abde-c9306ab1bce8",
+              "leftValue": "={{ $json.text }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3280,
+        192
+      ],
+      "id": "1e19274e-d9b1-4b72-9924-45aebc227e54",
+      "name": "If no text returned"
+    },
+    {
+      "parameters": {
+        "content": "# Generate Video Metadata\n\n## SWF003\n\n### Purpose\nFrom the given video_script produce the metadata for the video.\n\n### Input\n* video_script\n\n### Output\n* title\n* description\n* hashtags\n* tags\n* thumbnail_top_text\n* thumbnail_bottom_text",
+        "height": 496,
+        "width": 448
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1840,
+        288
+      ],
+      "id": "71086120-d0a5-4e57-b040-c650fc130743",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f095005b-4184-48e2-a5f4-f1040fed0a44",
+              "leftValue": "={{ $json.retry }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3504,
+        752
+      ],
+      "id": "12998efc-9f01-487c-99b1-6798af00c227",
+      "name": "If Retry Request"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "74ad3f19-1f62-4604-91fe-5113ab608572",
+              "name": "execution_timestamp",
+              "value": "={{ $now }}",
+              "type": "string"
+            },
+            {
+              "id": "10744d10-9e8c-49b7-bc13-5a2b1d98aa08",
+              "name": "system_prompt",
+              "value": "={{ $ifEmpty($json.system_prompt, `You are a highly skilled YouTube SEO specialist and professional copywriter, tasked with creating compelling metadata for a state news article (the user's prompt is the voice-over script). Your goal is to maximize visibility, click-through rates, and viewer retention on YouTube while optimizing for the platform's 2025 algorithm priorities.\n\nCRITICAL ALGORITHM UNDERSTANDING: YouTube has officially stated that tags play a \"minimal role\" in video discovery and are primarily useful for common misspellings. The algorithm prioritizes watch time, engagement metrics, titles, and descriptions over tags. Focus optimization efforts accordingly.\n\nYour response must be a single JSON object with exactly these keys:\n\n\"title\": A compelling, keyword-rich title (70-80 characters maximum for optimal display). Place your primary keyword within the first 60 characters. Avoid em dashes (—); use colons (:), semicolons (;), or other punctuation. Prioritize click-worthiness over keyword stuffing while maintaining search relevance. IMPORTANT: \"title\" MUST BE no more than 80 characters long!\n\n\"description\": A comprehensive, keyword-dense description (2000-3000 characters) written in first-person (\"I\"). Begin with a compelling 180-200 character hook that incorporates your primary keyword 2-3 times naturally. Structure with clear paragraphs detailing the story's emotional journey. Include relevant keywords naturally throughout without appearing spammy. Avoid em dashes (—); use alternative punctuation. End with a strong call-to-action encouraging likes, shares, and subscriptions.\n\n\"hashtags\": A space-separated string of 3-5 highly relevant hashtags focusing on broad, discoverable terms that align with your primary keywords. Prioritize hashtags that match actual search behavior rather than attempting to game trending topics. (e.g., \"#breakingnews #politics #investigation #corruption #justice\")\n\n\"tags\": A comma-separated string of 8-12 strategically chosen tags totaling approximately 200-300 characters (optimal range per research). CRITICAL TAG OPTIMIZATION:\n\nDue to YouTube's space character counting issue (spaces consume 3 characters each), minimize multi-word tags\n\nUse underscores for compound concepts when logical (e.g., \"breaking_news\" instead of \"breaking news\")\n\nInclude your primary keyword as the first tag\n\nAdd common misspellings of key terms\n\nInclude single-word variations and synonyms\n\nAvoid keyword stuffing; focus on relevance over quantity\n\nExample format: \"politics,corruption,investigation,government_scandal,news_analysis,political_drama,accountability,whistleblower,ethics_violation,transparency,public_interest,democracy\"\n\n\"top_text\": A dramatically compelling 3-4 sentence statement (in all caps, minimum 30 words) for thumbnail top text. Create immediate tension by highlighting the core conflict or betrayal. Avoid generic LLM phrases; craft human-like, visceral headlines that demand attention.\n\n\"bottom_text\": One powerful, intriguing sentence (in all caps) for thumbnail bottom text. Tease the resolution, twist, or ultimate outcome with maximum emotional impact while maintaining curiosity.\n\nOPTIMIZATION PRIORITIES (in order of algorithm importance):\n\nTitle optimization (highest impact on discovery)\n\nThumbnail effectiveness (drives CTR)\n\nDescription keyword density (supports algorithm understanding)\n\nHashtag relevance (moderate discovery benefit)\n\nTag efficiency (minimal impact, optimize for character economy)\n\nCHARACTER EFFICIENCY RULES:\n\nTags: Target 200-300 total characters for optimal performance\n\nPrioritize single words and underscore-connected compounds\n\nEvery character must serve SEO purpose\n\nTest tag variations that balance searchability with character economy\n\nRemember: YouTube's 2025 algorithm prioritizes content quality, engagement, and viewer satisfaction over metadata manipulation. Your optimization should support authentic content discovery rather than attempt to game the system.\n\nRespond with only the JSON object—no markdown, code fences, or extra text.`)\n}}",
+              "type": "string"
+            },
+            {
+              "id": "b91856e5-5550-4a7c-b5fe-cf14f88730af",
+              "name": "user_prompt",
+              "value": "={{ $ifEmpty($json.user_prompt, \n\"Here is the transcript:  \"\n+$json.video_script)\n}}",
+              "type": "string"
+            },
+            {
+              "id": "76715983-d952-4690-9d8a-83471198cd6c",
+              "name": "model",
+              "value": "={{ $ifEmpty($json.model, \"openai-large\") }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2608,
+        704
+      ],
+      "id": "2af47456-508f-49cc-98ca-b4dfdd1332f5",
+      "name": "Workflow Control"
+    },
+    {
+      "parameters": {
+        "errorMessage": "={{ $('YouTube Metadata Generator').first().json.error.message }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        3952,
+        768
+      ],
+      "id": "df949dd2-d4a2-4714-b3ce-b2330557011f",
+      "name": "Raise System Error Message"
+    },
+    {
+      "parameters": {
+        "errorMessage": "API returned empty text"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        3504,
+        192
+      ],
+      "id": "e7d13054-4b3e-4dcb-9835-ed5c661c4c67",
+      "name": "API Returned Empty Text"
+    },
+    {
+      "parameters": {
+        "amount": 5.01
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2832,
+        576
+      ],
+      "id": "c65b56ef-6c70-409c-a751-3f6af6da52c7",
+      "name": "Wait 5.01s to allow for multiple executions",
+      "webhookId": "3211f846-3938-405f-9a25-f46a819f5fb0"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "Zy23SQ1NqBBCmVwM",
+          "mode": "list",
+          "cachedResultName": "SWF018 - HTTP Request Error Management"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "={{ $json.error.status }}",
+            "code": "={{ $json.error.code }}",
+            "E429_wait_seconds": 5.01,
+            "E500_wait_seconds": 30
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "code",
+              "displayName": "code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "E429_wait_seconds",
+              "displayName": "E429_wait_seconds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "E500_wait_seconds",
+              "displayName": "E500_wait_seconds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        3280,
+        752
+      ],
+      "id": "d3d03f72-ffee-472c-bc0d-bd08febf04f8",
+      "name": "HTTP Request Error Manager"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6540f447-64cd-4df9-954b-70f1baf301ba",
+              "leftValue": "={{ $runIndex }}",
+              "rightValue": 35,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3728,
+        672
+      ],
+      "id": "58c4352a-c521-41f9-855d-838bd311f052",
+      "name": "If Retry Generate Metadata < 35"
+    },
+    {
+      "parameters": {
+        "content": "## 2025-10-01\n* Check for empty top_text || bottom_text and try again.",
+        "width": 448,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1840,
+        848
+      ],
+      "id": "1c21bd86-1386-486c-afa3-46b1a52e4ff2",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a470e8ac-9e3b-47d5-aaa6-7eb28966df17",
+              "leftValue": "={{ $json.output.top_text === '' || $json.output.bottom_text === '' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3728,
+        384
+      ],
+      "id": "398422a4-856e-4d76-a052-90a3d9ea3fd4",
+      "name": "If empty top_text or bottom_text"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "bc75237b-e796-4788-b8b8-6aac42527eca",
+              "leftValue": "={{ $runIndex }}",
+              "rightValue": 10,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3952,
+        384
+      ],
+      "id": "9fe07978-3c89-4770-8de3-c0119a95d875",
+      "name": "If attempts < 10"
+    },
+    {
+      "parameters": {
+        "errorMessage": "=Getting Empty top_text and bottom_text"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        4176,
+        384
+      ],
+      "id": "f872b26f-71ea-460b-baf3-57ccfdb8ab0e",
+      "name": "Getting Empty Text"
+    }
+  ],
+  "connections": {
+    "YouTube Metadata Generator": {
+      "main": [
+        [
+          {
+            "node": "If no text returned",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request Error Manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "YouTube Metadata Generator Cleaned": {
+      "main": [
+        [
+          {
+            "node": "If empty top_text or bottom_text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Workflow Control",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If no text returned": {
+      "main": [
+        [
+          {
+            "node": "API Returned Empty Text",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "YouTube Metadata Generator Cleaned",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Retry Request": {
+      "main": [
+        [
+          {
+            "node": "If Retry Generate Metadata < 35",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Raise System Error Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Control": {
+      "main": [
+        [
+          {
+            "node": "Wait 5.01s to allow for multiple executions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 5.01s to allow for multiple executions": {
+      "main": [
+        [
+          {
+            "node": "YouTube Metadata Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request Error Manager": {
+      "main": [
+        [
+          {
+            "node": "If Retry Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Retry Generate Metadata < 35": {
+      "main": [
+        [
+          {
+            "node": "YouTube Metadata Generator",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Raise System Error Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If empty top_text or bottom_text": {
+      "main": [
+        [
+          {
+            "node": "If attempts < 10",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Return",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If attempts < 10": {
+      "main": [
+        [
+          {
+            "node": "Workflow Control",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Getting Empty Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "37fe6d8c3b2aaeda95afa9d59c8cbc7c79e8171e6cc2a68043e239f8403c390e"
+  }
+}

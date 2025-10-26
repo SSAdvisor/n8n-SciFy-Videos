@@ -1,0 +1,76 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "YT_Video_ID"
+            },
+            {
+              "name": "list1",
+              "type": "array"
+            },
+            {
+              "name": "list2",
+              "type": "array"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a67d9533-1309-4311-b514-e9c1709d9d25",
+      "name": "Start"
+    },
+    {
+      "parameters": {
+        "jsCode": "const vid = $(\"Start\").first().json.YT_Video_ID;\nconst list1 = $(\"Start\").first().json.list1;\nconst list2 = $(\"Start\").first().json.list2;\nconst have = {};\nconst dhave = {};\nif (typeof list2[0].json.snippet !== \"undefined\") {\nfor (let h=0; h < list1.length; h++) {\n  let title1 = list1[h];\n  for (let i=0; i < list2.length; i++) {\n    let title2 = list2[i].json.snippet.title;\n    if (title2.toLowerCase() === title1.toLowerCase()) {\n      have[title1.toLowerCase()] = {title: title1, vid: vid, lid: list2[i].json.id};\n      break;\n    }\n  }\n}\n}\nconst haves = Object.keys(have);\nfor (const content of list1) {\n  if (haves.includes(content.toLowerCase())) {\n    continue;\n  }\n  dhave[content.toLowerCase()] = {title: content};\n}\nreturn {haves: have, have_nots: dhave}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "f93063ec-8ac2-4e32-b543-68027a471c1a",
+      "name": "Report Haves and Have Nots1"
+    },
+    {
+      "parameters": {
+        "content": "# Haves and Have Nots\n\n## SWF024\n\n### Purpose\nEnable code changes to be applied for multiple users simultaneously, reducing update time. The workflow compares items in list1 against list2: matches are returned in the haves array, while non‑matches are returned in the have_nots array.\n\n### Input\n* YT_Video_ID\n* list1\n* list2\n\n### Output\n* haves\n    * [title: \"...\", \"vid\": \"video id from input\", \"lid\": \"playlist id\"]\n    * Example:\n```\n[\n  {\n    \"haves\": {\n      \"ohio_news\": \n      {\n        \"title\": \"Ohio_news\",\n        \"vid\": \"vX-CHe27_ks\",\n        \"lid\": \"PLTfdPnFMpg8JNVEjL_xlYwPy1I-6bmMFg\"\n      },\n      \"ohio_statehouse\": \n      {\n        \"title\": \"Ohio_Statehouse\",\n        \"vid\": \"vX-CHe27_ks\",\n        \"lid\": \"PLTfdPnFMpg8KkeyYJ25mVgaTwzKBF48Y8\"\n      }\n    }\n  }\n]\n```\n* have_nots\n    * [title: \"...\"]\n    * Example:\n```\n[\n  {\n    \"have_nots\": \n    {\n      \"ohio_news\": \n      {\n        \"title\": \"Ohio_news\"\n      },\n      \"ohio_statehouse\": \n      {\n        \"title\": \"Ohio_Statehouse\"\n      },\n      \"government_shutdown\": \n      {\n        \"title\": \"government_shutdown\"\n      }\n    }\n  }\n]\n```\n",
+        "height": 1184,
+        "width": 528
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        -496
+      ],
+      "id": "ea346d62-156a-4ac3-9cf9-8bb84a4bba01",
+      "name": "Sticky Note"
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Report Haves and Have Nots1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "37fe6d8c3b2aaeda95afa9d59c8cbc7c79e8171e6cc2a68043e239f8403c390e"
+  }
+}

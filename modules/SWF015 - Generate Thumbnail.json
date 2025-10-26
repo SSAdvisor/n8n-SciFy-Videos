@@ -1,0 +1,629 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.zero2launch.com/generate-thumbnail",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "top_text",
+              "value": "={{ $('Start').item.json.top_text }}"
+            },
+            {
+              "name": "bottom_text",
+              "value": "={{ $('Start').item.json.bottom_text }}"
+            },
+            {
+              "name": "avatar_url",
+              "value": "={{ $json.avatar_url }}"
+            },
+            {
+              "name": "template",
+              "value": "temp_1"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        6560,
+        656
+      ],
+      "id": "07ef2b70-2387-4717-adae-23f0022f4e61",
+      "name": "Generate Video Thumbnail",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "maxTries": 5,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "lymWqGQ67PUobVpS",
+          "name": "Header Auth Z2L"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        7008,
+        480
+      ],
+      "id": "7ca42c7b-1789-4e1a-8060-e633dc004e81",
+      "name": "Wait 1m 2",
+      "webhookId": "9126e106-696a-455d-9b22-f9243c6a4b27"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get node-specific static data (persists across workflow runs)\nconst data = $getWorkflowStaticData('node');\n\n// Initialize attempt if it doesn't exist\nif (typeof data.attempt === 'undefined' || data.timestamp !== $('Start').first().json.execution_timestamp) {\n  data.attempt = 0;\n  data.timestamp = $('Start').first().json.execution_timestamp;\n}\n\n// Increment attempt\ndata.attempt += 1;\n\n// Return the current attempt count\nreturn [{ json: { attempts: data.attempt, }}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7232,
+        480
+      ],
+      "id": "c593a898-232e-421a-b6a6-6de0d29f81e5",
+      "name": "Increment Thumbnail Attempt"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7d63dbc8-6511-43c5-9261-67ab95dc60bd",
+              "leftValue": "={{ $json.attempts }}",
+              "rightValue": 11,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        7456,
+        480
+      ],
+      "id": "6bf4d118-2601-4794-b480-0f2a9d0e0318",
+      "name": "If Thumbnail attempts < 11"
+    },
+    {
+      "parameters": {
+        "errorMessage": "Generate Thumbnail node is DOWN; try again later"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        7680,
+        480
+      ],
+      "id": "038dbe0b-b485-4f3c-adbd-8d9e5a753cd5",
+      "name": "Generate Thumbnail DOWN"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "execution_timestamp"
+            },
+            {
+              "name": "top_text"
+            },
+            {
+              "name": "bottom_text"
+            },
+            {
+              "name": "avatar_prompt"
+            },
+            {
+              "name": "avatar_width",
+              "type": "number"
+            },
+            {
+              "name": "avatar_height",
+              "type": "number"
+            },
+            {
+              "name": "avatar_model"
+            },
+            {
+              "name": "temporary_storage_filename"
+            }
+          ]
+        }
+      },
+      "id": "7545ff72-02da-47dd-bc97-2348446fa4df",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        6128,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0134899c-c2fe-4921-adcd-c4308de9f24a",
+              "leftValue": "={{ $binary }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        6784,
+        576
+      ],
+      "id": "65d3af15-d94f-40ac-9b02-ee751ef494d3",
+      "name": "If Thumbnail binary data is empty"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4295af15-d371-4da6-89e5-62db9e568361",
+              "leftValue": "={{ $json.image_serve_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        7008,
+        672
+      ],
+      "id": "993c14da-cb9e-478f-8e51-9d990526bb17",
+      "name": "If image_serve_url is empty"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "eZzFJnX7CG3RlljQ",
+          "mode": "list",
+          "cachedResultName": "Temporary Binary File Storage"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "data": "={{ $('Generate Video Thumbnail').first().binary }}",
+            "filename": "={{ \"thumbnail_\" +$('Start').first().json.temporary_storage_filename }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "filename",
+              "displayName": "filename",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "data",
+              "displayName": "data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        7440,
+        672
+      ],
+      "id": "0d20a0b6-a9a1-4295-a732-7cc7222d3dc6",
+      "name": "Temporary File Storage"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "55e68c4b-2ebd-409e-b7a1-09ca1b823dfc",
+              "name": "thumbnail_url",
+              "value": "={{$json.fileUrl}}",
+              "type": "string"
+            },
+            {
+              "id": "c7ae0964-e863-44ca-a483-9c0db611807c",
+              "name": "avatar_url",
+              "value": "={{ $('Generate Avatar').first().json.avatar_url }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        7664,
+        672
+      ],
+      "id": "0ab84091-7ac7-42f7-b88a-09a0224f5c06",
+      "name": "Return thumbnail_url from temporary file storage"
+    },
+    {
+      "parameters": {
+        "content": "# Generate Thumbnail\n## SWF015\n### Purpose\nCreate a thumbnail for the video, typical use is for YouTube longform video.\n### Input\n* execution_timestamp\n* top_text\n* bottom_text\n* avatar_prompt\n* avatar_width\n* avatar_height\n* avatar_model\n* temporary_storage_filename\n### Output\n* thumbnail_url\n* avatar_url",
+        "height": 448,
+        "width": 368
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5648,
+        336
+      ],
+      "id": "d104e80c-c49e-448e-9dbe-1243cdf471c3",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# PR5\n* Always save thumbnail to temporary storage.\n* Add Generate Avatar\n* Start\n   * Remove avatar_url\n    * Add avatar_prompt\n    * Add avatar_width\n    * Add avatar_height\n    * Add avatar_model\n    * Add temporary_storage_filename\n* Output\n    * Add avatar_url",
+        "height": 304,
+        "width": 368,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5664,
+        832
+      ],
+      "id": "860fdbf0-e586-4bb5-8120-a800c477f20f",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "L5D8C9CJqsji3M6q",
+          "mode": "list",
+          "cachedResultName": "Generate Avatar PR5"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "avatar_width": "={{ $json.avatar_width }}",
+            "avatar_height": "={{ $json.avatar_height }}",
+            "temporary_storage_filename": "={{ $json.temporary_storage_filename }}",
+            "avatar_model": "={{ $json.avatar_model }}",
+            "avatar_prompt": "={{ $json.avatar_prompt }}",
+            "execution_timestamp": "={{ $json.execution_timestamp }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "execution_timestamp",
+              "displayName": "execution_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "avatar_prompt",
+              "displayName": "avatar_prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "avatar_width",
+              "displayName": "avatar_width",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "avatar_height",
+              "displayName": "avatar_height",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "avatar_model",
+              "displayName": "avatar_model",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "temporary_storage_filename",
+              "displayName": "temporary_storage_filename",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        6336,
+        656
+      ],
+      "id": "6b380aa8-ee78-4061-b3d5-976cb0ddcbc2",
+      "name": "Generate Avatar"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "ls8OvoluAw4Tg2Ls",
+          "mode": "list",
+          "cachedResultName": "Download File for given URL"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "file_url": "={{ $('Generate Video Thumbnail').first().json.image_serve_url }}"
+          },
+          "matchingColumns": [
+            "file_url"
+          ],
+          "schema": [
+            {
+              "id": "file_url",
+              "displayName": "file_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        7216,
+        768
+      ],
+      "id": "fefbf6a1-b910-42ac-9950-3f083598a8f9",
+      "name": "Download Thumbnail Data"
+    }
+  ],
+  "connections": {
+    "Generate Video Thumbnail": {
+      "main": [
+        [
+          {
+            "node": "If Thumbnail binary data is empty",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 1m 2": {
+      "main": [
+        [
+          {
+            "node": "Increment Thumbnail Attempt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Increment Thumbnail Attempt": {
+      "main": [
+        [
+          {
+            "node": "If Thumbnail attempts < 11",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Thumbnail attempts < 11": {
+      "main": [
+        [
+          {
+            "node": "Generate Video Thumbnail",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Generate Thumbnail DOWN",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Generate Avatar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Thumbnail binary data is empty": {
+      "main": [
+        [
+          {
+            "node": "Wait 1m 2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If image_serve_url is empty",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If image_serve_url is empty": {
+      "main": [
+        [
+          {
+            "node": "Temporary File Storage",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Download Thumbnail Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Temporary File Storage": {
+      "main": [
+        [
+          {
+            "node": "Return thumbnail_url from temporary file storage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Avatar": {
+      "main": [
+        [
+          {
+            "node": "Generate Video Thumbnail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Thumbnail Data": {
+      "main": [
+        [
+          {
+            "node": "Temporary File Storage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Start": [
+      {
+        "execution_timestamp": "2025-06-26T00:00:54.017+00:00",
+        "top_text": "THE DAY THEY LAUGHED THE LOUDEST I BELIEVED MY DREAMS WERE RIDICULOUS BUT INSIDE I KNEW I WAS CHASING A FUTURE THAT COULD REDEFINE CITIES AND RESHAPE LIVES. EVERY NAYSAYER AND SKEPTIC DARED ME TO GIVE UP BUT I REFUSED TO LET THEIR MOCKS DEFINE MY PURPOSE. WHAT STARTED AS A SMALL IDEA GROWING IN THE SHADOWS BECAME A REVOLUTION THAT TRANSFORMED ENTIRE COMMUNITIES AND PROVED THAT BASTARDIZED BELIEFS COULDN'T STOP A DETERMINED VISIONARY.",
+        "bottom_text": "THE TRUE POWER OF RESILIENCE LIES IN TURNING MOCKERY INTO MIRACLES",
+        "avatar_prompt": "Create a Protestant Christian avatar that is 384 pixels wide by 720 pixels high, optimized for the Flux model.",
+        "avatar_width": 384,
+        "avatar_height": 729,
+        "avatar_model": "flux",
+        "temporary_storage_filename": "thumbnail.jpg"
+      }
+    ]
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "37fe6d8c3b2aaeda95afa9d59c8cbc7c79e8171e6cc2a68043e239f8403c390e"
+  }
+}

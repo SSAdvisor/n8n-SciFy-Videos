@@ -1,0 +1,437 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.zero2launch.com/download-image/url",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "server",
+              "value": "vps1"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "prompt",
+              "value": "={{ $('Start').first().json.avatar_prompt || `A close-up portrait of a confident, smiling woman with natural makeup and long flowing hair, looking directly at the camera. The background should be bright and colorful, with soft gradients to make the subject stand out. The woman should have a friendly yet professional vibe, with expressive eyes and a relaxed but engaged posture. The style should be clean and modern, ideal for a YouTube thumbnail with a slight emphasis on high contrast for visual impact` }}"
+            },
+            {
+              "name": "width",
+              "value": "={{ $('Start').first().json.avatar_width || 384 }}"
+            },
+            {
+              "name": "height",
+              "value": "={{ $('Start').first().json.avatar_height || 720 }}"
+            },
+            {
+              "name": "model",
+              "value": "={{ $('Start').first().json.avatar_model || flux }}"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          },
+          "timeout": 120000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5904,
+        128
+      ],
+      "id": "6e49198f-7660-4d2d-adc0-df7a2eb80bc2",
+      "name": "Generate Video Avatar",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "alwaysOutputData": false,
+      "maxTries": 5,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "lymWqGQ67PUobVpS",
+          "name": "Header Auth Z2L"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7d63dbc8-6511-43c5-9261-67ab95dc60bd",
+              "leftValue": "={{ $runIndex }}",
+              "rightValue": 11,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        6576,
+        64
+      ],
+      "id": "c792e65d-80e8-49fc-a5cd-67a23fa55425",
+      "name": "If Avatar attempts < 11"
+    },
+    {
+      "parameters": {
+        "errorMessage": "Generate Avatar node is DOWN; try again later"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        6800,
+        64
+      ],
+      "id": "74c4ecd6-1c43-40cf-b6ea-67067297c148",
+      "name": "Generate Avatar DOWN"
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        6352,
+        32
+      ],
+      "id": "930e49b2-eaad-4b97-bef3-7dc71c830cbd",
+      "name": "Wait 1m",
+      "webhookId": "25cd267d-434c-43f0-84af-66ca27978ac4"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "execution_timestamp",
+              "type": "any"
+            },
+            {
+              "name": "avatar_prompt"
+            },
+            {
+              "name": "avatar_width",
+              "type": "number"
+            },
+            {
+              "name": "avatar_height",
+              "type": "number"
+            },
+            {
+              "name": "avatar_model"
+            },
+            {
+              "name": "temporary_storage_filename"
+            }
+          ]
+        }
+      },
+      "id": "dfd71ec1-2216-4c7d-977f-d0aeff369ba8",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        5680,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9df511bd-4f73-4068-84e2-7c4a44636f71",
+              "leftValue": "={{ $json.image_serve_url }}",
+              "rightValue": "Image generated and saved temporarily.",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        6128,
+        176
+      ],
+      "id": "4d477b1b-c18a-4b90-ab1e-f228d06b10ba",
+      "name": "If avatar URL is empty"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5faaf06f-a993-4cf8-960f-607d43db5af0",
+              "name": "avatar_url",
+              "value": "={{ $('Temporary File Storage').first().json.fileUrl }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        6800,
+        272
+      ],
+      "id": "6a6e8b4f-1134-447b-87ce-11c1b57e4571",
+      "name": "Return avatar_url"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "eZzFJnX7CG3RlljQ",
+          "mode": "list",
+          "cachedResultName": "SWF020 - Temporary Binary File Storage"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "data": "={{ $binary }}",
+            "filename": "={{ \"avatar_\" +$('Start').first().json.temporary_storage_filename }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "filename",
+              "displayName": "filename",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "data",
+              "displayName": "data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        6576,
+        272
+      ],
+      "id": "c045c018-2fab-4beb-b5da-d9b077616fd9",
+      "name": "Temporary File Storage"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.image_serve_url }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        6352,
+        272
+      ],
+      "id": "8b458cde-afc3-4b8b-8607-98ad8f6d3e6b",
+      "name": "Download image"
+    },
+    {
+      "parameters": {
+        "content": "# Generate Avatar\n## SWF010\n### Purpose\nGenerate an avatar based on the given avatar_prompt and specified width, height and model.\n### Input\n* execution_timestamp\n* avatar_prompt\n* avatar_width\n* avatar_height\n* avatar_model\n* temporary_storage_filename\n### Output\n* avatar_url",
+        "height": 384,
+        "width": 496
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5040,
+        -128
+      ],
+      "id": "4a7a77d2-7ee1-4c26-b3e6-f2851783f76f",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# PR5\n* Always save the avatar to temporary storage.\n* Start\n    * Add temporary_storage_filename",
+        "height": 144,
+        "width": 480,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5056,
+        288
+      ],
+      "id": "1407a6a0-798e-4e5d-a35f-13155e698f72",
+      "name": "Sticky Note1"
+    }
+  ],
+  "connections": {
+    "Generate Video Avatar": {
+      "main": [
+        [
+          {
+            "node": "If avatar URL is empty",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 1m",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Avatar attempts < 11": {
+      "main": [
+        [
+          {
+            "node": "Generate Video Avatar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Generate Avatar DOWN",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 1m": {
+      "main": [
+        [
+          {
+            "node": "If Avatar attempts < 11",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Generate Video Avatar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If avatar URL is empty": {
+      "main": [
+        [
+          {
+            "node": "Wait 1m",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Download image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Temporary File Storage": {
+      "main": [
+        [
+          {
+            "node": "Return avatar_url",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download image": {
+      "main": [
+        [
+          {
+            "node": "Temporary File Storage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Start": [
+      {
+        "execution_timestamp": "2025-10-15T09:00:55.021-04:00",
+        "avatar_prompt": "Create a Protestant Christian avatar that is 384 pixels wide by 720 pixels high, optimized for the Flux model. \n\nGenerate a peaceful and hopeful figure representing \"Salvation by Grace\" in contemporary Protestant Christian style. Include these elements: simple cross, open Bible, light rays, peaceful expression. \n\nThe avatar should emphasize grace through faith with a focus on Protestant theological principles including salvation by grace through faith, personal relationship with Jesus Christ, and the authority of Scripture. \n\nUse a color palette of warm gold, soft white, gentle blue to create a peaceful and hopeful atmosphere. The figure should be dressed in contemporary, modest clothing that reflects Protestant Christian values.\n\nEnsure the avatar maintains Protestant sensibilities by avoiding excessive religious iconography, focusing instead on personal faith, biblical themes, and the simplicity that characterizes Protestant worship. The background should be clean and uncluttered, emphasizing the spiritual message.\n\nThe lighting should be natural and warm, creating an approachable and authentic feel. The overall composition should be portrait-oriented (384x720 pixels), theologically accurate, and suitable for Protestant Christian communities.\n\nTechnical requirements: Portrait orientation, appropriate lighting for Flux model, high quality output, respectful and contemporary aesthetic.",
+        "avatar_width": 384,
+        "avatar_height": 720,
+        "avatar_model": "flux",
+        "temporary_storage_filename": "bibleReadings-TLB.jpg"
+      }
+    ]
+  },
+  "meta": {
+    "instanceId": "37fe6d8c3b2aaeda95afa9d59c8cbc7c79e8171e6cc2a68043e239f8403c390e"
+  }
+}
