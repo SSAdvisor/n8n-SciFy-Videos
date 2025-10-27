@@ -7,7 +7,7 @@
             {
               "id": "1f09afa6-2210-4cc5-b581-ea1526628bbc",
               "name": "list",
-              "value": "\n[\n      {\n        \"chan\": \"HOA_NIGHTMARES\",\n        \"path\": \"HOA_Nightmares\",\n        \"schd\": {\"morn\": \"6:00\", \"evng\": \"18:00\"}\n      },\n      {\n        \"chan\": \"RELATIONSHIP_HORROR\",\n        \"path\": \"Relationship_Horrors\",\n        \"schd\": {\"morn\": \"7:00\", \"evng\": \"19:00\"}\n      },\n      {\n        \"chan\": \"COURTROOM DEFENDANT DRAMA\",\n        \"path\": \"courtroom_defendant_drama\",\n        \"schd\": {\"morn\": \"8:00\", \"evng\": \"20:00\"}\n      },\n      {\n        \"chan\": \"SCIFY\",\n        \"path\": \"/ConnectCircuits/SciFy\",\n        \"schd\": {\"morn\": \"5:00\", \"evng\": \"17:00\"}\n      }\n]\n",
+              "value": "\n[\n      {\n        \"chan\": \"HOA_NIGHTMARES\",\n        \"path\": \"HOA_Nightmares\",\n        \"shtn\": \"YouTube\",\n        \"schd\": {\"morn\": \"6:00\", \"evng\": \"18:00\"}\n      },\n      {\n        \"chan\": \"RELATIONSHIP_HORROR\",\n        \"path\": \"Relationship_Horrors\",\n        \"shtn\": \"YouTube\",\n        \"schd\": {\"morn\": \"7:00\", \"evng\": \"19:00\"}\n      },\n      {\n        \"chan\": \"COURTROOM DEFENDANT DRAMA\",\n        \"path\": \"courtroom_defendant_drama\",\n        \"shtn\": \"YouTube\",\n        \"schd\": {\"morn\": \"8:00\", \"evng\": \"20:00\"}\n      },\n      {\n        \"chan\": \"SCIFY\",\n        \"path\": \"/ConnectCircuits/SciFy\",\n        \"shtn\": \"YouTubeLong\",\n        \"schd\": {\"morn\": \"5:00\", \"evng\": \"17:00\"}\n      }\n]\n",
               "type": "array"
             }
           ]
@@ -30,7 +30,7 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        1008,
+        784,
         816
       ],
       "id": "960fb235-fa48-47e2-95d9-79f23cf05347",
@@ -146,7 +146,7 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        1456,
+        1232,
         64
       ],
       "id": "5204ed2e-82da-4238-b078-b6f9922f7b21",
@@ -168,8 +168,8 @@
       "type": "n8n-nodes-base.youTube",
       "typeVersion": 1,
       "position": [
-        2800,
-        -456
+        2576,
+        -464
       ],
       "id": "365e31ed-3ea5-4200-a006-99659a9ea362",
       "name": "Update a video",
@@ -185,20 +185,20 @@
         "operation": "update",
         "documentId": {
           "__rl": true,
-          "value": "={{ $('Switch').item.json.file.id }}",
+          "value": "={{ $('Switch').item.json.file.drive_file_id }}",
           "mode": "id"
         },
         "sheetName": {
           "__rl": true,
-          "value": "YouTube",
+          "value": "={{ $('Split Out list array').all()[0].json.shtn }}",
           "mode": "name"
         },
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "scheduled": "={{ $ifEmpty($json.status.publishAt, $json.snippet.publishedAt) }}",
-            "status": "={{ $('Get HOA Nightmares video').item.json.status.privacyStatus }}",
-            "row_number": "={{ $('Switch').item.json.row.row_number }}"
+            "row_number": "={{ $('Switch').item.json.row.row_number }}",
+            "status": "={{ $json.status.privacyStatus }}",
+            "scheduled": "={{ $ifEmpty($json.status.publishAt, $json.snippet.publishedAt) }}"
           },
           "matchingColumns": [
             "row_number"
@@ -284,7 +284,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        2128,
+        1904,
         -576
       ],
       "id": "1a4ee4e9-3e73-44ae-8713-c61d5c54c754",
@@ -333,7 +333,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1904,
+        1680,
         -528
       ],
       "id": "c7da91a3-cbb4-40a3-ada0-d1ba1e602553",
@@ -376,7 +376,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1904,
+        1680,
         -144
       ],
       "id": "0f37d5a9-7616-4bc7-b411-6a4618c754ec",
@@ -419,7 +419,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1904,
+        1680,
         240
       ],
       "id": "0331a71a-0c95-417f-90ff-4182c02842d8",
@@ -430,20 +430,20 @@
         "operation": "update",
         "documentId": {
           "__rl": true,
-          "value": "={{ $('Switch').item.json.file.id }}",
+          "value": "={{ $('Switch').item.json.file.drive_file_id }}",
           "mode": "id"
         },
         "sheetName": {
           "__rl": true,
-          "value": "YouTube",
+          "value": "={{ $('Split Out list array').all()[1].json.shtn }}",
           "mode": "name"
         },
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
             "row_number": "={{ $('Switch').item.json.row.row_number }}",
-            "scheduled": "={{ $ifEmpty($json.status.publishAt, $json.snippet.publishedAt) }}",
-            "status": "={{ $json.status.privacyStatus }}"
+            "status": "={{ $json.status.privacyStatus }}",
+            "scheduled": "={{ $ifEmpty($json.status.publishAt, $json.snippet.publishedAt) }}"
           },
           "matchingColumns": [
             "row_number"
@@ -529,7 +529,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        2128,
+        1904,
         -192
       ],
       "id": "bef99003-06ad-400e-8176-1bb239da79b3",
@@ -546,20 +546,20 @@
         "operation": "update",
         "documentId": {
           "__rl": true,
-          "value": "={{ $('Switch').item.json.file.id }}",
+          "value": "={{ $('Switch').item.json.file.drive_file_id }}",
           "mode": "id"
         },
         "sheetName": {
           "__rl": true,
-          "value": "YouTube",
+          "value": "={{ $('Split Out list array').all()[2].json.shtn }}",
           "mode": "name"
         },
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
             "row_number": "={{ $('Switch').item.json.row.row_number }}",
-            "scheduled": "={{ $ifEmpty($json.status.publishAt, $json.snippet.publishedAt) }}",
-            "status": "={{ $json.status.privacyStatus }}"
+            "status": "={{ $json.status.privacyStatus }}",
+            "scheduled": "={{ $ifEmpty($json.status.publishAt, $json.snippet.publishedAt) }}"
           },
           "matchingColumns": [
             "row_number"
@@ -572,7 +572,8 @@
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": true
+              "canBeUsedToMatch": true,
+              "removed": false
             },
             {
               "id": "title",
@@ -581,7 +582,8 @@
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": true
+              "canBeUsedToMatch": true,
+              "removed": false
             },
             {
               "id": "videoId",
@@ -590,7 +592,8 @@
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": true
+              "canBeUsedToMatch": true,
+              "removed": false
             },
             {
               "id": "status",
@@ -599,7 +602,8 @@
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": true
+              "canBeUsedToMatch": true,
+              "removed": false
             },
             {
               "id": "youtubeLink",
@@ -608,7 +612,8 @@
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": true
+              "canBeUsedToMatch": true,
+              "removed": false
             },
             {
               "id": "scheduled",
@@ -617,7 +622,8 @@
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": true
+              "canBeUsedToMatch": true,
+              "removed": false
             },
             {
               "id": "row_number",
@@ -639,7 +645,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        2128,
+        1904,
         192
       ],
       "id": "193ca35d-0a9b-4377-ab14-1b501edc911e",
@@ -735,7 +741,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        3024,
+        2800,
         -384
       ],
       "id": "6420d763-f233-4579-8928-214ca6409061",
@@ -754,7 +760,7 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        2576,
+        2352,
         -384
       ],
       "id": "a88043f0-28af-4abb-a913-92daedeea19d",
@@ -776,8 +782,8 @@
       "type": "n8n-nodes-base.youTube",
       "typeVersion": 1,
       "position": [
-        2800,
-        -120
+        2576,
+        -128
       ],
       "id": "1a18ca1e-afbf-467b-82fd-ce5cdc580317",
       "name": "Update a video1",
@@ -872,7 +878,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        3024,
+        2800,
         0
       ],
       "id": "dfd65ea5-11c0-46ad-8746-5e70b14e81dc",
@@ -891,7 +897,7 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        2576,
+        2352,
         0
       ],
       "id": "6dd79a28-3510-479b-8124-b9101fa75013",
@@ -913,8 +919,8 @@
       "type": "n8n-nodes-base.youTube",
       "typeVersion": 1,
       "position": [
-        2800,
-        264
+        2576,
+        272
       ],
       "id": "d355be13-c399-4478-8ca8-934ba19f3ef2",
       "name": "Update a video2",
@@ -1009,7 +1015,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        3024,
+        2800,
         384
       ],
       "id": "93b8c414-5f54-42e3-aa07-c65491814722",
@@ -1028,7 +1034,7 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        2576,
+        2352,
         384
       ],
       "id": "73626e9c-05ce-402a-b5e1-1ba161520bd6",
@@ -1070,82 +1076,9 @@
     },
     {
       "parameters": {
-        "resource": "fileFolder",
-        "queryString": "={{ $json.path }}",
-        "returnAll": true,
-        "filter": {
-          "folderId": {
-            "mode": "list",
-            "value": "root",
-            "cachedResultName": "/ (Root folder)"
-          },
-          "whatToSearch": "folders"
-        },
-        "options": {
-          "fields": [
-            "id",
-            "name"
-          ]
-        }
-      },
-      "type": "n8n-nodes-base.googleDrive",
-      "typeVersion": 3,
-      "position": [
-        560,
-        816
-      ],
-      "id": "8b44373d-ba3c-492c-9fff-6ee47b572691",
-      "name": "Search for the given path",
-      "credentials": {
-        "googleDriveOAuth2Api": {
-          "id": "ddbrnr2ZeNfJZGtt",
-          "name": "Google Drive EBOYD53"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "resource": "fileFolder",
-        "queryString": "video_ledger",
-        "returnAll": true,
-        "filter": {
-          "folderId": {
-            "__rl": true,
-            "value": "={{ $json.id }}",
-            "mode": "id"
-          },
-          "whatToSearch": "files",
-          "fileTypes": [
-            "application/vnd.google-apps.spreadsheet"
-          ]
-        },
-        "options": {
-          "fields": [
-            "id",
-            "name"
-          ]
-        }
-      },
-      "type": "n8n-nodes-base.googleDrive",
-      "typeVersion": 3,
-      "position": [
-        784,
-        816
-      ],
-      "id": "8803ca38-fa35-4a25-826e-c9a200b4fcb0",
-      "name": "Search for video_ledger spreadsheet",
-      "credentials": {
-        "googleDriveOAuth2Api": {
-          "id": "ddbrnr2ZeNfJZGtt",
-          "name": "Google Drive EBOYD53"
-        }
-      }
-    },
-    {
-      "parameters": {
         "documentId": {
           "__rl": true,
-          "value": "={{ $('Search for video_ledger spreadsheet').all()[$runIndex].json.id }}",
+          "value": "={{ $json.drive_file_id }}",
           "mode": "id"
         },
         "sheetName": {
@@ -1158,7 +1091,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        1232,
+        1008,
         816
       ],
       "id": "261d7b3e-2421-4c0c-a86c-b60df2cb8c63",
@@ -1175,12 +1108,12 @@
       "parameters": {
         "documentId": {
           "__rl": true,
-          "value": "={{ $('Loop Over Items').item.json.id }}",
+          "value": "={{ $('Loop Over Items').item.json.drive_file_id }}",
           "mode": "id"
         },
         "sheetName": {
           "__rl": true,
-          "value": "YouTube",
+          "value": "={{ $('Split Out list array').all()[$runIndex].json.shtn }}",
           "mode": "name"
         },
         "options": {}
@@ -1188,7 +1121,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        1456,
+        1232,
         816
       ],
       "id": "1d98bb05-bd72-48f6-9a55-0af30410bab9",
@@ -1203,13 +1136,13 @@
     },
     {
       "parameters": {
-        "jsCode": "const chan = $('Split Out list array').all()[$runIndex].json.chan;\nconst path = $(\"Search for the given path\").all()[$runIndex].json;\nconst file = $(\"Search for video_ledger spreadsheet\").all()[$runIndex].json;\nconst raw = $(\"Get the YouTube data\").all();\nconst ctl = $(\"Get the ScheduleControl data\").first().json;\nconst rtrn = [];\n\nfor (let idx in raw) {\n  rtrn.push({chan: chan, path: path, file: file, ctl: ctl, row: raw[idx].json});\n}\n\nreturn {data: rtrn}"
+        "jsCode": "const chan = $('Split Out list array').all()[$runIndex].json.chan;\nconst path = $(\"Search for video_ledger spreadsheet\").all()[$runIndex].json;\nconst file = $(\"Search for video_ledger spreadsheet\").all()[$runIndex].json;\nconst raw = $(\"Get the YouTube data\").all();\nconst ctl = $(\"Get the ScheduleControl data\").first().json;\nconst rtrn = [];\n\nfor (let idx in raw) {\n  rtrn.push({chan: chan, path: path, file: file, ctl: ctl, row: raw[idx].json});\n}\n\nreturn {data: rtrn}"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1680,
-        888
+        1456,
+        896
       ],
       "id": "785c9313-d052-495e-b219-8978d8cad276",
       "name": "Combine data previous nodes data"
@@ -1236,7 +1169,7 @@
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        1232,
+        1008,
         96
       ],
       "id": "acb98f63-19d3-4c69-9a3f-10bcdc9285a0",
@@ -1252,7 +1185,7 @@
       "type": "n8n-nodes-base.youTube",
       "typeVersion": 1,
       "position": [
-        1680,
+        1456,
         -528
       ],
       "id": "1389df94-5b6c-43d5-92b2-2a7bb3d7d3a3",
@@ -1274,7 +1207,7 @@
       "type": "n8n-nodes-base.youTube",
       "typeVersion": 1,
       "position": [
-        1680,
+        1456,
         -144
       ],
       "id": "209c0c77-4525-44ed-85f0-ef9b6175f4ef",
@@ -1296,7 +1229,7 @@
       "type": "n8n-nodes-base.youTube",
       "typeVersion": 1,
       "position": [
-        1680,
+        1456,
         240
       ],
       "id": "2a0fd2d3-b398-4ea9-bca6-6d2d28d383b4",
@@ -1336,7 +1269,7 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
       "position": [
-        2128,
+        1904,
         -384
       ],
       "id": "51c72411-a25a-40d9-bb37-ee1ea8814e38",
@@ -1370,7 +1303,7 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
       "position": [
-        2128,
+        1904,
         0
       ],
       "id": "1dd69b34-af33-4a42-9fa6-1467641b6dff",
@@ -1404,7 +1337,7 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
       "position": [
-        2128,
+        1904,
         384
       ],
       "id": "86016489-9a82-4fd8-a06f-1b4b3d461d63",
@@ -1413,12 +1346,12 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const raw = $(\"Switch\").item.json.ctl\nconst vidId = $(\"Get HOA Nightmares video\").item.json.id\nconst vidTitle = $(\"Get HOA Nightmares video\").item.json.snippet.title\nconst vidCategory = $(\"Get HOA Nightmares video\").item.json.snippet.categoryId\nconst sheetId = $(\"Search for video_ledger spreadsheet\").first().json.id\n\nconst node = $getWorkflowStaticData('node');\n\nif (typeof node.tctl === 'undefined') {\n  node.tctl = raw.TimeCtl + $runIndex\n  node.date = raw.Date\n}\nif (node.tctl > 2) {\n  node.tctl = 1\n}\n\nif (node.tctl == 2) {\n  node.scheduleDate = DateTime.fromISO(node.date).plus({days: 1}).plus({hour: raw.TimeAM.split(':')[0]}).toISO({ suppressMilliseconds: true })\n  node.nextTimeCtl = 1\n  node.nextDate = DateTime.fromISO(node.scheduleDate).toFormat('yyyy-MM-dd')\n} else {\n  node.scheduleDate = DateTime.fromISO(node.date).plus({hour: raw.TimePM.split(':')[0]}).toISO({ suppressMilliseconds: true })\n  node.nextTimeCtl = 2\n  node.nextDate = DateTime.fromISO(node.scheduleDate).toFormat('yyyy-MM-dd')\n}\n\nnode.tctl += 1\nnode.date = node.nextDate\nreturn {vidId, vidTitle, vidCategory, sheetId, rawDate: raw.Date, rawCtl: raw.TimeCtl, scheduleDate: node.scheduleDate, nextDate: node.nextDate, nextTimeCtl: node.nextTimeCtl, tctl: node.tctl}"
+        "jsCode": "const raw = $(\"Switch\").item.json.ctl\nconst vidId = $(\"Get HOA Nightmares video\").item.json.id\nconst vidTitle = $(\"Get HOA Nightmares video\").item.json.snippet.title\nconst vidCategory = $(\"Get HOA Nightmares video\").item.json.snippet.categoryId\nconst sheetId = $(\"Search for video_ledger spreadsheet\").all()[0].json.drive_file_id\n\nconst node = $getWorkflowStaticData('node');\n\nif (typeof node.tctl === 'undefined') {\n  node.tctl = raw.TimeCtl + $runIndex\n  node.date = raw.Date\n}\nif (node.tctl > 2) {\n  node.tctl = 1\n}\n\nif (node.tctl == 2) {\n  node.scheduleDate = DateTime.fromISO(node.date).plus({days: 1}).plus({hour: raw.TimeAM.split(':')[0]}).toISO({ suppressMilliseconds: true })\n  node.nextTimeCtl = 1\n  node.nextDate = DateTime.fromISO(node.scheduleDate).toFormat('yyyy-MM-dd')\n} else {\n  node.scheduleDate = DateTime.fromISO(node.date).plus({hour: raw.TimePM.split(':')[0]}).toISO({ suppressMilliseconds: true })\n  node.nextTimeCtl = 2\n  node.nextDate = DateTime.fromISO(node.scheduleDate).toFormat('yyyy-MM-dd')\n}\n\nnode.tctl += 1\nnode.date = node.nextDate\nreturn {vidId, vidTitle, vidCategory, sheetId, rawDate: raw.Date, rawCtl: raw.TimeCtl, scheduleDate: node.scheduleDate, nextDate: node.nextDate, nextTimeCtl: node.nextTimeCtl, tctl: node.tctl}"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2352,
+        2128,
         -384
       ],
       "id": "a100b75a-7e13-4917-8305-8c1832fdddd4",
@@ -1427,12 +1360,12 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const raw = $(\"Switch\").item.json.ctl\nconst vidId = $(\"Get RELATIONSHIP_HORROR video\").item.json.id\nconst vidTitle = $(\"Get RELATIONSHIP_HORROR video\").item.json.snippet.title\nconst vidCategory = $(\"Get RELATIONSHIP_HORROR video\").item.json.snippet.categoryId\nconst sheetId = $(\"Search for video_ledger spreadsheet\").all()[1].json.id\n\nconst node = $getWorkflowStaticData('node');\n\nif (typeof node.tctl === 'undefined') {\n  node.tctl = raw.TimeCtl + $runIndex\n  node.date = raw.Date\n}\nif (node.tctl > 2) {\n  node.tctl = 1\n}\n\nif (node.tctl == 2) {\n  node.scheduleDate = DateTime.fromISO(node.date).plus({days: 1}).plus({hour: raw.TimeAM.split(':')[0]}).toISO({ suppressMilliseconds: true })\n  node.nextTimeCtl = 1\n  node.nextDate = DateTime.fromISO(node.scheduleDate).toFormat('yyyy-MM-dd')\n} else {\n  node.scheduleDate = DateTime.fromISO(node.date).plus({hour: raw.TimePM.split(':')[0]}).toISO({ suppressMilliseconds: true })\n  node.nextTimeCtl = 2\n  node.nextDate = DateTime.fromISO(node.scheduleDate).toFormat('yyyy-MM-dd')\n}\n\nnode.tctl += 1\nnode.date = node.nextDate\nreturn {vidId, vidTitle, vidCategory, sheetId, rawDate: raw.Date, rawCtl: raw.TimeCtl, scheduleDate: node.scheduleDate, nextDate: node.nextDate, nextTimeCtl: node.nextTimeCtl, tctl: node.tctl}"
+        "jsCode": "const raw = $(\"Switch\").item.json.ctl\nconst vidId = $(\"Get RELATIONSHIP_HORROR video\").item.json.id\nconst vidTitle = $(\"Get RELATIONSHIP_HORROR video\").item.json.snippet.title\nconst vidCategory = $(\"Get RELATIONSHIP_HORROR video\").item.json.snippet.categoryId\nconst sheetId = $(\"Search for video_ledger spreadsheet\").all()[1].json.drive_file_id\n\nconst node = $getWorkflowStaticData('node');\n\nif (typeof node.tctl === 'undefined') {\n  node.tctl = raw.TimeCtl + $runIndex\n  node.date = raw.Date\n}\nif (node.tctl > 2) {\n  node.tctl = 1\n}\n\nif (node.tctl == 2) {\n  node.scheduleDate = DateTime.fromISO(node.date).plus({days: 1}).plus({hour: raw.TimeAM.split(':')[0]}).toISO({ suppressMilliseconds: true })\n  node.nextTimeCtl = 1\n  node.nextDate = DateTime.fromISO(node.scheduleDate).toFormat('yyyy-MM-dd')\n} else {\n  node.scheduleDate = DateTime.fromISO(node.date).plus({hour: raw.TimePM.split(':')[0]}).toISO({ suppressMilliseconds: true })\n  node.nextTimeCtl = 2\n  node.nextDate = DateTime.fromISO(node.scheduleDate).toFormat('yyyy-MM-dd')\n}\n\nnode.tctl += 1\nnode.date = node.nextDate\nreturn {vidId, vidTitle, vidCategory, sheetId, rawDate: raw.Date, rawCtl: raw.TimeCtl, scheduleDate: node.scheduleDate, nextDate: node.nextDate, nextTimeCtl: node.nextTimeCtl, tctl: node.tctl}"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2352,
+        2128,
         0
       ],
       "id": "994563f5-cdbb-44eb-8e25-796804a629db",
@@ -1441,12 +1374,12 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const raw = $(\"Switch\").item.json.ctl\nconst vidId = $(\"Get Courtroom Defendant Drama video\").item.json.id\nconst vidTitle = $(\"Get Courtroom Defendant Drama video\").item.json.snippet.title\nconst vidCategory = $(\"Get Courtroom Defendant Drama video\").item.json.snippet.categoryId\nconst sheetId = $(\"Search for video_ledger spreadsheet\").all()[2].json.id\n\nconst node = $getWorkflowStaticData('node');\n\nif (typeof node.tctl === 'undefined') {\n  node.tctl = raw.TimeCtl + $runIndex\n  node.date = raw.Date\n}\nif (node.tctl > 2) {\n  node.tctl = 1\n}\n\nif (node.tctl == 2) {\n  node.scheduleDate = DateTime.fromISO(node.date).plus({days: 1}).plus({hour: raw.TimeAM.split(':')[0]}).toISO({ suppressMilliseconds: true })\n  node.nextTimeCtl = 1\n  node.nextDate = DateTime.fromISO(node.scheduleDate).toFormat('yyyy-MM-dd')\n} else {\n  node.scheduleDate = DateTime.fromISO(node.date).plus({hour: raw.TimePM.split(':')[0]}).toISO({ suppressMilliseconds: true })\n  node.nextTimeCtl = 2\n  node.nextDate = DateTime.fromISO(node.scheduleDate).toFormat('yyyy-MM-dd')\n}\n\nnode.tctl += 1\nnode.date = node.nextDate\nreturn {vidId, vidTitle, vidCategory, sheetId, rawDate: raw.Date, rawCtl: raw.TimeCtl, scheduleDate: node.scheduleDate, nextDate: node.nextDate, nextTimeCtl: node.nextTimeCtl, tctl: node.tctl}"
+        "jsCode": "const raw = $(\"Switch\").item.json.ctl\nconst vidId = $(\"Get Courtroom Defendant Drama video\").item.json.id\nconst vidTitle = $(\"Get Courtroom Defendant Drama video\").item.json.snippet.title\nconst vidCategory = $(\"Get Courtroom Defendant Drama video\").item.json.snippet.categoryId\nconst sheetId = $(\"Search for video_ledger spreadsheet\").all()[2].json.drive_file_id\n\nconst node = $getWorkflowStaticData('node');\n\nif (typeof node.tctl === 'undefined') {\n  node.tctl = raw.TimeCtl + $runIndex\n  node.date = raw.Date\n}\nif (node.tctl > 2) {\n  node.tctl = 1\n}\n\nif (node.tctl == 2) {\n  node.scheduleDate = DateTime.fromISO(node.date).plus({days: 1}).plus({hour: raw.TimeAM.split(':')[0]}).toISO({ suppressMilliseconds: true })\n  node.nextTimeCtl = 1\n  node.nextDate = DateTime.fromISO(node.scheduleDate).toFormat('yyyy-MM-dd')\n} else {\n  node.scheduleDate = DateTime.fromISO(node.date).plus({hour: raw.TimePM.split(':')[0]}).toISO({ suppressMilliseconds: true })\n  node.nextTimeCtl = 2\n  node.nextDate = DateTime.fromISO(node.scheduleDate).toFormat('yyyy-MM-dd')\n}\n\nnode.tctl += 1\nnode.date = node.nextDate\nreturn {vidId, vidTitle, vidCategory, sheetId, rawDate: raw.Date, rawCtl: raw.TimeCtl, scheduleDate: node.scheduleDate, nextDate: node.nextDate, nextTimeCtl: node.nextTimeCtl, tctl: node.tctl}"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2352,
+        2128,
         384
       ],
       "id": "445aaa01-9627-49a4-8d5d-9042303c612e",
@@ -1489,7 +1422,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1904,
+        1680,
         624
       ],
       "id": "07067182-bb6a-4ae5-9e53-519625bb6962",
@@ -1500,20 +1433,20 @@
         "operation": "update",
         "documentId": {
           "__rl": true,
-          "value": "={{ $('Switch').item.json.file.id }}",
+          "value": "={{ $('Switch').item.json.file.drive_file_id }}",
           "mode": "id"
         },
         "sheetName": {
           "__rl": true,
-          "value": "YouTube",
+          "value": "={{ $('Split Out list array').all()[3].json.shtn }}",
           "mode": "name"
         },
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
             "row_number": "={{ $('Switch').item.json.row.row_number }}",
-            "scheduled": "={{ $ifEmpty($json.status.publishAt, $json.snippet.publishedAt) }}",
-            "status": "={{ $json.status.privacyStatus }}"
+            "status": "={{ $json.status.privacyStatus }}",
+            "scheduled": "={{ $ifEmpty($json.status.publishAt, $json.snippet.publishedAt) }}"
           },
           "matchingColumns": [
             "row_number"
@@ -1526,7 +1459,8 @@
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": true
+              "canBeUsedToMatch": true,
+              "removed": false
             },
             {
               "id": "title",
@@ -1535,7 +1469,8 @@
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": true
+              "canBeUsedToMatch": true,
+              "removed": false
             },
             {
               "id": "videoId",
@@ -1544,7 +1479,8 @@
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": true
+              "canBeUsedToMatch": true,
+              "removed": false
             },
             {
               "id": "status",
@@ -1553,7 +1489,8 @@
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": true
+              "canBeUsedToMatch": true,
+              "removed": false
             },
             {
               "id": "youtubeLink",
@@ -1562,7 +1499,8 @@
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": true
+              "canBeUsedToMatch": true,
+              "removed": false
             },
             {
               "id": "scheduled",
@@ -1571,7 +1509,8 @@
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": true
+              "canBeUsedToMatch": true,
+              "removed": false
             },
             {
               "id": "row_number",
@@ -1593,7 +1532,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        2128,
+        1904,
         576
       ],
       "id": "5850124e-2fbe-4f8f-a0dd-2f99d7362703",
@@ -1621,8 +1560,8 @@
       "type": "n8n-nodes-base.youTube",
       "typeVersion": 1,
       "position": [
-        2800,
-        648
+        2576,
+        656
       ],
       "id": "63bad7f4-b2fa-48b0-93ff-c4c2a1440f69",
       "name": "Update a video3",
@@ -1717,7 +1656,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        3024,
+        2800,
         768
       ],
       "id": "4befa4c2-ea41-4b5d-be66-33f86084a2ff",
@@ -1736,7 +1675,7 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        2576,
+        2352,
         768
       ],
       "id": "44f6ad63-3ab6-44c7-a23a-6ccb64463669",
@@ -1770,7 +1709,7 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
       "position": [
-        2128,
+        1904,
         768
       ],
       "id": "8b62e072-92fb-4d3d-9bfc-3a37041171fb",
@@ -1786,7 +1725,7 @@
       "type": "n8n-nodes-base.youTube",
       "typeVersion": 1,
       "position": [
-        1680,
+        1456,
         624
       ],
       "id": "b23cac0f-c04c-4baa-8392-312e11448df4",
@@ -1801,16 +1740,86 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const raw = $(\"Switch\").item.json.ctl\nconst vidId = $(\"Get SciFy Shorts video\").item.json.id\nconst vidTitle = $(\"Get SciFy Shorts video\").item.json.snippet.title\nconst vidCategory = $(\"Get SciFy Shorts video\").item.json.snippet.categoryId\nconst sheetId = $(\"Search for video_ledger spreadsheet\").all()[2].json.id\n\nconst node = $getWorkflowStaticData('node');\n\nif (typeof node.tctl === 'undefined') {\n  node.tctl = raw.TimeCtl + $runIndex\n  node.date = raw.Date\n}\nif (node.tctl > 2) {\n  node.tctl = 1\n}\n\nif (node.tctl == 2) {\n  node.scheduleDate = DateTime.fromISO(node.date).plus({days: 1}).plus({hour: raw.TimeAM.split(':')[0]}).toISO({ suppressMilliseconds: true })\n  node.nextTimeCtl = 1\n  node.nextDate = DateTime.fromISO(node.scheduleDate).toFormat('yyyy-MM-dd')\n} else {\n  node.scheduleDate = DateTime.fromISO(node.date).plus({hour: raw.TimePM.split(':')[0]}).toISO({ suppressMilliseconds: true })\n  node.nextTimeCtl = 2\n  node.nextDate = DateTime.fromISO(node.scheduleDate).toFormat('yyyy-MM-dd')\n}\n\nnode.tctl += 1\nnode.date = node.nextDate\nreturn {vidId, vidTitle, vidCategory, sheetId, rawDate: raw.Date, rawCtl: raw.TimeCtl, scheduleDate: node.scheduleDate, nextDate: node.nextDate, nextTimeCtl: node.nextTimeCtl, tctl: node.tctl}"
+        "jsCode": "const raw = $(\"Switch\").item.json.ctl\nconst vidId = $(\"Get SciFy Shorts video\").item.json.id\nconst vidTitle = $(\"Get SciFy Shorts video\").item.json.snippet.title\nconst vidCategory = $(\"Get SciFy Shorts video\").item.json.snippet.categoryId\nconst sheetId = $(\"Search for video_ledger spreadsheet\").all()[3].json.drive_file_id\n\nconst node = $getWorkflowStaticData('node');\n\nif (typeof node.tctl === 'undefined') {\n  node.tctl = raw.TimeCtl + $runIndex\n  node.date = raw.Date\n}\nif (node.tctl > 2) {\n  node.tctl = 1\n}\n\nif (node.tctl == 2) {\n  node.scheduleDate = DateTime.fromISO(node.date).plus({days: 1}).plus({hour: raw.TimeAM.split(':')[0]}).toISO({ suppressMilliseconds: true })\n  node.nextTimeCtl = 1\n  node.nextDate = DateTime.fromISO(node.scheduleDate).toFormat('yyyy-MM-dd')\n} else {\n  node.scheduleDate = DateTime.fromISO(node.date).plus({hour: raw.TimePM.split(':')[0]}).toISO({ suppressMilliseconds: true })\n  node.nextTimeCtl = 2\n  node.nextDate = DateTime.fromISO(node.scheduleDate).toFormat('yyyy-MM-dd')\n}\n\nnode.tctl += 1\nnode.date = node.nextDate\nreturn {vidId, vidTitle, vidCategory, sheetId, rawDate: raw.Date, rawCtl: raw.TimeCtl, scheduleDate: node.scheduleDate, nextDate: node.nextDate, nextTimeCtl: node.nextTimeCtl, tctl: node.tctl}"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2352,
+        2128,
         768
       ],
       "id": "70732669-deb4-44e7-b772-58ba412a3eb6",
       "name": "Prepare SciFy Shorts Video schedule"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "kpEM9u3xtyQfOVNq",
+          "mode": "list",
+          "cachedResultName": "SWF019 - Find GGL Document File PR2"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "which_credentials": "EBOYD53",
+            "drive_file_path": "={{ $json.path }}",
+            "drive_file_name": "video_ledger",
+            "drive_file_type": "SPREADSHEET"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "which_credentials",
+              "displayName": "which_credentials",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "drive_file_path",
+              "displayName": "drive_file_path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "drive_file_name",
+              "displayName": "drive_file_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "drive_file_type",
+              "displayName": "drive_file_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        560,
+        816
+      ],
+      "id": "03922d8a-c1ce-4505-9e7c-1741432dd4be",
+      "name": "Search for video_ledger spreadsheet"
     }
   ],
   "connections": {
@@ -2047,28 +2056,6 @@
         ]
       ]
     },
-    "Search for the given path": {
-      "main": [
-        [
-          {
-            "node": "Search for video_ledger spreadsheet",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Search for video_ledger spreadsheet": {
-      "main": [
-        [
-          {
-            "node": "Loop Over Items",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Get the ScheduleControl data": {
       "main": [
         [
@@ -2106,7 +2093,7 @@
       "main": [
         [
           {
-            "node": "Search for the given path",
+            "node": "Search for video_ledger spreadsheet",
             "type": "main",
             "index": 0
           }
@@ -2307,9 +2294,36 @@
           }
         ]
       ]
+    },
+    "Search for video_ledger spreadsheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "pinData": {},
+  "pinData": {
+    "Schedule Trigger": [
+      {
+        "timestamp": "2025-10-26T20:00:41.046-04:00",
+        "Readable date": "October 26th 2025, 8:00:41 pm",
+        "Readable time": "8:00:41 pm",
+        "Day of week": "Sunday",
+        "Year": "2025",
+        "Month": "October",
+        "Day of month": "26",
+        "Hour": "20",
+        "Minute": "00",
+        "Second": "41",
+        "Timezone": "America/New_York (UTC-04:00)"
+      }
+    ]
+  },
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "37fe6d8c3b2aaeda95afa9d59c8cbc7c79e8171e6cc2a68043e239f8403c390e"
