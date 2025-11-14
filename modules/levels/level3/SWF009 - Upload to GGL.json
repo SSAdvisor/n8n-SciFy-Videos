@@ -1,0 +1,540 @@
+{
+  "name": "SWF009 - Upload to GGL",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "WHICH_GGL_ACCOUNT"
+            },
+            {
+              "name": "input_file_url"
+            },
+            {
+              "name": "save_file_path"
+            },
+            {
+              "name": "save_file_name"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        32,
+        384
+      ],
+      "id": "c26b5c09-f1c7-411c-a38c-ba33c879dca4",
+      "name": "Start"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "ls8OvoluAw4Tg2Ls",
+          "mode": "list",
+          "cachedResultName": "Download File"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "file_url": "={{ $('Start').first().json.input_file_url }}"
+          },
+          "matchingColumns": [
+            "file_url"
+          ],
+          "schema": [
+            {
+              "id": "file_url",
+              "displayName": "file_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        464,
+        384
+      ],
+      "id": "03233967-e6c1-483f-9b17-680195fe0154",
+      "name": "Download File"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "sXktitdaADu1cUI9",
+          "mode": "list",
+          "cachedResultName": "Find GGL Drive Path"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "file_path": "={{ $('Start').first().json.save_file_path }}",
+            "which_credentials": "={{ $json.WHICH_GGL_ACCOUNT }}"
+          },
+          "matchingColumns": [
+            "file_path"
+          ],
+          "schema": [
+            {
+              "id": "which_credentials",
+              "displayName": "which_credentials",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "file_path",
+              "displayName": "file_path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        384
+      ],
+      "id": "d99f9620-d20d-4dce-a4fb-82a74a3c0950",
+      "name": "Find Google Drive Path"
+    },
+    {
+      "parameters": {
+        "content": "# Upload to GGL\n## SWF009\n### Purpose\nUpload given input_file_url to a stated save_file_path and save_file_name returning GGL_file_id.\n### Input\n* WHICH_GGL_ACCOUNT\n    * Tag to identify which credentials to use.\n* input_file_url\n    * the URL of the file to download\n* save_file_path\n    * the directory path to save the file to\n        * will be created if not found\n* save_file_name\n    * the file name to save the download as.\n        * the file is set as public viewable.\n### Output\n* GGL_file_id\n* webContentLink\n",
+        "height": 572,
+        "width": 660
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        48,
+        -240
+      ],
+      "id": "1ab3cd0c-2e7b-48f6-90cd-53a44404f63b",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c5a77a6d-a8b1-4076-8dfb-c713a2feb21f",
+              "name": "GGL_file_id",
+              "value": "={{ $input.first().json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "9efd8713-2acd-405d-871d-b04d368ee9ce",
+              "name": "webContentLink",
+              "value": "={{ $input.first().json.webContentLink }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1616,
+        272
+      ],
+      "id": "606b476d-6bed-4877-b2df-ebfac352d8fe",
+      "name": "Return GGL_file_id"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Start').item.json.WHICH_GGL_ACCOUNT.toUpperCase() }}",
+                    "rightValue": "SSADVISOR",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "22b1f582-e51c-4af6-9bcf-3521efca4e76"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "SSADVISOR"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "dd3d2b60-b5d9-460b-83b2-7c5fe11ab786",
+                    "leftValue": "={{ $('Start').item.json.WHICH_GGL_ACCOUNT.toUpperCase() }}",
+                    "rightValue": "EBOYD53",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "EBOYD53"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        896,
+        384
+      ],
+      "id": "a2215202-bcae-4096-b87b-a70eadbfc350",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Upload EBOYD53 File').first().json.id }}",
+          "mode": "id"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "reader",
+            "type": "anyone",
+            "allowFileDiscovery": true
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1344,
+        80
+      ],
+      "id": "043c4363-5c4e-4015-b298-3dbd4c45cd38",
+      "name": "Set EBOYD53 File Public Viewable",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "ddbrnr2ZeNfJZGtt",
+          "name": "Google Drive EBOYD53"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "={{ $('Start').first().json.save_file_name }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Find Google Drive Path').item.json.folder_id }}",
+          "mode": "id"
+        },
+        "options": {
+          "simplifyOutput": false
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1136,
+        384
+      ],
+      "id": "08966534-0129-408e-b1ef-bdfbd8b9df41",
+      "name": "Upload EBOYD53 File",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "ddbrnr2ZeNfJZGtt",
+          "name": "Google Drive EBOYD53"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "={{ $('Start').first().json.save_file_name }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Find Google Drive Path').item.json.folder_id }}",
+          "mode": "id"
+        },
+        "options": {
+          "simplifyOutput": false
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1088,
+        208
+      ],
+      "id": "a78dda79-2f91-45d4-9aa3-019c60420814",
+      "name": "Upload SSADVISOR File",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "EmOx2Vwbkitjzmsa",
+          "name": "GGL Drive seasonedsolutionsadvisor"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Upload SSADVISOR File').first().json.id }}",
+          "mode": "id"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "reader",
+            "type": "anyone",
+            "allowFileDiscovery": true
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1344,
+        -112
+      ],
+      "id": "68cbf6ed-ca1f-4745-a03e-dc5956ff638f",
+      "name": "Set SSADVISOR File Public Viewable",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "EmOx2Vwbkitjzmsa",
+          "name": "GGL Drive seasonedsolutionsadvisor"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6a6d35e1-b586-4e44-86fc-838a2a6e1e5a",
+              "leftValue": "={{ $json.download_status }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        384
+      ],
+      "id": "b889a221-f527-4b12-807a-8e4b2eca3c88",
+      "name": "If download_status is true"
+    },
+    {
+      "parameters": {
+        "errorMessage": "Error in Download File"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        928,
+        528
+      ],
+      "id": "d90ffd2e-62d8-40ee-9e36-eeb8332ddd3a",
+      "name": "Error in Download File"
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Find Google Drive Path",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download File": {
+      "main": [
+        [
+          {
+            "node": "If download_status is true",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Google Drive Path": {
+      "main": [
+        [
+          {
+            "node": "Download File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Upload SSADVISOR File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Upload EBOYD53 File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set EBOYD53 File Public Viewable": {
+      "main": [
+        []
+      ]
+    },
+    "Upload EBOYD53 File": {
+      "main": [
+        [
+          {
+            "node": "Set EBOYD53 File Public Viewable",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Return GGL_file_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload SSADVISOR File": {
+      "main": [
+        [
+          {
+            "node": "Set SSADVISOR File Public Viewable",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Return GGL_file_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set SSADVISOR File Public Viewable": {
+      "main": [
+        []
+      ]
+    },
+    "If download_status is true": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error in Download File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Start": [
+      {
+        "WHICH_GGL_ACCOUNT": "SSADVISOR",
+        "input_file_url": "https://tmpfiles.org/dl/9053958/tmp2rvzjhhr.mp3",
+        "save_file_path": "/Z2L/Audio",
+        "save_file_name": "From Mocked Dreamer to Earth Savior: My Battle to Reclaim Nature and My Life.mp3"
+      }
+    ]
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "37fe6d8c3b2aaeda95afa9d59c8cbc7c79e8171e6cc2a68043e239f8403c390e"
+  }
+}

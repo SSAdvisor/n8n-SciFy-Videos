@@ -1,0 +1,111 @@
+{
+  "name": "SWF054 - LLM Completeness Check",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "LLM_Response",
+              "type": "any"
+            },
+            {
+              "name": "control_hash"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "62e50707-9c35-4146-81c7-2b726c6c667e",
+      "name": "Start"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the LLM response text\nconst llmResponse = $input.all()[0].json.response || $input.all()[0].json.text || '';\n\nfunction isJsonComplete(jsonString) {\n  if (!jsonString || typeof jsonString !== 'string') {\n    return {\n      isComplete: false,\n      reason: 'empty_or_invalid_input',\n      needsContinuation: true\n    };\n  }\n\n  const trimmed = jsonString.trim();\n  \n  // Check for obvious truncation indicators\n  const truncationIndicators = [\n    /\\.\\.\\.$/, // ends with ...\n    /…$/, // ends with ellipsis character\n    /\\[truncated\\]$/i,\n    /\\[continued\\]$/i,\n    /\\(continued\\)$/i\n  ];\n  \n  for (const indicator of truncationIndicators) {\n    if (indicator.test(trimmed)) {\n      return {\n        isComplete: false,\n        reason: 'explicit_truncation_indicator',\n        needsContinuation: true\n      };\n    }\n  }\n\n  // Try to parse JSON\n  let parsed;\n  let isValidJson = false;\n  \n  try {\n    parsed = JSON.parse(trimmed);\n    isValidJson = true;\n  } catch (error) {\n    // Check if it's a partial JSON that could be continued\n    const commonIncompletePatterns = [\n      /[,{[]$/, // ends with comma, opening brace, or bracket\n      /\"[^\"]*$/, // ends with unclosed quote\n      /:\\s*$/, // ends with colon (incomplete key-value pair)\n      /[^}}\\]]*$/ // doesn't end with proper closing\n    ];\n    \n    const hasIncompletePattern = commonIncompletePatterns.some(pattern => \n      pattern.test(trimmed)\n    );\n    \n    return {\n      isComplete: false,\n      reason: 'invalid_json_syntax',\n      needsContinuation: hasIncompletePattern,\n      error: error.message\n    };\n  }\n\n  // If JSON is valid, check for semantic completeness\n  if (isValidJson) {\n    // Check if values seem incomplete (common patterns)\n    const jsonString = JSON.stringify(parsed, null, 2);\n    \n    const incompleteValuePatterns = [\n      /\"[^\"]*\\s*\\.\\.\\.\"/, // text ending with ...\n      /\"[^\"]*…\"/, // text ending with ellipsis\n      /\"\\s*$/, // empty string values that might be placeholders\n      /\"TODO\"/, // placeholder values\n      /\"CONTINUE\"/, // explicit continuation markers\n      /\"...$/ // values ending with dots\n    ];\n    \n    const hasIncompleteValues = incompleteValuePatterns.some(pattern =>\n      pattern.test(jsonString)\n    );\n    \n    // Check for arrays that might be incomplete\n    function checkArrayCompleteness(obj) {\n      if (Array.isArray(obj)) {\n        return obj.length > 0; // Assume non-empty arrays are more likely complete\n      }\n      if (typeof obj === 'object' && obj !== null) {\n        return Object.values(obj).every(checkArrayCompleteness);\n      }\n      return true;\n    }\n    \n    const seemsComplete = !hasIncompleteValues && checkArrayCompleteness(parsed);\n    \n    return {\n      isComplete: seemsComplete,\n      reason: seemsComplete ? 'complete' : 'incomplete_content',\n      needsContinuation: !seemsComplete,\n      parsedJson: parsed\n    };\n  }\n}\n\nfunction generateContinuationPrompt(analysis, originalResponse) {\n  const basePrompts = {\n    empty_or_invalid_input: \"Please provide the complete JSON response.\",\n    explicit_truncation_indicator: \"Please continue from where you left off and provide the complete JSON.\",\n    invalid_json_syntax: \"The JSON appears to be incomplete or truncated. Please continue and complete the JSON structure.\",\n    incomplete_content: \"Please continue and complete the JSON with any remaining data.\"\n  };\n  \n  let prompt = basePrompts[analysis.reason] || \"Please continue and complete the JSON response.\";\n  \n  // Add context about what was received\n  if (originalResponse && originalResponse.length > 50) {\n    const lastChars = originalResponse.slice(-100);\n    prompt += `\\n\\nContinue from: \"...${lastChars}\"`;\n  }\n  \n  return prompt;\n}\n\n// Analyze the response\nconst analysis = isJsonComplete(llmResponse);\nconst continuationPrompt = analysis.needsContinuation \n  ? generateContinuationPrompt(analysis, llmResponse)\n  : null;\n\n// Return the results\nreturn [{\n  json: {\n    originalResponse: llmResponse,\n    isComplete: analysis.isComplete,\n    needsContinuation: analysis.needsContinuation,\n    reason: analysis.reason,\n    continuationPrompt: continuationPrompt,\n    parsedJson: analysis.parsedJson || null,\n    error: analysis.error || null,\n    // Additional fields for workflow logic\n    shouldContinue: analysis.needsContinuation,\n    isValidJson: !!analysis.parsedJson\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "29dbe694-d9db-4b91-a83b-7f38703e1c24",
+      "name": "LLM Response Check"
+    },
+    {
+      "parameters": {
+        "jsCode": "const node = $getWorkflowStaticData('node');\nif (typeof node.control_hash === 'undefined' || node.control_hash !== $input.first().json.control_hash) {\n  node.control_hash = $input.first().json.control_hash;\n  node.response = $input.first().json.LLM_Response;\n} else {\n  node.response += $input.first().json.LLM_Response;\n}\n\nreturn {response: node.response}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "df6d97fc-6109-4bd1-a1d1-46495267e6fb",
+      "name": "Accumulate JSON Response"
+    }
+  ],
+  "pinData": {
+    "Start": [
+      {
+        "json": {
+          "LLM_Response": "A grimy, rain-soaked city street at night, neon lights reflecting off the wet pavement as a man in handcuffs is shoved through a chaotic crowd of reporters and photographers. The courthouse looms in the background, its towering facade casting long, ominous shadows. Flashes of camera lights strobe across the scene, illuminating the man's terrified, disbelieving expression as he is swallowed by the courthouse doors, leaving behind a swirling vortex of accusing voices and harsh, judgmental eyes.",
+          "control_hash": "2025-10-11T12:01:31.086-04:00"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Accumulate JSON Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Accumulate JSON Response": {
+      "main": [
+        [
+          {
+            "node": "LLM Response Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "7d00cd37-27df-4a28-b3ad-fb73b92fa7bf",
+  "meta": {
+    "instanceId": "37fe6d8c3b2aaeda95afa9d59c8cbc7c79e8171e6cc2a68043e239f8403c390e"
+  },
+  "id": "JFqvFHES7a8UJ5bC",
+  "tags": [
+    {
+      "updatedAt": "2025-08-27T23:14:28.658Z",
+      "createdAt": "2025-08-27T23:14:28.658Z",
+      "id": "wuVB256GIIfCIkgj",
+      "name": "Module"
+    },
+    {
+      "updatedAt": "2025-10-11T16:28:29.764Z",
+      "createdAt": "2025-10-11T16:28:29.764Z",
+      "id": "FEkp9XG9VcfgPW5p",
+      "name": "SWF054"
+    }
+  ]
+}

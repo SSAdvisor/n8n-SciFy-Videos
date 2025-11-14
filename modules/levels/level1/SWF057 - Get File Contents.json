@@ -1,0 +1,179 @@
+{
+  "name": "SWF057 - Get File Contents",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "filepath"
+            },
+            {
+              "name": "filename"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        -112
+      ],
+      "id": "2488d1db-b64d-4377-a60c-1815d39c6267",
+      "name": "Start"
+    },
+    {
+      "parameters": {
+        "command": "={{ 'cat ' +$json.full_filename +' || echo \\'FAILURE\\''}}"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        448,
+        -112
+      ],
+      "id": "b02e3dda-becd-4d52-b6d4-d99d1f70b2d7",
+      "name": "Execute Command"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1f8933db-67be-439c-bdec-2087953e074c",
+              "name": "full_filename",
+              "value": "={{ './' +$input.item.json.filepath.replace('/','') + '/' +$input.item.json.filename.split('/').last() }}",
+              "type": "string"
+            },
+            {
+              "id": "c583e340-43ee-46d6-8b53-4740cbfa8b81",
+              "name": "filepath",
+              "value": "={{ './' +$input.item.json.filepath.replace(\"/\",\"\") }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        -112
+      ],
+      "id": "a57812f5-b483-4534-8902-8cf0d2e3b3d1",
+      "name": "Set full_filename"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ca14e2d4-4849-45fe-bb4f-76d6e17bf40c",
+              "name": "status",
+              "value": "={{ $if($input.item.json.stderr, \"FAILURE\", \"SUCCESS\") }}",
+              "type": "string"
+            },
+            {
+              "id": "1d991352-6ef5-4a84-93ca-f7d4dc334429",
+              "name": "message",
+              "value": "={{ $if($input.item.json.stderr, $input.item.json.stderr.split(':')[2].trim(), 'File read') }}",
+              "type": "string"
+            },
+            {
+              "id": "7f25fb04-605a-4e94-8bdd-a9ee8f140c1f",
+              "name": "contents",
+              "value": "={{ $json.stdout }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        656,
+        -112
+      ],
+      "id": "47c2542f-5223-498c-9b04-a6192802418d",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {
+    "Start": [
+      {
+        "json": {
+          "filepath": "/testdir",
+          "filename": "test.txt"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Set full_filename",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set full_filename": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c2f38002-90f5-46b0-be0b-54af92a3c105",
+  "meta": {
+    "instanceId": "37fe6d8c3b2aaeda95afa9d59c8cbc7c79e8171e6cc2a68043e239f8403c390e"
+  },
+  "id": "CDwXbjJGtKLepMDT",
+  "tags": [
+    {
+      "updatedAt": "2025-07-24T12:24:28.570Z",
+      "createdAt": "2025-07-24T12:24:28.570Z",
+      "id": "rIeC6mkwng2eLV1h",
+      "name": "Production"
+    },
+    {
+      "updatedAt": "2025-08-27T23:14:28.658Z",
+      "createdAt": "2025-08-27T23:14:28.658Z",
+      "id": "wuVB256GIIfCIkgj",
+      "name": "Module"
+    },
+    {
+      "updatedAt": "2025-11-07T18:40:59.602Z",
+      "createdAt": "2025-11-07T18:40:59.602Z",
+      "id": "120ztsjBos1qEwef",
+      "name": "SWF057"
+    }
+  ]
+}

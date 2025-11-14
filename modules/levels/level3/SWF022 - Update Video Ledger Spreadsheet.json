@@ -1,0 +1,626 @@
+{
+  "name": "SWF022 - Update Video Ledger Spreadsheet",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "kpEM9u3xtyQfOVNq",
+          "mode": "list",
+          "cachedResultName": "Find GGL Document File PR2"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "which_credentials": "={{ $('Start').first().json.which_credentials }}",
+            "drive_file_path": "={{ $('Start').first().json.drive_file_path }}",
+            "drive_file_name": "={{ $('Start').first().json.spreadsheet_document_name }}",
+            "drive_file_type": "SPREADSHEET"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "which_credentials",
+              "displayName": "which_credentials",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "drive_file_path",
+              "displayName": "drive_file_path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "drive_file_name",
+              "displayName": "drive_file_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "drive_file_type",
+              "displayName": "drive_file_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        -192
+      ],
+      "id": "d8c30a8d-cd69-4058-bc3d-6acdd089ff8e",
+      "name": "Find Spreadsheet Document Id"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Start').item.json.which_credentials.toUpperCase() }}",
+                    "rightValue": "GGL ACCT 1",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "6165a597-d761-4be2-9a56-81b24c1ea29d"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "GGL ACCT 1"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "518449dd-da50-4d38-968b-e7f9687fbcf7",
+                    "leftValue": "={{ $('Start').item.json.which_credentials.toUpperCase() }}",
+                    "rightValue": "GGL ACCT 2",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "GGL ACCT 2"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1120,
+        -64
+      ],
+      "id": "e11dcb0e-0ced-43f9-8c02-4c3de40330fb",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "content": "# Update Video Ledger Spreadsheet\n## SWF022\n### Purpose\nUpdate rows in the specified Google Spreadsheet Sheet with the given data.\n\n### Input\n* which_credentials\n* drive_file_path\n* spreadsheet_document_name\n* spreadsheet_sheet_name\n* spreadsheet_fields_to_update\n    * Example:\n```JSON\n    [\n      {\n        \"title\": \"The Dark Side of Becoming Anyone\",\n        \"status\": \"posted\",\n        \"youtubeLink\": \"https://youtube.com/shorts/5MRjazOmO-w\"\n      }\n    ]\n```\n\n### Output\n* nothing useful -- The spreadsheet fields and data are returned",
+        "height": 640,
+        "width": 608
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        -496
+      ],
+      "id": "9d9d94ce-59c3-42f3-aded-92dd1c0cde23",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Find Spreadsheet Document Id').item.json.drive_file_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $('Start').item.json.spreadsheet_sheet_name }}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "title"
+          ],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "youtubeLink",
+              "displayName": "youtubeLink",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1344,
+        -96
+      ],
+      "id": "4e8409e2-3877-49b3-a75b-0bb70e9cfc22",
+      "name": "Append row in GGL ACCT 1 sheet",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "OzQ4PbEIP03p2VmI",
+          "name": "GGL Sheets seasonedsolutionsadvisor"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Find Spreadsheet Document Id').item.json.drive_file_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $('Start').item.json.spreadsheet_sheet_name }}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "title"
+          ],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "youtubeLink",
+              "displayName": "youtubeLink",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1344,
+        112
+      ],
+      "id": "63121005-5d13-40e3-a2d3-526dd7669f84",
+      "name": "Append row in GGL ACCT 2 sheet",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "sBSUvpbcf6G35DbF",
+          "name": "Google Sheets GGL ACCT 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a5870194-a9f3-4800-a9e2-9e6e518f693f",
+              "name": "rows",
+              "value": "={{ $('Start').item.json.spreadsheet_fields_to_update }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        448,
+        -256
+      ],
+      "id": "f6f38620-eb3d-4a78-907c-7300ecebd090",
+      "name": "Set rows data to split."
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "rows",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        896,
+        -64
+      ],
+      "id": "291045ee-2a06-4945-8c2f-2cc132c4efb7",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7acf1a21-62b2-4af7-b4e9-aa0d9b329ffa",
+              "leftValue": "={{ $('Find Spreadsheet Document Id').item.json.drive_file_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        -256
+      ],
+      "id": "fd6bdee5-035a-49c1-8d5d-76f29b5fa21f",
+      "name": "If we didn't find file"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "which_credentials"
+            },
+            {
+              "name": "drive_file_path"
+            },
+            {
+              "name": "spreadsheet_document_name"
+            },
+            {
+              "name": "spreadsheet_sheet_name"
+            },
+            {
+              "name": "spreadsheet_fields_to_update",
+              "type": "any"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        -192
+      ],
+      "id": "2ed5d630-f34c-407d-aeea-1fe3e8e27a80",
+      "name": "Start"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "O1WfsgYO8xnmQfLf",
+          "mode": "list",
+          "cachedResultName": "Create GGL Sheets File"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "which_credentials": "={{ $('Start').item.json.which_credentials }}",
+            "spreadsheet_file_name": "={{ $('Start').item.json.spreadsheet_document_name }}",
+            "spreadsheet_sheet_name": "={{ $('Start').item.json.spreadsheet_sheet_name }}",
+            "GGL_DRV_path_id": "={{ $('Find Spreadsheet Document Id').first().json.drive_path_id }}",
+            "spreadsheet_header_row": "=[{{ JSON.stringify(Object.keys($('Start').first().json.spreadsheet_fields_to_update.parseJson()[0]).reduce((acc, currentValue) => {\n  acc[currentValue] = \"\"; // Assign a default value or calculate one\n  return acc;\n}, {})) }}]"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "which_credentials",
+              "displayName": "which_credentials",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "GGL_DRV_path_id",
+              "displayName": "GGL_DRV_path_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "spreadsheet_file_name",
+              "displayName": "spreadsheet_file_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "spreadsheet_sheet_name",
+              "displayName": "spreadsheet_sheet_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "spreadsheet_header_row",
+              "displayName": "spreadsheet_header_row",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        896,
+        -256
+      ],
+      "id": "b09b9695-d9f3-402c-ac54-fc0ae7ad6e47",
+      "name": "Create GGL Sheet"
+    }
+  ],
+  "pinData": {
+    "Start": [
+      {
+        "json": {
+          "which_credentials": "GGL ACCT 2",
+          "drive_file_path": "/HOA_Nightmares",
+          "spreadsheet_document_name": "video_ledger",
+          "spreadsheet_sheet_name": "YouTube",
+          "spreadsheet_fields_to_update": "[\n  {\n    \"upload_timestamp\": \"2025-09-22T16:32:02.430-04:00\",\n    \"title\": \"HOA Horror: How a Fence Dispute Turned My Safe Neighborhood into a Paranoid Nightmare\", \n    \"videoId\": \"ATrpoRsiWTs\",\n    \"status\": \"private\", \n    \"youtubeLink\": \"https://youtube.com/shorts/ATrpoRsiWTs\",\n    \"scheduled\": \"\"\n  }\n]\n"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Find Spreadsheet Document Id": {
+      "main": [
+        [
+          {
+            "node": "Set rows data to split.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Append row in GGL ACCT 1 sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in GGL ACCT 2 sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set rows data to split.": {
+      "main": [
+        [
+          {
+            "node": "If we didn't find file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If we didn't find file": {
+      "main": [
+        [
+          {
+            "node": "Create GGL Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Find Spreadsheet Document Id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create GGL Sheet": {
+      "main": [
+        [
+          {
+            "node": "Find Spreadsheet Document Id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "581046bd-b5d6-41c8-bb48-4fa2511d4668",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "37fe6d8c3b2aaeda95afa9d59c8cbc7c79e8171e6cc2a68043e239f8403c390e"
+  },
+  "id": "1Lr6oRgJoL92k0nM",
+  "tags": [
+    {
+      "updatedAt": "2025-07-24T12:24:28.570Z",
+      "createdAt": "2025-07-24T12:24:28.570Z",
+      "id": "rIeC6mkwng2eLV1h",
+      "name": "Production"
+    },
+    {
+      "updatedAt": "2025-07-24T19:10:21.972Z",
+      "createdAt": "2025-07-24T19:10:21.972Z",
+      "id": "snV1mbiJFto6cNG1",
+      "name": "PR1"
+    },
+    {
+      "updatedAt": "2025-08-10T19:57:56.066Z",
+      "createdAt": "2025-08-10T19:57:56.066Z",
+      "id": "U9ncJeSRkGccLgqx",
+      "name": "SWF022"
+    },
+    {
+      "updatedAt": "2025-08-27T23:14:28.658Z",
+      "createdAt": "2025-08-27T23:14:28.658Z",
+      "id": "wuVB256GIIfCIkgj",
+      "name": "Module"
+    }
+  ]
+}

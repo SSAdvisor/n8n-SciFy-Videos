@@ -1,0 +1,626 @@
+{
+  "name": "SWF026.1 - Create GGL Sheets File GGL ACCT 1",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "which_credentials"
+            },
+            {
+              "name": "GGL_DRV_path_id"
+            },
+            {
+              "name": "spreadsheet_file_name"
+            },
+            {
+              "name": "spreadsheet_sheet_name"
+            },
+            {
+              "name": "spreadsheet_header_row",
+              "type": "any"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1344,
+        368
+      ],
+      "id": "c533a23a-c3c0-45b4-93ad-068adc8a887a",
+      "name": "Start"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Set Header Row Data For Split').item.json.spreadsheetId }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $('Set Header Row Data For Split').first().json.sheetName }}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        672,
+        288
+      ],
+      "id": "71a9c9f5-a1c9-42ef-8a30-d7da1af480f3",
+      "name": "Create the header row in the named sheet."
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ $('Start').item.json.spreadsheet_file_name }}",
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "={{ $('Start').first().json.GGL_DRV_path_id }}",
+            "mode": "id"
+          },
+          "whatToSearch": "files",
+          "fileTypes": [
+            "application/vnd.google-apps.spreadsheet"
+          ]
+        },
+        "options": {
+          "fields": [
+            "id",
+            "name",
+            "mimeType"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -896,
+        272
+      ],
+      "id": "efb35df2-1e45-45c0-a141-01b83f86e5b0",
+      "name": "Search for named GGL Sheets Document",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6994303e-8d9a-4208-9599-35cedf1ad6ff",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "={{ $('Start').item.json.spreadsheet_file_name }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "0807692e-c0dc-493e-aa9c-d6b940a11b2a",
+              "leftValue": "={{ $json.mimeType }}",
+              "rightValue": "application/vnd.google-apps.spreadsheet",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -672,
+        192
+      ],
+      "id": "babafdf5-2ba9-433f-81fd-a3fb4187f617",
+      "name": "Make sure we have the correct document",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cb76c542-eb66-43ec-bf8c-78b6a9f2dbab",
+              "leftValue": "={{ $('Search for named GGL Sheets Document').first().json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -448,
+        192
+      ],
+      "id": "efbf5650-eb1d-4496-9b7f-23a5638ddb17",
+      "name": "If document exists",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "resource": "spreadsheet",
+        "title": "={{ $('Start').item.json.spreadsheet_file_name }}",
+        "sheetsUi": {
+          "sheetValues": [
+            {
+              "title": "={{ $('Start').item.json.spreadsheet_sheet_name || \"Sheet1\"}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -224,
+        384
+      ],
+      "id": "273cb85a-0ab1-4fd4-a0dd-7b760dec0c78",
+      "name": "Create the named GGL sheets document with named sheet",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "move",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.spreadsheetId }}",
+          "mode": "id"
+        },
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Start').first().json.GGL_DRV_path_id }}",
+          "mode": "id"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        0,
+        384
+      ],
+      "id": "0eeee10c-b15a-4ae9-8d43-21fbfeda52b8",
+      "name": "Move the GGL document to the correct folder"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $('Set Header Row Data For Split').item.json.spreadsheetId }}:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "=json",
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "jsonBody": "={\n  \"requests\": [\n    {\n      \"repeatCell\": {\n        \"range\": {\n          \"sheetId\": \"{{ $('Set Header Row Data For Split').first().json.sheetId }}\",\n          \"startRowIndex\": 0,\n          \"endRowIndex\": 1\n        },\n        \"cell\": {\n          \"userEnteredFormat\": {\n            \"textFormat\": { \"bold\": true },\n            \"horizontalAlignment\": \"CENTER\",\n            \"verticalAlignment\": \"MIDDLE\"\n          }\n        },\n        \"fields\": \"userEnteredFormat(textFormat,horizontalAlignment,verticalAlignment)\"\n      }\n    },\n    {\n      \"updateSheetProperties\": {\n        \"properties\": {\n          \"sheetId\": \"{{ $('Set Header Row Data For Split').item.json.sheetId }}\",\n          \"gridProperties\": { \"frozenRowCount\": 1 }\n        },\n        \"fields\": \"gridProperties.frozenRowCount\"\n      }\n    }\n  ]\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        896,
+        368
+      ],
+      "id": "a1c403e0-3ad6-43ea-a898-4b8ff27a4898",
+      "name": "Set the attributes for the header row"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0a55da24-79f8-4dd1-b015-8219aa168e18",
+              "name": "row",
+              "value": "={{ $('Start').first().json.spreadsheet_header_row }}",
+              "type": "array"
+            },
+            {
+              "id": "913ad7a9-9732-4093-b7bf-4cca5cae07b1",
+              "name": "spreadsheetId",
+              "value": "={{ $json.spreadsheetId  || $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "389c8fc9-cd5d-4c7b-a06a-07bef0c5388e",
+              "name": "sheetName",
+              "value": "={{ $('Start').item.json.spreadsheet_sheet_name }}",
+              "type": "string"
+            },
+            {
+              "id": "827be797-d4ac-4dcc-885a-047f41cf29aa",
+              "name": "sheetId",
+              "value": "={{ $json.sheetId || $('Create the named GGL sheets document with named sheet').item.json.sheets[0].properties.sheetId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        288
+      ],
+      "id": "d5a28fb3-d94a-4b11-af29-4b1c43bb23dd",
+      "name": "Set Header Row Data For Split"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "=row",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        448,
+        288
+      ],
+      "id": "61ffdfe7-3b30-4faf-bfa8-47f00544f88a",
+      "name": "Split row data for automatic mapping"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $('Start').item.json.spreadsheet_sheet_name }}",
+          "mode": "name"
+        },
+        "options": {
+          "dataLocationOnSheet": {
+            "values": {
+              "rangeDefinition": "specifyRange",
+              "firstDataRow": 1
+            }
+          },
+          "returnFirstMatch": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -224,
+        96
+      ],
+      "id": "c95ddafb-7ce4-4b30-801e-15119fb644d2",
+      "name": "Get row(s) in sheet",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('If document exists').item.json.id }}",
+          "mode": "id"
+        },
+        "title": "={{ $('Start').item.json.spreadsheet_sheet_name }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        0,
+        192
+      ],
+      "id": "52be1bdd-966c-4928-918e-5360a08bf667",
+      "name": "Create sheet"
+    },
+    {
+      "parameters": {
+        "errorMessage": "This workflow is specific to GGL ACCT 1"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -896,
+        464
+      ],
+      "id": "b919d16e-a38b-44f7-bb8c-58805bcea8e9",
+      "name": "Wrong Credentials"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2ad1b2f9-7296-4cef-8892-c3fa2114608e",
+              "name": "GGL_sheets_id",
+              "value": "={{ $('Search for named GGL Sheets Document').first().json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5e92b600-3ba6-473a-8722-200cdbbe0c41",
+      "name": "Return GGL Sheets ID"
+    },
+    {
+      "parameters": {
+        "content": "# Create GGL Sheets File GGL ACCT 1\n\n## SWF026\n\n### Purpose\nFind or Create the specified GGL Sheets file. The sheets file will be created if it isn't found and the named sheet in the sheets file will be created if it doesn't exist. The GGL_sheets_id is returned.\n\n### Input\n* which_credentials\n* GGL_DRV_path_id\n* spreadsheet_file_name\n* spreadsheet_sheet_name\n* spreadsheet_header_row\n    * Object e.g. [{\"date\": \"\", \"videoId\": \"\"}]\n\n### Output\n* GGL_sheets_id",
+        "height": 592,
+        "width": 624
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2064,
+        48
+      ],
+      "id": "04cf016f-6e9d-4e39-8764-511d23b63c0c",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c455d45f-9080-4895-a572-a6840278f169",
+              "leftValue": "={{ $json.which_credentials.toUpperCase() }}",
+              "rightValue": "GGL ACCT 1",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1120,
+        368
+      ],
+      "id": "84bc6a30-fb56-4cf4-8568-ab9ceef250bc",
+      "name": "If GGL ACCT 1 credentials"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "If GGL ACCT 1 credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create the header row in the named sheet.": {
+      "main": [
+        [
+          {
+            "node": "Set the attributes for the header row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search for named GGL Sheets Document": {
+      "main": [
+        [
+          {
+            "node": "Make sure we have the correct document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Make sure we have the correct document": {
+      "main": [
+        [
+          {
+            "node": "If document exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If document exists": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create the named GGL sheets document with named sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create the named GGL sheets document with named sheet": {
+      "main": [
+        [
+          {
+            "node": "Move the GGL document to the correct folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Move the GGL document to the correct folder": {
+      "main": [
+        [
+          {
+            "node": "Set Header Row Data For Split",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set the attributes for the header row": {
+      "main": [
+        [
+          {
+            "node": "Search for named GGL Sheets Document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Header Row Data For Split": {
+      "main": [
+        [
+          {
+            "node": "Split row data for automatic mapping",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split row data for automatic mapping": {
+      "main": [
+        [
+          {
+            "node": "Create the header row in the named sheet.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Return GGL Sheets ID",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create sheet": {
+      "main": [
+        [
+          {
+            "node": "Set Header Row Data For Split",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If GGL ACCT 1 credentials": {
+      "main": [
+        [
+          {
+            "node": "Search for named GGL Sheets Document",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wrong Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f6c8b868-7b14-411e-a9e1-e4fc14fd25c0",
+  "meta": {
+    "instanceId": "1a9bddba989a25b9b63277adaf1f54896f7309e49579080eb90bf0a9338b3602"
+  },
+  "id": "Vx3v15mj6J8c2Uvp",
+  "tags": []
+}

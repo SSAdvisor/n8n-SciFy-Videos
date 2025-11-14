@@ -1,0 +1,167 @@
+{
+  "name": "SWF055 - Does File Exist",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "filepath"
+            },
+            {
+              "name": "filename"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ecfdb2a5-7cb2-4dc8-900f-6c13c88ab883",
+      "name": "Start"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1f8933db-67be-439c-bdec-2087953e074c",
+              "name": "full_filename",
+              "value": "={{ './' +$input.item.json.filepath.replace('/','') + '/' +$input.item.json.filename.split('/').last() }}",
+              "type": "string"
+            },
+            {
+              "id": "c583e340-43ee-46d6-8b53-4740cbfa8b81",
+              "name": "filepath",
+              "value": "={{ './' +$input.item.json.filepath.replace(\"/\",\"\") }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        0
+      ],
+      "id": "db523f1d-af9e-4ecd-8185-8cad713cb510",
+      "name": "Set full_filename"
+    },
+    {
+      "parameters": {
+        "command": "={{ 'if [ -f \"' + $('Set full_filename').item.json.full_filename + '\" ]; then echo \"TRUE\"; else echo \"FALSE\"; fi' }}"
+      },
+      "id": "1a5a65a8-6507-40b2-9a8f-5d9a1546d927",
+      "name": "Check File Exists",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        448,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "47aa29a8-63df-4241-b811-8e797b27b965",
+              "name": "status",
+              "value": "={{ $input.item.json.stdout }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        672,
+        0
+      ],
+      "id": "2c3afa3b-168d-4a89-b860-aee48aa17a23",
+      "name": "Set status"
+    }
+  ],
+  "pinData": {
+    "Start": [
+      {
+        "json": {
+          "filepath": "/testdir",
+          "filename": "test.txt"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Set full_filename",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set full_filename": {
+      "main": [
+        [
+          {
+            "node": "Check File Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check File Exists": {
+      "main": [
+        [
+          {
+            "node": "Set status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "29445020-55ef-4d35-a0e2-cf5120ffac4a",
+  "meta": {
+    "instanceId": "37fe6d8c3b2aaeda95afa9d59c8cbc7c79e8171e6cc2a68043e239f8403c390e"
+  },
+  "id": "cAN9Ud79hcFGA5r9",
+  "tags": [
+    {
+      "updatedAt": "2025-07-24T12:24:28.570Z",
+      "createdAt": "2025-07-24T12:24:28.570Z",
+      "id": "rIeC6mkwng2eLV1h",
+      "name": "Production"
+    },
+    {
+      "updatedAt": "2025-08-27T23:14:28.658Z",
+      "createdAt": "2025-08-27T23:14:28.658Z",
+      "id": "wuVB256GIIfCIkgj",
+      "name": "Module"
+    },
+    {
+      "updatedAt": "2025-11-07T18:25:36.016Z",
+      "createdAt": "2025-11-07T18:25:36.016Z",
+      "id": "NX99uW5zv06pHsyr",
+      "name": "SWF055"
+    }
+  ]
+}

@@ -1,0 +1,1072 @@
+{
+  "name": "SWF051 - Generate Long Story",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2e51c636-8eef-4819-8f6a-26cc4b215d36",
+              "name": "model",
+              "value": "={{ $ifEmpty($('Start').first().json.model, 'gemini') }}",
+              "type": "string"
+            },
+            {
+              "id": "6b77e91a-b989-4aea-9245-ae6f44de4a09",
+              "name": "word_count",
+              "value": "={{ $ifEmpty($('Start').first().json.word_count, 2000) }}",
+              "type": "number"
+            },
+            {
+              "id": "8efe1f8c-d664-41af-b11d-2fb9b6ecc222",
+              "name": "isComplete",
+              "value": "={{ $input.first().json.isComplete || false }}",
+              "type": "boolean"
+            },
+            {
+              "id": "ea9a063a-28db-42e1-b053-7e830f9f8dc7",
+              "name": "story",
+              "value": "={{ $ifEmpty($input.first().json.story, '') }}",
+              "type": "string"
+            },
+            {
+              "id": "1cce18ba-c626-492b-a59f-25ddaa1ee4f8",
+              "name": "cache",
+              "value": "={{ $ifEmpty($input.first().json.cache, '') }}",
+              "type": "string"
+            },
+            {
+              "id": "a2c995ca-6e2e-4e28-a30c-b2a02580f581",
+              "name": "continue",
+              "value": "={{ $ifEmpty($input.first().json.continue, '') }}",
+              "type": "string"
+            },
+            {
+              "id": "42d1135a-ead0-431f-be70-379d53554f98",
+              "name": "segmentCount",
+              "value": "={{ $input.first().json.segmentCount || 0 }}",
+              "type": "number"
+            },
+            {
+              "id": "47e07e7e-f926-461d-9f48-f3e2a626a8fa",
+              "name": "totalWords",
+              "value": "={{ $input.first().json.totalWords || 0 }}",
+              "type": "number"
+            },
+            {
+              "id": "cb4c9f5b-c8fc-489a-bc09-e179354b0649",
+              "name": "targetWordCount",
+              "value": "={{ $input.first().json.targetWordCount || $('Start').first().json.word_count }}",
+              "type": "number"
+            },
+            {
+              "id": "d9a752d8-fc63-4fb9-8bd3-90d1bba54083",
+              "name": "wordsRemaining",
+              "value": "={{ $ifEmpty($input.first().json.wordsRemaining, $('Start').first().json.word_count) }}",
+              "type": "number"
+            },
+            {
+              "id": "6a7c249a-a949-491d-afa5-c9fb010716bb",
+              "name": "contextSummary",
+              "value": "={{ $input.first().json.contextSummary || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "71b5d2d8-fba8-44dc-91ec-1a322faabc02",
+              "name": "progressPercent",
+              "value": "={{ $input.first().json.progressPercent || 0 }}",
+              "type": "number"
+            },
+            {
+              "id": "e0dc1f4c-a94d-455c-be27-02e5eace3779",
+              "name": "shouldContinue",
+              "value": "={{ $input.first().json.shouldCountinue || true }}",
+              "type": "boolean"
+            },
+            {
+              "id": "f1914b74-cda0-4107-b0e8-d514ac6d5fd8",
+              "name": "UID",
+              "value": "={{ $('Start').item.json.UID }}",
+              "type": "string"
+            },
+            {
+              "id": "c4afd95b-99b1-400b-8495-2d442638c60a",
+              "name": "store_filepath",
+              "value": "={{ '/' + $('Start').first().json.UID }}",
+              "type": "string"
+            },
+            {
+              "id": "c324e688-3169-4a19-ad6d-39fc17826b48",
+              "name": "store_filename",
+              "value": "longstory_story.txt",
+              "type": "string"
+            },
+            {
+              "id": "bba1920c-62a9-4a26-b955-07a1a5d3a47b",
+              "name": "minWords",
+              "value": "={{ $('Workflow Control').first().json.minWords }}",
+              "type": "number"
+            },
+            {
+              "id": "548f777a-743b-499e-89ca-47fb4a61f262",
+              "name": "maxWords",
+              "value": "={{ $('Workflow Control').first().json.maxWords }}",
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        464,
+        80
+      ],
+      "id": "57a91c1b-f89c-492a-979c-5823c3e73a90",
+      "name": "Set default inputs"
+    },
+    {
+      "parameters": {
+        "content": "# Generate Long Story\n## SWF051\n### Purpose\nCall the Z2L generate-text API with the given inputs returning the story. The returned generated_text is checked for completeness (i.e. does it end with \"-- THE END --\" as instructed) and a continuation prompt generated if not.\n### Input\n* prompt\n* model\n* word_count\n### Output\n* story \"...\"\n",
+        "height": 416,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -944,
+        -128
+      ],
+      "id": "ca347d67-2ed5-4d6e-b5dd-92819dedf759",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.zero2launch.com/generate-text",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": {{ JSON.stringify($('Set system and user prompts').first().json.system) }}\n    },\n    {\n      \"role\": \"user\",\n      \"content\": {{ JSON.stringify($('Set system and user prompts').first().json.continue || $('Set system and user prompts').first().json.user) }}\n    }\n  ],\n  \"word_count\": {{ $('Set default inputs').first().json.word_count }},\n  \"model\": \"{{ $('Set default inputs').first().json.model }}\"\n}\n",
+        "options": {
+          "timeout": 480000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        928,
+        80
+      ],
+      "id": "cce730db-9f93-4f80-830f-8c428a8264bd",
+      "name": "Generate Long Story",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "lymWqGQ67PUobVpS",
+          "name": "Header Auth Z2L"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1dbfe41d-2460-4092-8824-162066c68005",
+              "leftValue": "={{ $json.retry }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2592,
+        112
+      ],
+      "id": "24e42ac2-ec65-468f-8548-70a22b0a689c",
+      "name": "If Retry"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "prompt"
+            },
+            {
+              "name": "model"
+            },
+            {
+              "name": "word_count",
+              "type": "number"
+            },
+            {
+              "name": "story_genre"
+            },
+            {
+              "name": "UID"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -400,
+        96
+      ],
+      "id": "481aeb13-be4f-4872-aaa8-2b1b7ffd584d",
+      "name": "Start"
+    },
+    {
+      "parameters": {
+        "errorMessage": "={{ $json.error.message }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        3024,
+        288
+      ],
+      "id": "b9e3bc5c-8ccb-4a90-b837-5d5997bfbcde",
+      "name": "Stop and Error"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        3120,
+        -320
+      ],
+      "id": "4b0056e1-b046-4508-9544-dbff53111465",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "Zy23SQ1NqBBCmVwM",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/Zy23SQ1NqBBCmVwM",
+          "cachedResultName": "SWF018 - HTTP Request Error Management"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "={{ $json.error.status }}",
+            "E429_wait_seconds": 5.01,
+            "E500_wait_seconds": 30,
+            "code": "={{ $json.error.code }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "code",
+              "displayName": "code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "E429_wait_seconds",
+              "displayName": "E429_wait_seconds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "E500_wait_seconds",
+              "displayName": "E500_wait_seconds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1536,
+        112
+      ],
+      "id": "d11b20e8-55be-46d2-986a-0f0c7a6b3ef0",
+      "name": "HTTP Request Error Management"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Enhanced continuation logic for long-form story generation\nconst raw = $('Set default inputs').first().json;\nraw.text = $input.first().json.text;\n\n// Get target word count (default to 20000 if not provided)\nconst targetWordCount = raw.word_count || raw.targetWordCount || 20000;\n\n// Initialize state variables on first run\nif (typeof raw.cache === 'undefined') {\n  raw.cache = '';           \n  raw.continue = '';        \n  raw.segmentCount = 0;     \n  raw.totalWords = 0;       \n  raw.contextSummary = '';  \n}\n\n// Handle the incoming text from LLM\nlet currentSegment = '';\nif (typeof raw.text !== 'undefined') {\n  currentSegment = raw.text;\n} else if (typeof raw.story !== 'undefined') {\n  currentSegment = raw.story;\n} else if (typeof raw.response !== 'undefined') {\n  currentSegment = raw.response;\n} \n\n// Check for completion marker\nconst isComplete = currentSegment.includes('-- THE END --');\n\n// IMPORTANT: Only concatenate if this is a NEW segment\n// Avoid double-concatenation if cache already contains this segment\nif (raw.segmentCount === 0 || !raw.cache.includes(currentSegment.substring(0, 100))) {\n  // Add spacing between segments if cache exists\n  if (raw.cache.length > 0 && currentSegment.length > 0) {\n    raw.cache += '\\n\\n' + currentSegment;\n  } else {\n    raw.cache += currentSegment;\n  }\n  raw.segmentCount += 1;\n}\n\n// Estimate word count from the full cache\nconst wordCount = raw.cache.trim().split(/\\s+/).filter(w => w.length > 0).length;\nraw.totalWords = wordCount;\n\n// Calculate words remaining to target\nconst wordsRemaining = Math.max(0, targetWordCount - wordCount);\nconst progressPercent = Math.min(100, Math.round((wordCount / targetWordCount) * 100));\n\n// Generate context summary every 3 segments to manage context window\nif (raw.segmentCount % 3 === 0 && !isComplete) {\n  raw.contextSummary = `[Progress: ~${wordCount} words across ${raw.segmentCount} segments | Target: ${targetWordCount} words | Remaining: ~${wordsRemaining} words]`;\n}\n\nif (!isComplete && wordsRemaining > 0) {\n  // Extract continuation point from current segment\n  const lastSegment = currentSegment.slice(-500);\n  const sentenceEndings = /[.!?][\"']?\\s/g;\n  const matches = [...lastSegment.matchAll(sentenceEndings)];\n  \n  let continuationPoint;\n  if (matches.length >= 2) {\n    const secondLastSentence = matches[matches.length - 2].index;\n    continuationPoint = lastSegment.slice(secondLastSentence).trim();\n  } else {\n    continuationPoint = lastSegment.slice(-200).trim();\n  }\n  \n  // Calculate suggested words for next segment\n  const suggestedSegmentWords = Math.min(4000, Math.max(2000, wordsRemaining));\n  \n  // Build continuation prompt for USER message\n  raw.continue = `[CONTINUE PROMPT]\n\nStory Progress:\n- Segments completed: ${raw.segmentCount}\n- Current word count: ${wordCount} words\n- Target word count: ${targetWordCount} words\n- Words remaining: ~${wordsRemaining} words\n- Suggested for this segment: ~${suggestedSegmentWords} words\n\nContinue the story seamlessly from this exact point:\n\"...${continuationPoint}\"\n\nInstructions: Pick up exactly where the narrative left off. Do not repeat or summarize what came before. Maintain the same voice, scene, and momentum. Write approximately ${suggestedSegmentWords} words${wordsRemaining <= 4000 ? ' and bring the story to a satisfying conclusion with \"-- THE END --\"' : ' before the next natural break point'}.`;\n  \n} else if (isComplete) {\n  // Story has ended\n  raw.continue = '';\n} else {\n  // Target reached but no end marker - prompt for conclusion\n  raw.continue = `[CONTINUE PROMPT]\n\nStory Progress:\n- Target word count reached: ${wordCount} / ${targetWordCount} words\n- Segments completed: ${raw.segmentCount}\n\nContinue from this point:\n\"...${currentSegment.slice(-200).trim()}\"\n\nInstructions: --STOP-- You have reached the target word count. Please bring the story to a natural and satisfying conclusion. Resolve all major plot threads and end with \"-- THE END --\".`;\n}\n\n// Store current segment for reference\nraw.story = currentSegment;\n\nreturn {\n  isComplete: isComplete,\n  continue: raw.continue,        // Next prompt (empty if complete)\n  segmentCount: raw.segmentCount,\n  totalWords: raw.totalWords,\n  targetWordCount: targetWordCount,\n  wordsRemaining: wordsRemaining,\n  contextSummary: raw.contextSummary,\n  progressPercent: progressPercent,\n  shouldContinue: !isComplete && wordsRemaining > 0,\n  story: currentSegment,        // Current segment only\n  cache: raw.cache              // Full accumulated story\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1472,
+        -192
+      ],
+      "id": "0de28887-8613-495c-8dda-dddd109cb625",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "563a8d2b-66ea-4143-8f2b-21d5f90b2151",
+              "leftValue": "={{ $json.isComplete }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1760,
+        -192
+      ],
+      "id": "2a160f77-0e3b-4722-9d35-d0c57b8ecb17",
+      "name": "If isComplete"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a05d0472-6f3a-4514-b8dd-8b6033d729c6",
+              "name": "story",
+              "value": "={{ $json.cache.substring(0, $json.cache.length - 13) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2912,
+        -320
+      ],
+      "id": "e5a16a81-8abb-474e-aff8-a4d8e9da0834",
+      "name": "Set story output variable"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1316ceef-bb38-42f6-aed7-cc56dc5da100",
+              "leftValue": "={{ $json.error.code }}",
+              "rightValue": "ECONNABORTED",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1184,
+        128
+      ],
+      "id": "0ef29a89-d27d-4176-ba41-f11151d91577",
+      "name": "If error.code != ECONNABORTED"
+    },
+    {
+      "parameters": {
+        "amount": 5.01
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1536,
+        288
+      ],
+      "id": "1e61eef3-2f0c-4032-8505-692df28b17b5",
+      "name": "Wait 5s 2",
+      "webhookId": "d33f8d9e-a8a7-479a-92d8-fc5dbad6dc84"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "CDwXbjJGtKLepMDT",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/CDwXbjJGtKLepMDT",
+          "cachedResultName": "Get File Contents"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "filepath": "={{ $('Workflow Control').first().json.store_filepath }}",
+            "filename": "={{ $('Workflow Control').first().json.store_filename }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "filepath",
+              "displayName": "filepath",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "filename",
+              "displayName": "filename",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1680,
+        -544
+      ],
+      "id": "84289b01-5340-466b-aed0-c4e06b1f5ba1",
+      "name": "Call 'Get File Contents'"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "ha0Ppv5TvrrRLqMn",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/ha0Ppv5TvrrRLqMn",
+          "cachedResultName": "Create File"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "filepath": "={{ $('Set default inputs').first().json.store_filepath }}",
+            "filename": "={{ $('Set default inputs').first().json.store_filename }}",
+            "file_contents": "={{ $json.cache }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "filepath",
+              "displayName": "filepath",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "filename",
+              "displayName": "filename",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "file_contents",
+              "displayName": "file_contents",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        2368,
+        -368
+      ],
+      "id": "72dbc35c-8a49-40d6-bf8a-b7885e23fa83",
+      "name": "Call 'Create File'"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "902d1e9b-ced3-46f3-8174-faf90b242b2c",
+              "name": "cache",
+              "value": "={{ $json.contents }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2672,
+        -320
+      ],
+      "id": "0284cd44-b93d-491f-bb04-6d6cd5a660a7",
+      "name": "Set cache"
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2896,
+        -80
+      ],
+      "id": "1cca8c0b-7349-494b-9098-a18bf01d8b05",
+      "name": "Wait 10s",
+      "webhookId": "abdb68cf-7982-4d32-a29b-1a716e1c5a30"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "cAN9Ud79hcFGA5r9",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/cAN9Ud79hcFGA5r9",
+          "cachedResultName": "Look_For_File"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "filepath": "={{ $json.store_filepath }}",
+            "filename": "={{ $json.store_filename }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "filepath",
+              "displayName": "filepath",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "filename",
+              "displayName": "filename",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        96
+      ],
+      "id": "42999013-ac7d-43bf-8295-243ac7baa468",
+      "name": "Call 'Look_For_File'"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c4aa88e9-b9bc-4606-89e1-7baa251dd09c",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "=FALSE",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        96
+      ],
+      "id": "26098f90-a5bc-4516-ac75-c07f7b674f9f",
+      "name": "If file not found"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a9cdc1db-6961-4832-bda2-c65122c95fb8",
+              "name": "UID",
+              "value": "={{ $('Start').item.json.UID }}",
+              "type": "string"
+            },
+            {
+              "id": "5d43512b-fd8d-4224-af8d-12039b594cd8",
+              "name": "store_filepath",
+              "value": "={{ '/' +$('Start').item.json.UID }}",
+              "type": "string"
+            },
+            {
+              "id": "6940df36-75ac-4bb3-a10c-68bad1950b05",
+              "name": "store_filename",
+              "value": "longstory_story.txt",
+              "type": "string"
+            },
+            {
+              "id": "131df754-2a39-4ad0-9a20-13c433316439",
+              "name": "minWords",
+              "value": "={{ ($('Start').first().json.word_count * .90).floor() }}",
+              "type": "number"
+            },
+            {
+              "id": "fe1ad3ef-433c-46cd-8d43-7eeafdb507f3",
+              "name": "maxWords",
+              "value": "={{ ($('Start').first().json.word_count * 1.10).floor() }}",
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -192,
+        96
+      ],
+      "id": "b7ede193-2eae-4e5a-9051-ff4abc7269d3",
+      "name": "Workflow Control"
+    },
+    {
+      "parameters": {
+        "content": "# 2025-11-05\n## Add result file storage to prevent reprocessing on retry.",
+        "width": 480,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -944,
+        320
+      ],
+      "id": "6603a69d-d1b6-4395-be07-8e9942cadfd4",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8a0f6d04-be60-4bcb-b6bb-23a1779b738e",
+              "name": "system",
+              "value": "=You are a professional narrative writer specializing in long-form content creation for {{ $('Start').first().json.story_genre }} video productions.  \n\nCRITICAL WORD COUNT CONSTRAINT: \n- Your story MUST be between {{ $('Workflow Control').first().json.minWords }} and {{ $('Workflow Control').first().json.maxWords }} words (±10% variance from {{ $('Start').first().json.word_count }} target) and no less that {{ $('Workflow Control').first().json.minWords }} words\n- Current total: {{ $ifEmpty($json.totalWords, 0) }} words \n- Remaining budget: {{ $ifEmpty($json.wordsRemaining, $('Start').first().json.word_count) }} words \n- You MUST stop writing immediately when you reach {{ $('Workflow Control').first().json.maxWords }} words \n- Do NOT exceed the maximum word count of {{ $('Workflow Control').first().json.maxWords }} under any circumstances  \n\nWRITING GUIDELINES: \n1. Write in vivid, descriptive narrative style suitable for video narration \n2. Maintain consistent character development and plot coherence \n3. Use varied sentence structure (mix of short punchy sentences with longer descriptive ones) \n4. Output ONLY story content - no meta-commentary, explanations, or stage directions \n5. Focus on quality over quantity - prioritize impactful scenes over filler content \n6. Pacing: allocate approximately 20% setup, 60% rising action/conflict, 20% resolution \n7. Stop mid-scene if necessary to respect word count limits - continuity will be maintained in segments  \n8. Place \"-- THE END --\" ONLY when the complete story arc is fully resolved and concluded\n\n\nHARD LIMITS ON OUTPUT: \n- If you reach {{ $('Workflow Control').first().json.maxWords }} words before story completion: END with a natural break or cliff-hanger and include [CONTINUE] marker \n- If story completes before {{ $('Workflow Control').first().json.minWords }} words: You may add 1-2 additional scenes (max 10% over target) \n- Never add padding, filler dialogue, or repetitive descriptions to meet word count  \n\nCONTINUATION PROTOCOL: \n- When [CONTINUE PROMPT] appears: resume exactly where you left off without recap or summary \n- Maintain established narrative voice, character behavior, and world-building - Track cumulative word count from previous segments \n- Apply the same word count constraints to continuation segments \n\n{{ $ifEmpty($json.continue, \"\") }}",
+              "type": "string"
+            },
+            {
+              "id": "128ccbc9-b0c4-45bf-bbb3-d6c4deb6b7d1",
+              "name": "user",
+              "value": "=Generate a {{ $('Start').first().json.story_genre }} story with these specifications:\n\n**Story Brief:**\n{{ $ifEmpty($('Start').first().json.prompt, \"Create a compelling science fiction story about finding romance on an Earth twin planet.\") }}\n\n**Word Count Mandate:**\n- Target: {{ $('Start').first().json.word_count }} words\n- Acceptable Range: {{ $('Workflow Control').first().json.minWords }}-{{ $('Workflow Control').first().json.maxWords }} words (10% variance)\n- Current Progress: {{ $json.totalWords }} words ({{ $json.progressPercent }}% complete)\n- Remaining: {{ $json.wordsRemaining }} words\n\n**Quality Standards:**\n- Prioritize narrative impact within the word limit\n- Avoid redundant descriptions or dialogue padding\n- Create a complete narrative arc (beginning, climax, resolution) or natural stopping point\n- Ensure smooth continuation points if story continues\n\n{{ $if($json.totalWords, \"**CONTINUATION MODE - Resume from Previous Segment:**\\n\" +$json.continue +\"\\n\\n**Progress Check:**\\nPrevious \" +$json.totalWords +\" words | Target remaining: \" + $json.remainingBudget +\" words | Hard limit: \" +$('Workflow Control').first().json.maxWords +\" words\", \"\") }}\n\nBegin writing:\n",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        672,
+        80
+      ],
+      "id": "987826c2-fbf9-4140-b6ec-d3e20cc7b93e",
+      "name": "Set system and user prompts"
+    }
+  ],
+  "pinData": {
+    "Start": [
+      {
+        "json": {
+          "prompt": "A gene-pure rebel hijacks a bio-synthesis vault in a city of body mods.,He’s hunted by his estranged augmented outcast sibling, sworn to uphold the law.,Both must choose: sabotage the vault and risk a bio-plague, or exploit it for genetic equality.,Suddenly, the vault’s AI reveals their mother’s secret neural enhancements, destabilizing family loyalty.,A frenzied standoff: sabotage means saving society, but destroying family truth.,Human identity splits anew—genetics no longer define belonging.,Enjoyed this twist? Like, comment, share, and subscribe for more mind-bending sci-fi!",
+          "model": "openai-large",
+          "word_count": 5000,
+          "story_genre": "science fiction",
+          "UID": "c168d86bdfdef66f208102faef070623"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Set default inputs": {
+      "main": [
+        [
+          {
+            "node": "Set system and user prompts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Long Story": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If error.code != ECONNABORTED",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Retry": {
+      "main": [
+        [
+          {
+            "node": "Set default inputs",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Workflow Control",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request Error Management": {
+      "main": [
+        [
+          {
+            "node": "If Retry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "If isComplete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If isComplete": {
+      "main": [
+        [
+          {
+            "node": "Call 'Create File'",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 10s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set story output variable": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If error.code != ECONNABORTED": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request Error Management",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 5s 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 5s 2": {
+      "main": [
+        [
+          {
+            "node": "Set default inputs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Get File Contents'": {
+      "main": [
+        [
+          {
+            "node": "Set cache",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Create File'": {
+      "main": [
+        [
+          {
+            "node": "Set cache",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set cache": {
+      "main": [
+        [
+          {
+            "node": "Set story output variable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 10s": {
+      "main": [
+        [
+          {
+            "node": "Set default inputs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Look_For_File'": {
+      "main": [
+        [
+          {
+            "node": "If file not found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If file not found": {
+      "main": [
+        [
+          {
+            "node": "Set default inputs",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call 'Get File Contents'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Control": {
+      "main": [
+        [
+          {
+            "node": "Call 'Look_For_File'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set system and user prompts": {
+      "main": [
+        [
+          {
+            "node": "Generate Long Story",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "f117a634-0988-48bf-b088-cc9abb89bb32",
+  "meta": {
+    "instanceId": "37fe6d8c3b2aaeda95afa9d59c8cbc7c79e8171e6cc2a68043e239f8403c390e"
+  },
+  "id": "Kj9RR8PBCfCovFFS",
+  "tags": [
+    {
+      "updatedAt": "2025-07-24T12:24:28.570Z",
+      "createdAt": "2025-07-24T12:24:28.570Z",
+      "id": "rIeC6mkwng2eLV1h",
+      "name": "Production"
+    },
+    {
+      "updatedAt": "2025-08-27T23:14:28.658Z",
+      "createdAt": "2025-08-27T23:14:28.658Z",
+      "id": "wuVB256GIIfCIkgj",
+      "name": "Module"
+    },
+    {
+      "updatedAt": "2025-09-20T14:41:24.035Z",
+      "createdAt": "2025-09-20T14:41:24.035Z",
+      "id": "6fNdhEIGIlgVY20f",
+      "name": "SWF051"
+    }
+  ]
+}

@@ -1,0 +1,351 @@
+{
+  "name": "SWF026 - Create GGL Sheets File",
+  "nodes": [
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.which_credentials.toUpperCase() }}",
+                    "rightValue": "GGL ACCT 1",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "2f1ffa28-0f8b-4b02-8e68-eb9cec4d10fd"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "GGL ACCT 1"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "11724ccc-0f9e-442d-ab71-471bcb308006",
+                    "leftValue": "={{ $json.which_credentials.toUpperCase() }}",
+                    "rightValue": "GGL ACCT 2",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "GGL ACCT 2"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -224,
+        176
+      ],
+      "id": "56041129-5de9-4ab9-9435-fbc61eeb1ad0",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "which_credentials"
+            },
+            {
+              "name": "GGL_DRV_path_id"
+            },
+            {
+              "name": "spreadsheet_file_name"
+            },
+            {
+              "name": "spreadsheet_sheet_name"
+            },
+            {
+              "name": "spreadsheet_header_row",
+              "type": "any"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -448,
+        192
+      ],
+      "id": "462f6055-13f7-4592-998e-d8ebc01a3887",
+      "name": "Start"
+    },
+    {
+      "parameters": {
+        "errorMessage": "=Invalid Credentials: \"{{ $json.which_credentials }}\""
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        0,
+        384
+      ],
+      "id": "74e3b4c6-df80-4be8-ae13-0420259b29d3",
+      "name": "Invalid Credentials"
+    },
+    {
+      "parameters": {
+        "content": "# Create GGL Sheets File\n\n## SWF026\n\n### Purpose\nManage the flow of which_credentials for the specific credential workflow.\n\n### Input\n* which_credentials\n* GGL_DRV_path_id\n* spreadsheet_file_name\n* spreadsheet_sheet_name\n* spreadsheet_header_row\n    * Object e.g. [{\"date\": \"\", \"videoId\": \"\"}]\n\n### Output\n* GGL_sheets_id",
+        "height": 512,
+        "width": 416
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -944,
+        32
+      ],
+      "id": "c1ee0a3f-4138-45b2-9a45-d887daa7b4f1",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "QolTuGTqmh4QzeDT",
+          "mode": "list",
+          "cachedResultName": "Create GGL Sheets File SSADVISOR"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "GGL_DRV_path_id": "={{ $('Start').item.json.GGL_DRV_path_id }}",
+            "which_credentials": "={{ $('Start').item.json.which_credentials }}",
+            "spreadsheet_file_name": "={{ $('Start').item.json.spreadsheet_file_name }}",
+            "spreadsheet_sheet_name": "={{ $('Start').item.json.spreadsheet_sheet_name }}",
+            "spreadsheet_header_row": "={{ $('Start').item.json.spreadsheet_header_row }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "which_credentials",
+              "displayName": "which_credentials",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "GGL_DRV_path_id",
+              "displayName": "GGL_DRV_path_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "spreadsheet_file_name",
+              "displayName": "spreadsheet_file_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "spreadsheet_sheet_name",
+              "displayName": "spreadsheet_sheet_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "spreadsheet_header_row",
+              "displayName": "spreadsheet_header_row",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "dcb0fddc-fa6d-43ae-80af-39741aa5a8a4",
+      "name": "Create GGL Sheets File GGL ACCT 1"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "Oe6u1Evz0Tz9Td8Y",
+          "mode": "list",
+          "cachedResultName": "Create GGL Sheets File EBOYD53"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "which_credentials": "={{ $('Start').item.json.which_credentials }}",
+            "GGL_DRV_path_id": "={{ $('Start').item.json.GGL_DRV_path_id }}",
+            "spreadsheet_file_name": "={{ $('Start').item.json.spreadsheet_file_name }}",
+            "spreadsheet_sheet_name": "={{ $('Start').item.json.spreadsheet_sheet_name }}",
+            "spreadsheet_header_row": "={{ $('Start').item.json.spreadsheet_header_row }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "which_credentials",
+              "displayName": "which_credentials",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "GGL_DRV_path_id",
+              "displayName": "GGL_DRV_path_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "spreadsheet_file_name",
+              "displayName": "spreadsheet_file_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "spreadsheet_sheet_name",
+              "displayName": "spreadsheet_sheet_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "spreadsheet_header_row",
+              "displayName": "spreadsheet_header_row",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        192
+      ],
+      "id": "9baa178d-a480-43b7-940f-1056ee0ec821",
+      "name": "Create GGL Sheets File GGL ACCT 2"
+    }
+  ],
+  "pinData": {
+    "Start": [
+      {
+        "json": {
+          "which_credentials": "GGL ACCT 1",
+          "GGL_DRV_path_id": "1r9pilyLcc2jS3UrIvk0iSZH3w6e9Vi88",
+          "spreadsheet_file_name": "Video_Ledger",
+          "spreadsheet_sheet_name": "Sheet1",
+          "spreadsheet_header_row": null
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Create GGL Sheets File GGL ACCT 1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create GGL Sheets File GGL ACCT 2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Invalid Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1cbfd835-ffd7-4247-9ce5-c2f3e1d7c4ba",
+  "meta": {
+    "instanceId": "1a9bddba989a25b9b63277adaf1f54896f7309e49579080eb90bf0a9338b3602"
+  },
+  "id": "wtzEXgIjBYMBNA5b",
+  "tags": []
+}

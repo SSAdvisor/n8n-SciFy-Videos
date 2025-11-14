@@ -1,0 +1,651 @@
+{
+  "name": "SWF007.2 - YT CHAN 2 Upload to YT",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "WHICH_YOUTUBE_CHANNEL"
+            },
+            {
+              "name": "title"
+            },
+            {
+              "name": "region_code"
+            },
+            {
+              "name": "category_id"
+            },
+            {
+              "name": "language_id"
+            },
+            {
+              "name": "description"
+            },
+            {
+              "name": "hashtags"
+            },
+            {
+              "name": "attribution"
+            },
+            {
+              "name": "embeddable",
+              "type": "boolean"
+            },
+            {
+              "name": "license"
+            },
+            {
+              "name": "notify_subscribers",
+              "type": "boolean"
+            },
+            {
+              "name": "privacy_status"
+            },
+            {
+              "name": "public_stats_viewable",
+              "type": "boolean"
+            },
+            {
+              "name": "publish_at"
+            },
+            {
+              "name": "made_for_kids",
+              "type": "boolean"
+            },
+            {
+              "name": "tags"
+            },
+            {
+              "name": "video_url"
+            },
+            {
+              "name": "data",
+              "type": "any"
+            }
+          ]
+        }
+      },
+      "id": "0729f647-beef-446d-b37b-76845e8c1b6d",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        -896,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "errorMessage": "Expecting YOUTUBE_CHANNEL YT CHAN 2"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -448,
+        464
+      ],
+      "id": "2efe6d17-e803-4877-8020-d832801aac3f",
+      "name": "Expecting YOUTUBE_CHANNEL EBOYD53"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.n8nDetails.cause.code }}",
+                    "rightValue": "EAI_AGAIN",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "87db8f15-a3c4-4a76-aafd-b29bca366986"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "EAI_AGAIN"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "eb66b806-078e-422c-8a0c-f481b26e7933",
+                    "leftValue": "={{ $json.error }}",
+                    "rightValue": "network socket disconnected",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "network socket disconnected"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        0,
+        208
+      ],
+      "id": "1e4d456c-61e8-47c0-83bd-079c9dcee9d4",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "Zy23SQ1NqBBCmVwM",
+          "mode": "list",
+          "cachedResultName": "SWF018 - HTTP Request Error Management"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "={{ $json.error.status }}",
+            "code": "={{ $json.error.code }}",
+            "E429_wait_seconds": 5.01,
+            "E500_wait_seconds": 30
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "code",
+              "displayName": "code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "E429_wait_seconds",
+              "displayName": "E429_wait_seconds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "E500_wait_seconds",
+              "displayName": "E500_wait_seconds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        320
+      ],
+      "id": "775df831-6f80-4893-a303-e0764803b4fd",
+      "name": "HTTP Request Error Management"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4aed1285-8b7e-4833-942e-2408be126698",
+              "leftValue": false,
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        320
+      ],
+      "id": "8849a12f-ab11-48e2-9064-ca7354e55b88",
+      "name": "If Retry"
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        128
+      ],
+      "id": "1caa0648-1190-4954-843e-055912c825e9",
+      "name": "Wait 30s",
+      "webhookId": "63329f72-0b34-4e98-9787-daff7bba26dc"
+    },
+    {
+      "parameters": {
+        "errorMessage": "Unknown API Error"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        672,
+        544
+      ],
+      "id": "c821421f-b1b1-4204-8601-6f055c3e9950",
+      "name": "Unknown API Error"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        672,
+        304
+      ],
+      "id": "3ef7426d-d5d6-4aa8-9f23-cdd9620d0859",
+      "name": "Common Retry Point"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "96147c8e-27c4-48d9-bce1-1006dba1469d",
+              "name": "uploadId",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "367da399-7fe6-4204-ab54-ff23f95c142e",
+      "name": "Set uploadId Return Value"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ $('YT CHAN 2 Post').item.json.headers.location }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "youTubeOAuth2Api",
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "={{ $('Start').item.binary.data }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -224,
+        48
+      ],
+      "id": "5bceb403-fd1b-4c2a-a01e-3bd13b0b9016",
+      "name": "YT CHAN 2 Put",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/upload/youtube/v3/videos",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "youTubeOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "uploadType",
+              "value": "=resumable"
+            },
+            {
+              "name": "part",
+              "value": "=snippet,status"
+            },
+            {
+              "name": "notifySubscribers",
+              "value": "={{ $('Start').first().json.notify_subscribers || false }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json; charset=UTF-8"
+            },
+            {
+              "name": "X-Upload-Content-Length",
+              "value": "={{ $binary.data.fileSize }}"
+            },
+            {
+              "name": "X-Upload-Content-Type",
+              "value": "video/*"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"snippet\": {\n    \"title\": \"{{ $('Start').first().json.title }}\",\n    \"description\": {{ JSON.stringify($('Start').first().json.description +\"\\n\\n\" +$('Start').first().json.hashtags +\"\\n\\n\" +$('Start').first().json.attribution) }},\n    \"categoryId\": \"{{ $('Start').first().json.category_id || '1' }}\",\n    \"tags\": [\"{{ $('Start').first().json.tags.replaceAll(',','\",\"') }}\"],\n    \"defaultLanguage\": \"{{ $('Start').first().json.language_id || 'en-US' }}\",\n    \"defaultAudioLanguage\": \"{{ $('Start').first().json.language_id || 'en' }}\"\n  },\n  \"status\": {\n    \"privacyStatus\": \"{{ $('Start').first().json.privacy_status || 'private' }}\",\n    \"embeddable\": {{ $('Start').first().json.embeddable || false }},\n    \"license\": \"{{ $('Start').first().json.license || 'creativeCommon' }}\",\n    \"publicStatsViewable\": {{ $('Start').first().json.public_stats_viewable || false }},\n    \"selfDeclaredMadeForKids\": {{ $('Start').first().json.made_for_kids || false }}\n  }\n}\n",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -448,
+        272
+      ],
+      "id": "914ae995-7135-4738-a6a9-6a93ce92a138",
+      "name": "YT CHAN 2 Post",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fb23cccf-54ea-4bc8-8462-352554f011f5",
+              "leftValue": "={{ $json.WHICH_YOUTUBE_CHANNEL }}",
+              "rightValue": "YT CHAN 2",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -672,
+        368
+      ],
+      "id": "5b696207-20f0-4f68-a136-73b35bb6bce2",
+      "name": "If channel YT CHAN 2"
+    }
+  ],
+  "pinData": {
+    "Start": [
+      {
+        "json": {
+          "WHICH_YOUTUBE_CHANNEL": "EBOYD53",
+          "title": "State News Update: Major Developments Unfold in Local Government Today",
+          "description": "Breaking state news: I reveal major state news updates and critical developments in local government, analyzing the impact of these state news reports on our daily lives. As I walk you through the unfolding story, you'll discover how this state news shapes community decisions and ignites new public discussions. The tension builds as new facts emerge, uncovering the motivations behind key political moves, and I explore the emotional toll these changes have on citizens and lawmakers alike. \n\nFrom the initial headlines to exclusive insights, I share the latest revelations in state government activity, emphasizing the importance of transparency and accountability. My coverage dives deep into urgent topics—policy changes, controversial events, and the reactions from officials—as I navigate the emotional highs and lows with you in real time.\n\nThroughout the report, I highlight the voices of those most affected, bringing you interviews, local perspectives, and on-the-ground analysis. The story takes unexpected turns, as community members rally for justice and demand answers, and I connect the dots between breaking news and the broader political landscape. By staying informed, I help you understand the deeper significance of current state news and what these updates mean for the future of local governance.\n\nAs the coverage concludes, there is a call to action for viewers everywhere: stay involved, share your opinions in the comments, and subscribe for the latest state news updates. Hit the like button if you found this report informative, and don't forget to share it with your network to keep our community engaged and empowered.",
+          "hashtags": "#state_news #localgovernment #breakingnews #politics #publicaffairs",
+          "attribution": "Copyright (C) 2025 Seasoned Solutions Advisor LLC",
+          "embeddable": true,
+          "notify_subscribers": true,
+          "privacy_status": "private",
+          "public_stats_viewable": true,
+          "made_for_kids": false,
+          "tags": "state_news,localgovernment,breakingnews,statnews,governance,government,news,state_updates,politics,state_affairs,statnew,community",
+          "video_url": "https://n8n.connectcircuits.com/webhook/a60c3f68-7bcf-4504-a087-0fb9c7a3fce0/file/565a793732db55eee8a5fd1fd9e03e3903a8e332673b97c67ffda2899262c58a.mp4",
+          "data": "{{ $('Switch').item.binary.data }}"
+        },
+        "binary": {
+          "data": {
+            "mimeType": "video/mp4",
+            "fileType": "video",
+            "fileExtension": "mp4",
+            "data": "filesystem-v2",
+            "directory": "webhook/a60c3f68-7bcf-4504-a087-0fb9c7a3fce0/file",
+            "fileName": "State News Update: Major Developments Unfold in Local Government Today.mp4",
+            "id": "filesystem-v2:workflows/XzsLQJg7AL6XWm5K/executions/173165/binary_data/90a0d5b0-e4f2-4a76-9b1c-cdaa109a0d58",
+            "fileSize": "149 MB"
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "If channel YT CHAN 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Wait 30s",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 30s",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request Error Management",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request Error Management": {
+      "main": [
+        [
+          {
+            "node": "If Retry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Retry": {
+      "main": [
+        [
+          {
+            "node": "Common Retry Point",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Unknown API Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 30s": {
+      "main": [
+        [
+          {
+            "node": "Common Retry Point",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Common Retry Point": {
+      "main": [
+        [
+          {
+            "node": "YT CHAN 2 Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "YT CHAN 2 Put": {
+      "main": [
+        [
+          {
+            "node": "Set uploadId Return Value",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "YT CHAN 2 Post": {
+      "main": [
+        [
+          {
+            "node": "YT CHAN 2 Put",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If channel YT CHAN 2": {
+      "main": [
+        [
+          {
+            "node": "YT CHAN 2 Post",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Expecting YOUTUBE_CHANNEL EBOYD53",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "937400c7-58bf-4fff-b506-6a5e9e8a611a",
+  "meta": {
+    "instanceId": "1a9bddba989a25b9b63277adaf1f54896f7309e49579080eb90bf0a9338b3602"
+  },
+  "id": "7qT8ZdimpJScR7vv",
+  "tags": [
+    {
+      "name": "Production",
+      "id": "AU6GjdkcPIm4CJcG",
+      "updatedAt": "2025-11-11T14:57:59.679Z",
+      "createdAt": "2025-11-11T14:57:59.679Z"
+    },
+    {
+      "name": "SWF007",
+      "id": "y3IMSewVfSEATcOn",
+      "updatedAt": "2025-11-11T14:57:59.737Z",
+      "createdAt": "2025-11-11T14:57:59.737Z"
+    },
+    {
+      "updatedAt": "2025-09-11T00:38:56.991Z",
+      "createdAt": "2025-09-11T00:38:56.991Z",
+      "id": "ydubjRItVIm8Dtc7",
+      "name": "Module"
+    },
+    {
+      "name": "SWF007.2",
+      "id": "Bqr3ITb3R0j5FfsJ",
+      "updatedAt": "2025-11-11T15:29:37.642Z",
+      "createdAt": "2025-11-11T15:29:37.642Z"
+    }
+  ]
+}

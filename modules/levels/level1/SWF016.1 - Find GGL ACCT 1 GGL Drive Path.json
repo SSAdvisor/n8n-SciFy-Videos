@@ -1,0 +1,428 @@
+{
+  "name": "SWF016.1 - Find GGL ACCT 1 GGL Drive Path",
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ $json.path }}",
+        "returnAll": true,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "={{ $json.parentPath }}",
+            "mode": "id"
+          },
+          "whatToSearch": "folders"
+        },
+        "options": {
+          "fields": [
+            "id",
+            "name"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -672,
+        272
+      ],
+      "id": "d633a378-637c-4f1a-b578-0391e24b622d",
+      "name": "Find GGL ACCT 1 Google Drive Path",
+      "executeOnce": false,
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $('Start').first().json.path }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Start').first().json.parentPath}}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4f428034-69ec-4c41-a1d6-1abe7a6a36fd",
+      "name": "Create GGL ACCT 1 Google Drive Path"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4b6ed6fc-993d-4496-9f8f-9f9d0ed5cfa8",
+              "leftValue": "={{ $json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -224,
+        64
+      ],
+      "id": "0d092a48-8cc7-4fe2-bc5f-9bcf715cbac3",
+      "name": "No GGL ACCT 1 folder found"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d87d48f3-5e92-4050-b905-44aae9d50edd",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "={{ $('Start').item.json.path }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -448,
+        64
+      ],
+      "id": "dc44769b-fa28-4a3b-bcdd-c3ba1de92bfe",
+      "name": "Make sure we have the exact name",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "which_credentials"
+            },
+            {
+              "name": "parent_path"
+            },
+            {
+              "name": "path"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1120,
+        368
+      ],
+      "id": "afb4bead-5896-45be-aa21-aca2fc946c7c",
+      "name": "Start"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        224,
+        64
+      ],
+      "id": "9d1eac24-ac82-4755-b248-e9d1a6cd25d3",
+      "name": "Return Data"
+    },
+    {
+      "parameters": {
+        "amount": 15
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -224,
+        288
+      ],
+      "id": "00d4b470-29e9-4143-945d-361ecdfdc191",
+      "name": "Wait 15s",
+      "webhookId": "f5364ef4-1896-4a8e-af4a-a557c54b040d"
+    },
+    {
+      "parameters": {
+        "errorMessage": "This workflow is only for GGL ACCT 1 credentials"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        464
+      ],
+      "id": "f956e728-3c3d-423c-8326-bf67aba3873f",
+      "name": "Wrong Credentials"
+    },
+    {
+      "parameters": {
+        "errorMessage": "={{ $json.error.message }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        480
+      ],
+      "id": "e6a08079-f528-4021-a33f-1d5a44a31358",
+      "name": "Give error.message"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "263c64e3-0a4a-4483-b93a-d32a2c3a44fe",
+              "leftValue": "={{ $json.error.status >= 500 && $json.error.status < 600 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -448,
+        272
+      ],
+      "id": "60b7c481-b7f6-4290-80a8-1b3b49372384",
+      "name": "If 500 series error"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3272a77b-5f56-4baf-ae40-3e7c7fddf5fe",
+              "leftValue": "={{ $json.which_credentials }}",
+              "rightValue": "GGL ACCT 1",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -896,
+        368
+      ],
+      "id": "ad31e12d-3a5a-4f34-9f21-a5db70801522",
+      "name": "Check which_credentials"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Find GGL ACCT 1 Google Drive Path": {
+      "main": [
+        [
+          {
+            "node": "Make sure we have the exact name",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If 500 series error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No GGL ACCT 1 folder found": {
+      "main": [
+        [
+          {
+            "node": "Create GGL ACCT 1 Google Drive Path",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Return Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Make sure we have the exact name": {
+      "main": [
+        [
+          {
+            "node": "No GGL ACCT 1 folder found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Check which_credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create GGL ACCT 1 Google Drive Path": {
+      "main": [
+        [
+          {
+            "node": "Return Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 15s": {
+      "main": [
+        [
+          {
+            "node": "Find GGL ACCT 1 Google Drive Path",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If 500 series error": {
+      "main": [
+        [
+          {
+            "node": "Wait 15s",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Give error.message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check which_credentials": {
+      "main": [
+        [
+          {
+            "node": "Find GGL ACCT 1 Google Drive Path",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wrong Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "dbf73f8d-a5c7-4fb7-811a-cca04fe6c4f0",
+  "meta": {
+    "instanceId": "1a9bddba989a25b9b63277adaf1f54896f7309e49579080eb90bf0a9338b3602"
+  },
+  "id": "vTdcjnmVFNUzrCDb",
+  "tags": [
+    {
+      "updatedAt": "2025-09-11T00:38:56.991Z",
+      "createdAt": "2025-09-11T00:38:56.991Z",
+      "id": "ydubjRItVIm8Dtc7",
+      "name": "Module"
+    },
+    {
+      "name": "Production",
+      "id": "AU6GjdkcPIm4CJcG",
+      "updatedAt": "2025-11-11T14:57:59.679Z",
+      "createdAt": "2025-11-11T14:57:59.679Z"
+    },
+    {
+      "name": "PR1",
+      "id": "6OTkWEf873dFbuIo",
+      "updatedAt": "2025-11-11T14:57:59.699Z",
+      "createdAt": "2025-11-11T14:57:59.699Z"
+    },
+    {
+      "name": "SWF016",
+      "id": "Oc1Yn789MZVKXhqh",
+      "updatedAt": "2025-11-11T17:39:42.515Z",
+      "createdAt": "2025-11-11T17:39:42.515Z"
+    }
+  ]
+}

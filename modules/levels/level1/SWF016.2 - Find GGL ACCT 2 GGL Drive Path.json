@@ -1,0 +1,423 @@
+{
+  "name": "SWF016.2 - Find GGL ACCT 2 GGL Drive Path",
+  "nodes": [
+    {
+      "parameters": {
+        "errorMessage": "={{ $json.error.message }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        480
+      ],
+      "id": "5e2e5c53-0aa8-48f1-8e33-ed5fec23f080",
+      "name": "Give error.message"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "263c64e3-0a4a-4483-b93a-d32a2c3a44fe",
+              "leftValue": "={{ $json.error.status >= 500 && $json.error.status < 600 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -448,
+        272
+      ],
+      "id": "67dfaf5f-19a5-4ca1-bd28-91ccdcb17bbf",
+      "name": "If 500 series error"
+    },
+    {
+      "parameters": {
+        "amount": 15
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -224,
+        288
+      ],
+      "id": "90ca04f8-da70-490a-acf6-e04323e2afc6",
+      "name": "Wait 15s",
+      "webhookId": "f5364ef4-1896-4a8e-af4a-a557c54b040d"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ $json.path }}",
+        "returnAll": true,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "={{ $json.parentPath }}",
+            "mode": "id"
+          },
+          "whatToSearch": "folders"
+        },
+        "options": {
+          "fields": [
+            "id",
+            "name"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -672,
+        272
+      ],
+      "id": "31673f36-eeb7-4548-bda9-1996d54268c1",
+      "name": "Find GGL ACCT 2 Google Drive Path",
+      "executeOnce": false,
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $('Start').first().json.path }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Start').first().json.parentPath }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d41e536e-7bc4-4ac2-9f8a-5e52897410eb",
+      "name": "Create GGL ACCT 2 Google Drive Path"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4b6ed6fc-993d-4496-9f8f-9f9d0ed5cfa8",
+              "leftValue": "={{ $json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -224,
+        80
+      ],
+      "id": "7fbd17b4-d83e-45cf-94a4-7dd47ec600b6",
+      "name": "No GGL ACCT 2 folder found"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "8522ca78-3832-4b57-83a4-3e17d634da58",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "={{ $('Start').item.json.path }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -448,
+        80
+      ],
+      "id": "76988e75-7648-4ebe-ac6e-7e01680361f7",
+      "name": "Make sure we have the exact name",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "which_credentials"
+            },
+            {
+              "name": "parentPath"
+            },
+            {
+              "name": "path"
+            }
+          ]
+        }
+      },
+      "id": "9c04cc9d-a45f-432e-b98e-bf1af1279f76",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        -1120,
+        368
+      ]
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        224,
+        80
+      ],
+      "id": "17afc542-5ee1-481d-973f-0261923221cc",
+      "name": "Return Data"
+    },
+    {
+      "parameters": {
+        "errorMessage": "This workflow is only for GGL ACCT 2 credentials"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        464
+      ],
+      "id": "cbc6e79b-98cf-4b69-8081-0dfa1651186b",
+      "name": "Wrong Credentials"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c67bd71e-08ec-43be-832f-5c724617ed7a",
+              "leftValue": "={{ $json.which_credentials }}",
+              "rightValue": "GGL ACCT 2",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -896,
+        368
+      ],
+      "id": "f0b04694-db5c-4a83-a215-2aac7e0a539d",
+      "name": "Check which_credentials"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "No GGL ACCT 2 folder found": {
+      "main": [
+        [
+          {
+            "node": "Create GGL ACCT 2 Google Drive Path",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Return Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If 500 series error": {
+      "main": [
+        [
+          {
+            "node": "Wait 15s",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Give error.message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 15s": {
+      "main": [
+        [
+          {
+            "node": "Find GGL ACCT 2 Google Drive Path",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find GGL ACCT 2 Google Drive Path": {
+      "main": [
+        [
+          {
+            "node": "Make sure we have the exact name",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If 500 series error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create GGL ACCT 2 Google Drive Path": {
+      "main": [
+        [
+          {
+            "node": "Return Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Make sure we have the exact name": {
+      "main": [
+        [
+          {
+            "node": "No GGL ACCT 2 folder found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Check which_credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check which_credentials": {
+      "main": [
+        [
+          {
+            "node": "Find GGL ACCT 2 Google Drive Path",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wrong Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "85ad012f-8562-4af8-aa16-36376baaa63e",
+  "meta": {
+    "instanceId": "1a9bddba989a25b9b63277adaf1f54896f7309e49579080eb90bf0a9338b3602"
+  },
+  "id": "fMbj9rbbgCxUEMoX",
+  "tags": [
+    {
+      "name": "Production",
+      "id": "AU6GjdkcPIm4CJcG",
+      "updatedAt": "2025-11-11T14:57:59.679Z",
+      "createdAt": "2025-11-11T14:57:59.679Z"
+    },
+    {
+      "name": "SWF016",
+      "id": "Oc1Yn789MZVKXhqh",
+      "updatedAt": "2025-11-11T17:39:42.515Z",
+      "createdAt": "2025-11-11T17:39:42.515Z"
+    },
+    {
+      "updatedAt": "2025-09-11T00:38:56.991Z",
+      "createdAt": "2025-09-11T00:38:56.991Z",
+      "id": "ydubjRItVIm8Dtc7",
+      "name": "Module"
+    }
+  ]
+}

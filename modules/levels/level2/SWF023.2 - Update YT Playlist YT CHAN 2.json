@@ -1,0 +1,406 @@
+{
+  "name": "SWF023.2 - Update YT Playlist YT CHAN 2",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "WHICH_YT_CHANNEL"
+            },
+            {
+              "name": "YT_Video_ID"
+            },
+            {
+              "name": "channel_playlists",
+              "type": "array"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        592,
+        192
+      ],
+      "id": "4fe7f88b-b23d-4de9-aec1-d84a3715c30c",
+      "name": "Start"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "yeVBGOhJawGitSdM",
+          "mode": "list",
+          "cachedResultName": "Haves and Have Nots"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "list1": "={{ $('Start').first().json.channel_playlists }}",
+            "list2": "={{ $(\"Get playlists\").all() }}",
+            "YT_Video_ID": "={{ $('Start').first().json.YT_Video_ID }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "YT_Video_ID",
+              "displayName": "YT_Video_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "list1",
+              "displayName": "list1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array"
+            },
+            {
+              "id": "list2",
+              "displayName": "list2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1264,
+        320
+      ],
+      "id": "9e000303-e753-418b-9dca-40f118ebc016",
+      "name": "Haves and Have Nots"
+    },
+    {
+      "parameters": {
+        "resource": "playlist",
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        320
+      ],
+      "id": "3cf050d7-82b1-40ce-ac41-d43cd3a35db4",
+      "name": "Get playlists"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "04c1a977-4ac5-49a8-86cc-24687e13edd0",
+              "leftValue": "={{ $json.have_nots }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1488,
+        320
+      ],
+      "id": "75323243-9582-4e89-b865-1977aac49fde",
+      "name": "If have_nots is not empty"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "have_nots",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1712,
+        224
+      ],
+      "id": "7bc94491-3f4e-45c9-a82b-26d5487bae1a",
+      "name": "Get Playlist Items To Create"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "haves",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1712,
+        416
+      ],
+      "id": "ec6136a7-4913-4942-b244-2ed81a171706",
+      "name": "Return Playlist Items with ID"
+    },
+    {
+      "parameters": {
+        "resource": "playlistItem",
+        "playlistId": "={{ $json.lid }}",
+        "videoId": "={{ $json.vid }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        1936,
+        496
+      ],
+      "id": "da8d35d6-8a6b-41cf-b527-7a7b45cbe187",
+      "name": "Add playlist item"
+    },
+    {
+      "parameters": {
+        "resource": "playlist",
+        "operation": "create",
+        "title": "={{ $json.title }}",
+        "options": {
+          "privacyStatus": "public"
+        }
+      },
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        1936,
+        304
+      ],
+      "id": "ae5d5688-505b-430b-ad0f-fa17db5b578d",
+      "name": "Create playlists"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3f218f0f-a520-419d-95a4-53a0e117deb2",
+              "leftValue": "={{ $json.WHICH_YT_CHANNEL }}",
+              "rightValue": "YT CHAN 2",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        816,
+        192
+      ],
+      "id": "887388d2-1e33-408d-b6d7-3b27e1db1b41",
+      "name": "If wrong WHICH_YT_CHANNEL"
+    },
+    {
+      "parameters": {
+        "content": "# Update YT Playlist YT CHAN 2\n## SWF023.2\n### Purpose\nAdd YT_Video_ID to the given channel_playlists.\n\n**NOTE:** ```When you duplicate this workflow you need to modify the credentials in the various nodes.```\n\n### Input\n* WHICH_YT_CHANNEL\n* YT_Video_ID\n* channel_playlists\n    * Array of playlists to add the YT_Video_ID to.\n\n### Output\n* YouTube JSON response",
+        "height": 512,
+        "width": 528
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "64ac3f97-65dd-4643-919e-847a4c07adc4",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "errorMessage": "The parent has called the wrong WHICH_YT_CHANNEL"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        128
+      ],
+      "id": "303aa8e6-54b4-48a5-aec9-e37ec62e7429",
+      "name": "Wrong Channel"
+    }
+  ],
+  "pinData": {
+    "Start": [
+      {
+        "json": {
+          "WHICH_YT_CHANNEL": "YT CHAN 2",
+          "YT_Video_ID": null,
+          "channel_playlists": null
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "If wrong WHICH_YT_CHANNEL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Haves and Have Nots": {
+      "main": [
+        [
+          {
+            "node": "If have_nots is not empty",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get playlists": {
+      "main": [
+        [
+          {
+            "node": "Haves and Have Nots",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If have_nots is not empty": {
+      "main": [
+        [
+          {
+            "node": "Get Playlist Items To Create",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Return Playlist Items with ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Playlist Items To Create": {
+      "main": [
+        [
+          {
+            "node": "Create playlists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Return Playlist Items with ID": {
+      "main": [
+        [
+          {
+            "node": "Add playlist item",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create playlists": {
+      "main": [
+        [
+          {
+            "node": "Get playlists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If wrong WHICH_YT_CHANNEL": {
+      "main": [
+        [
+          {
+            "node": "Wrong Channel",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get playlists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9600149c-b672-4dae-a989-88b54f783ccb",
+  "meta": {
+    "instanceId": "1a9bddba989a25b9b63277adaf1f54896f7309e49579080eb90bf0a9338b3602"
+  },
+  "id": "N4bBmQ7nmTc2dNPJ",
+  "tags": [
+    {
+      "name": "PR2",
+      "id": "o8vTE5ANJi1SLVrK",
+      "updatedAt": "2025-11-11T15:46:21.402Z",
+      "createdAt": "2025-11-11T15:46:21.402Z"
+    },
+    {
+      "name": "SWF023",
+      "id": "yATrhWvzeXw67GvM",
+      "updatedAt": "2025-11-11T15:46:21.269Z",
+      "createdAt": "2025-11-11T15:46:21.269Z"
+    },
+    {
+      "updatedAt": "2025-09-11T00:38:56.991Z",
+      "createdAt": "2025-09-11T00:38:56.991Z",
+      "id": "ydubjRItVIm8Dtc7",
+      "name": "Module"
+    }
+  ]
+}

@@ -1,0 +1,562 @@
+{
+  "name": "SWF016 - Find GGL Drive Path",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "which_credentials"
+            },
+            {
+              "name": "file_path"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        32,
+        592
+      ],
+      "id": "e2d4abc7-264c-4816-9c9f-1dc3767a6f1a",
+      "name": "Start"
+    },
+    {
+      "parameters": {
+        "jsCode": "const directories = $input.first().json.file_path.split('/');\nconst drive_paths = [];\nfor (const path of directories) {\n  if (path) {drive_paths.push(path)}\n}\nreturn {\n  drive_paths: drive_paths, \n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        256,
+        592
+      ],
+      "id": "701868d0-6789-4070-8947-152e292e8f79",
+      "name": "Normalize Input Data"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.all();\nfor (const item of data) {\n  if (item.json.name === $(\"Loop over paths\").first().json.path) {\n    return {parentPath: item.json.id, drive_paths: $(\"Normalize Input Data\").first().json.drive_paths}\n  }\n  console.log({item: item})\n}\nconsole.log( { data: data})"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        736
+      ],
+      "id": "f4cb2028-3e15-4faa-8fff-6b11c8648974",
+      "name": "Find matching folder name"
+    },
+    {
+      "parameters": {
+        "jsCode": "/**\n * Return the drive name to search.\n * Loop back to this node to find the id of the last path element given.\n */\nconst paths = $input.first().json.drive_paths;\nconst counter = $getWorkflowStaticData('node');\n\nlet parentPath = 'root';\n\nif (typeof counter.count === 'undefined') {\n  counter.count = 0;\n}\n\nif (counter.count < paths.length) {\n  if (counter.count > 0 ) {\n    parentPath = $input.first().json.parentPath;\n  }\n  return {parentPath: parentPath, path: paths[counter.count++], folder_id: null}\n}\n\ncounter.count = 0;\nreturn {folder_id: $input.first().json.parentPath}\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        688
+      ],
+      "id": "386172c0-c774-488a-b5b3-4015ce7ea370",
+      "name": "Loop over paths"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d851f17c-1d6c-4e66-91e5-9948824a0c48",
+              "leftValue": "={{ $json.folder_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        928,
+        608
+      ],
+      "id": "f4f57739-3318-456e-8370-92b24731d4ce",
+      "name": "Have we found the final path?"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1152,
+        416
+      ],
+      "id": "307d1e00-c727-4486-9d21-3d7598517f11",
+      "name": "Return folder_id"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f9b726c6-75fb-4fae-afeb-517d9f8739e2",
+              "leftValue": "={{ $json.drive_paths.length }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "263cc94e-4c41-4144-839a-c0aba65bc8c6",
+              "leftValue": "={{ $json.drive_paths[0] }}",
+              "rightValue": "root",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        480,
+        592
+      ],
+      "id": "ca32aefb-8e29-4211-8f9a-0a1b1dce3788",
+      "name": "If we only have root"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "af28a896-e191-4d08-ad6f-f08831e7bb74",
+              "name": "folder_id",
+              "value": "root",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        928,
+        368
+      ],
+      "id": "4b7e5aeb-2b60-4c4e-8c75-815277bfccd0",
+      "name": "Set folder_id = root"
+    },
+    {
+      "parameters": {
+        "content": "# Find GGL Drive Path\n## SWF016\n### Purpose\nReturn the Google Drive folder ID of the last item of path.\n### Input Field\n* file_path\n### Output Field\n* folder_id\n### Examples:\n* file_path / returns folder_id = root\n* file_path /path1 returns Google Drive's folder_id (will create path1 in the root folder if it doesn't exist and return the created folder_id.\n* file_path /path1/path2 returns Google Drive's folder_id of path2. If path2 doesn't exist in path1 then it will be created and if path1 doesn't exist in root it will be created.",
+        "height": 440,
+        "width": 540
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "3bde66df-af54-4be5-8cb3-c3c3ca7c073a",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Start').first().json.which_credentials.toUpperCase() }}",
+                    "rightValue": "GGL ACCT 1",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "94406720-74bd-42fe-877c-ae4182236e81"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "GGL ACCT 1"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "f8288dbd-52e5-4760-bbdd-2e4836e4f9fd",
+                    "leftValue": "={{ $('Start').first().json.which_credentials.toUpperCase() }}",
+                    "rightValue": "GGL ACCT 2",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "GGL ACCT 2"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1152,
+        656
+      ],
+      "id": "8a38e98c-c38e-43b2-b4aa-78d1bc3107a4",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "7BUK1WuQuOg46KZ9",
+          "mode": "list",
+          "cachedResultName": "SWF016.2 - Find GGL ACCT 2 GGL Drive Path"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "path": "={{ $('Loop over paths').item.json.path }}",
+            "parentPath": "={{ $json.parentPath }}",
+            "which_credentials": "={{ $('Start').item.json.which_credentials }}"
+          },
+          "matchingColumns": [
+            "path",
+            "parentPath",
+            "path_firstItem",
+            "parentPath_firstItem"
+          ],
+          "schema": [
+            {
+              "id": "which_credentials",
+              "displayName": "which_credentials",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "parentPath",
+              "displayName": "parentPath",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "path",
+              "displayName": "path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1376,
+        752
+      ],
+      "name": "Find GGL ACCT 2 GGL Drive Path",
+      "id": "dc04267a-8c9a-46ea-b901-b3f34e74058f"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "WPW9ClZ8IotlirOI",
+          "mode": "list",
+          "cachedResultName": "SWF016.1 - Find GGL ACCT 1 GGL Drive Path"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "which_credentials": "={{ $('Start').first().json.which_credentials }}",
+            "parent_path": "={{ $json.parentPath }}",
+            "path": "={{ $json.path }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "which_credentials",
+              "displayName": "which_credentials",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "parent_path",
+              "displayName": "parent_path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "path",
+              "displayName": "path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1376,
+        560
+      ],
+      "id": "1c70c382-44f7-49a1-a444-b03c9e93cc06",
+      "name": "Find GGL ACCT 1 GGL Drive Path"
+    }
+  ],
+  "pinData": {
+    "Start": [
+      {
+        "json": {
+          "which_credentials": "GGL ACCT 2",
+          "file_path": "/YOUR FOLDER/RSV/257/video"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Normalize Input Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Input Data": {
+      "main": [
+        [
+          {
+            "node": "If we only have root",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find matching folder name": {
+      "main": [
+        [
+          {
+            "node": "Loop over paths",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop over paths": {
+      "main": [
+        [
+          {
+            "node": "Have we found the final path?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Have we found the final path?": {
+      "main": [
+        [
+          {
+            "node": "Return folder_id",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If we only have root": {
+      "main": [
+        [
+          {
+            "node": "Set folder_id = root",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop over paths",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set folder_id = root": {
+      "main": [
+        [
+          {
+            "node": "Return folder_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Find GGL ACCT 1 GGL Drive Path",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Find GGL ACCT 2 GGL Drive Path",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find GGL ACCT 2 GGL Drive Path": {
+      "main": [
+        [
+          {
+            "node": "Find matching folder name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find GGL ACCT 1 GGL Drive Path": {
+      "main": [
+        [
+          {
+            "node": "Find matching folder name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "77a98fb1-0b34-4164-8928-0022c7bd8b41",
+  "meta": {
+    "instanceId": "1a9bddba989a25b9b63277adaf1f54896f7309e49579080eb90bf0a9338b3602"
+  },
+  "id": "QdZ0tF0wWaIoSDAy",
+  "tags": [
+    {
+      "name": "Production",
+      "id": "AU6GjdkcPIm4CJcG",
+      "updatedAt": "2025-11-11T14:57:59.679Z",
+      "createdAt": "2025-11-11T14:57:59.679Z"
+    },
+    {
+      "name": "PR1",
+      "id": "6OTkWEf873dFbuIo",
+      "updatedAt": "2025-11-11T14:57:59.699Z",
+      "createdAt": "2025-11-11T14:57:59.699Z"
+    },
+    {
+      "name": "SWF016",
+      "id": "Oc1Yn789MZVKXhqh",
+      "updatedAt": "2025-11-11T17:39:42.515Z",
+      "createdAt": "2025-11-11T17:39:42.515Z"
+    },
+    {
+      "updatedAt": "2025-09-11T00:38:56.991Z",
+      "createdAt": "2025-09-11T00:38:56.991Z",
+      "id": "ydubjRItVIm8Dtc7",
+      "name": "Module"
+    }
+  ]
+}
