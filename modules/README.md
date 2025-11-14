@@ -23,7 +23,7 @@ SWF055 - Does File Exist.json
 SWF056 - Create File.json
 SWF057 - Get File Contents.json
 
-### leve2
+### level2
 These are the modules you ned to import second, they depend on the level1 modules.
 SWF007 - Upload to YT.json
 SWF010 - Generate Avatar.json
