@@ -1,4 +1,5 @@
 {
+  "name": "SWF018 - HTTP Request Error Management",
   "nodes": [
     {
       "parameters": {
@@ -222,31 +223,6 @@
                 },
                 "conditions": [
                   {
-                    "id": "b78c786e-5b52-4b38-b8bf-831921b55d89",
-                    "leftValue": "={{$json.status > 0 || true}}",
-                    "rightValue": "",
-                    "operator": {
-                      "type": "boolean",
-                      "operation": "true",
-                      "singleValue": true
-                    }
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "Eother"
-            },
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 2
-                },
-                "conditions": [
-                  {
                     "id": "e43b5fca-c5e6-4f3a-8184-fbb31d35dde7",
                     "leftValue": "={{ $json.code }}",
                     "rightValue": "ECONNRESET",
@@ -286,6 +262,56 @@
               },
               "renameOutput": true,
               "outputKey": "ECONNABORTED"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "525d3759-e87b-49ee-b46b-10bf4c2994c4",
+                    "leftValue": "={{ $json.code }}",
+                    "rightValue": "aborted",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "aborted"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b78c786e-5b52-4b38-b8bf-831921b55d89",
+                    "leftValue": "={{$json.status > 0 || true}}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Eother"
             }
           ]
         },
@@ -327,34 +353,23 @@
       "name": "Return Data"
     }
   ],
+  "pinData": {
+    "Start": [
+      {
+        "json": {
+          "code": "ECONNRESET",
+          "E429_wait_seconds": 5.01,
+          "E500_wait_seconds": 60
+        }
+      }
+    ]
+  },
   "connections": {
     "Start": {
       "main": [
         [
           {
             "node": "Normalize inputs",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Return Retry true": {
-      "main": [
-        [
-          {
-            "node": "Return Data",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Return Retry false": {
-      "main": [
-        [
-          {
-            "node": "Return Data",
             "type": "main",
             "index": 0
           }
@@ -412,21 +427,50 @@
         ],
         [
           {
+            "node": "E429 Wait",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "E429 Wait",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "E500 Wait",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
             "node": "Return Retry false",
             "type": "main",
             "index": 0
           }
-        ],
+        ]
+      ]
+    },
+    "Return Retry true": {
+      "main": [
         [
           {
-            "node": "E429 Wait",
+            "node": "Return Data",
             "type": "main",
             "index": 0
           }
-        ],
+        ]
+      ]
+    },
+    "Return Retry false": {
+      "main": [
         [
           {
-            "node": "E429 Wait",
+            "node": "Return Data",
             "type": "main",
             "index": 0
           }
@@ -434,17 +478,39 @@
       ]
     }
   },
-  "pinData": {
-    "Start": [
-      {
-        "status": 500,
-        "code": "ERR_BAD_RESPONSE",
-        "E429_wait_seconds": 5.01,
-        "E500_wait_seconds": 30
-      }
-    ]
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
   },
+  "versionId": "58900eb6-82a5-4189-8cab-afec7957fa98",
   "meta": {
     "instanceId": "37fe6d8c3b2aaeda95afa9d59c8cbc7c79e8171e6cc2a68043e239f8403c390e"
-  }
+  },
+  "id": "Zy23SQ1NqBBCmVwM",
+  "tags": [
+    {
+      "updatedAt": "2025-07-24T12:24:28.570Z",
+      "createdAt": "2025-07-24T12:24:28.570Z",
+      "id": "rIeC6mkwng2eLV1h",
+      "name": "Production"
+    },
+    {
+      "updatedAt": "2025-07-24T19:10:21.972Z",
+      "createdAt": "2025-07-24T19:10:21.972Z",
+      "id": "snV1mbiJFto6cNG1",
+      "name": "PR1"
+    },
+    {
+      "updatedAt": "2025-08-02T17:30:58.784Z",
+      "createdAt": "2025-08-02T17:30:58.784Z",
+      "id": "JlO9ofLv5vKlSpdh",
+      "name": "SWF018"
+    },
+    {
+      "updatedAt": "2025-08-27T23:14:28.658Z",
+      "createdAt": "2025-08-27T23:14:28.658Z",
+      "id": "wuVB256GIIfCIkgj",
+      "name": "Module"
+    }
+  ]
 }
