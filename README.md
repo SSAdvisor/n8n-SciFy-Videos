@@ -20,9 +20,11 @@ sub-workflows) and modify them if needed to fit your needs.
 │   ├── WF020 - YouTube Scheduler.json
 │   └── WF021 - SciFy Shorts Expanded 2 Long Form.json
 │
-├── modules/           # Sub-workflows/dependencies (29 files)
+├── modules/           # Sub-workflows/dependencies (35 files)
 │   ├── SWF003 - Generate Video Metadata.json
 │   ├── SWF007 - Upload to YT.json
+│   ├── SWF007.1 - YT CHAN 1 Upload to YT.json
+│   ├── SWF007.2 - YT CHAN 2 Upload to YT.json
 │   ├── SWF008 - Download File for given URL.json
 │   ├── SWF009 - Upload to GGL.json
 │   ├── SWF010 - Generate Avatar.json
@@ -32,25 +34,28 @@ sub-workflows) and modify them if needed to fit your needs.
 │   ├── SWF014 - Generate Script.json
 │   ├── SWF015 - Generate Thumbnail.json
 │   ├── SWF016 - Find GGL Drive Path.json
+│   ├── SWF016.1 - Find GGL ACCT 1 GGL Drive Path.json
+│   ├── SWF016.2 - Find GGL ACCT 2 GGL Drive Path.json
 │   ├── SWF017 - Update YT Video.json
 │   ├── SWF019 - Find GGL Document File.json
 │   ├── SWF020 - Temporary Binary File Storage.json
 │   ├── SWF021 - Upload Video.json
 │   ├── SWF022 - Update Video Ledger Spreadsheet.json
 │   ├── SWF023 - Update YT Playlist.json
-│   ├── SWF023 - Update YT Playlist BIBLE READINGS.json
-│   ├── SWF023 - Update YT Playlist EBOYD53.json
-│   ├── SWF023 - Update YT Playlist OHIO NEWS.json
-│   ├── SWF023 - Update YT Playlist SSADVISOR.json
-│   ├── SWF023 - Update YT Playlist USA STATES NEWS.json
+│   ├── SWF023.1 - Update YT Playlist YT CHAN 1.json
+│   ├── SWF023.2 - Update YT Playlist YT CHAN 2.json
 │   ├── SWF024 - Haves and Have Nots.json
 │   ├── SWF026 - Create GGL Sheets File.json
-│   ├── SWF026 - Create GGL Sheets File EBOYD53.json
-│   ├── SWF026-- Create GGL Sheets File SSADVISOR.json
+│   ├── SWF026.1 - Create GGL Sheets File GGL ACCT 1.json
+│   ├── SWF026.2 - Create GGL Sheets File GGL ACCT 2.json
 │   ├── SWF030 - Download And Save.json
 │   ├── SWF051 - Generate Long Story.json
 │   ├── SWF052 - Download And Save Temporarily.json
-│   └── SWF053 - Long Story Video Generation.json
+│   ├── SWF053 - Long Story Video Generation.json
+│   ├── SWF054 - LLM Completeness Check.json
+│   ├── SWF055 - Does File Exist.json
+│   ├── SWF056 - Create File.json
+│   └── SWF057 - Get File Contents.json
 │
 ├── webhooks/          # Webhook handlers (1 file)
 │   └── WF003 - Webhook File Server.json
@@ -60,17 +65,17 @@ sub-workflows) and modify them if needed to fit your needs.
     └── WF010 - Oops Something is Wrong.json
 ```
 
-**Total: 35 workflow files**
+**Total: 41 workflow files**
 
 ## Prerequisites
 
 Before importing these workflows, ensure you have:
 
-1. **Self-hosted n8n instance** (version 1.0+)
+1. **Self-hosted latest version n8n instance** (version 1.0+)
 2. **Required credentials configured** (see Credentials Setup section)
 3. **Admin access** to your n8n instance
 4. **Understanding of workflow dependencies** and execution order
-5. **Sufficient storage** for temporary files and video processing
+5. **Sufficient storage** [SSDNodes](https://www.ssdnodes.com/manage/aff.php?aff=2117&register=true) for temporary files and video processing
 6. **Zero2Lauch** [API key](https://www.skool.com/z2l-premium-builders-circle-7291/about?ref=a9f6fac834ae4192ad86455a3cee0439)
 
 ## Import Order (Critical!)
@@ -85,81 +90,81 @@ These provide error handling for all other workflows.
 2. WF010 - Oops Something is Wrong.json
 ```
 
-### Phase 2: Foundation Sub-workflows (Import Second)
+### Phase 2: Level 1 Sub-workflows (Import Second)
 These have no dependencies on other sub-workflows.
 
 ```
-3. SWF008 - Download File for given URL.json
-4. SWF016 - Find GGL Drive Path.json
-5. SWF019 - Find GGL Document File.json
-6. SWF020 - Temporary Binary File Storage.json
-7. SWF026 - Create GGL Sheets File.json
-8. SWF026 - Create GGL Sheets File EBOYD53.json
-9. SWF026-- Create GGL Sheets File SSADVISOR.json
-10. SWF030 - Download And Save.json
-11. SWF052 - Download And Save Temporarily.json
+3. SWF003 - Generate Video Metadata.json
+4. SWF007.1 - YT CHAN 1 Upload to YT.json
+5. SWF007.2 - YT CHAN 2 Upload to YT.json
+6. SWF008 - Download File for given URL.json
+7. SWF013 - Add Slideshow Captions.json
+8. SWF016.1 - Find GGL ACCT 1 GGL Drive Path.json
+9. SWF016.2 - Find GGL ACCT 2 GGL Drive Path.json
+10. SWF020 - Temporary Binary File Storage.json
+11. SWF024 - Haves and Have Nots.json
+12. SWF026.1 - Create GGL Sheets File GGL ACCT 1.json
+13. SWF026.2 - Create GGL Sheets File GGL ACCT 2.json
+14. SWF051 - Generate Long Story.json
+15. SWF054 - LLM Completeness Check.json
+16. SWF055 - Does File Exist.json
+17. SWF056 - Create File.json
+18. SWF057 - Get File Contents.json
 ```
 
-### Phase 3: Content Generation Sub-workflows (Import Third)
+### Phase 3: Level 2 Sub-workflows (Import Third)
 These may depend on Phase 2 modules.
 
 ```
-12. SWF010 - Generate Avatar.json
-13. SWF011 - Generate Images.json
-14. SWF014 - Generate Script.json
-15. SWF051 - Generate Long Story.json
-16. SWF003 - Generate Video Metadata.json
+19. SWF007 - Upload to YT.json
+21 .SWF010 - Generate Avatar.json
+22 .SWF014 - Generate Script.json
+23 .SWF016 - Find GGL Drive Path.json
+24 .SWF019 - Find GGL Document File.json
+25 .SWF023.1 - Update YT Playlist YT CHAN 1.json
+26 .SWF023.2 - Update YT Playlist YT CHAN 2.json
+27 .SWF026 - Create GGL Sheets File.json
+28 .SWF030 - Download And Save.json
+29 .SWF052 - Download And Save Temporarily.json
 ```
 
-### Phase 4: Video Production Sub-workflows (Import Fourth)
+### Phase 4: Level 3 Sub-workflows (Import Fourth)
 These depend on content generation modules.
 
 ```
-17. SWF012 - Generate Slideshow.json
-18. SWF013 - Add Slideshow Captions.json
-19. SWF015 - Generate Thumbnail.json
-20. SWF053 - Long Story Video Generation.json
+30. SWF009 - Upload to GGL.json
+31. SWF011 - Generate Images.json
+32. SWF012 - Generate Slideshow.json
+33. SWF015 - Generate Thumbnail.json
+34. SWF022 - Update Video Ledger Spreadsheet.json
+35. SWF023 - Update YT Playlist.json
 ```
 
-### Phase 5: Upload & Management Sub-workflows (Import Fifth)
+### Phase 5: Level 4 Sub-workflows (Import Fifth)
 These handle final video processing and distribution.
-**Note:** The "Update YT Playlist\*.json files don't need to be uploaded
-if you modify the "Update YT Video.json" file.
 
 ```
-21. SWF007 - Upload to YT.json
-22. SWF009 - Upload to GGL.json
-23. SWF017 - Update YT Video.json
-24. SWF021 - Upload Video.json
-25. SWF022 - Update Video Ledger Spreadsheet.json
-26. SWF023 - Update YT Playlist.json
-27. SWF023 - Update YT Playlist BIBLE READINGS.json
-28. SWF023 - Update YT Playlist EBOYD53.json
-29. SWF023 - Update YT Playlist OHIO NEWS.json
-30. SWF023 - Update YT Playlist SSADVISOR.json
-31. SWF023 - Update YT Playlist USA STATES NEWS.json
-32. SWF024 - Haves and Have Nots.json
+36. SWF017 - Update YT Video.json
+37. SWF053 - Long Story Video Generation.json
 ```
 
-### Phase 6: Webhook Handlers (Import Sixth)
+### Phase 6: Level 5 (Import Sixth)
+```
+SWF021 - Upload Video.json
+```
+
+### Phase 7: Webhook Handlers (Import Sixth)
 ```
 33. WF003 - Webhook File Server.json
 ```
 
-### Phase 7: Main Workflows (Import Last)
+### Phase 8: Main Workflows (Import Last)
 These orchestrate all the sub-workflows.
 
 ```
 34. WF002 - SciFy Shorts.json
 35. WF020 - YouTube Scheduler.json
 36. WF021 - SciFy Shorts Expanded 2 Long Form.json
-```
-
-## Quick Import Order Summary
-
-```
-Error Management → Foundation Modules → Content Generation → 
-Video Production → Upload/Management → Webhooks → Main Workflows
 ```
 
 ## How to Import Each Workflow
