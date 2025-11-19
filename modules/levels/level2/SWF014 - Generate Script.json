@@ -1,5 +1,5 @@
 {
-  "name": "SWF014 - Generate Script",
+  "name": "SWF014 - Generate Script PR5",
   "nodes": [
     {
       "parameters": {
@@ -21,7 +21,7 @@
       "typeVersion": 1.1,
       "position": [
         -384,
-        160
+        400
       ],
       "id": "fd66ad10-8236-4ff8-a7ff-41249c689f42",
       "name": "Execute Video Script"
@@ -56,7 +56,7 @@
       "typeVersion": 3.4,
       "position": [
         -160,
-        160
+        400
       ],
       "id": "cc08f372-d395-4d50-8958-f52b7d316661",
       "name": "Set default inputs"
@@ -68,7 +68,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        512,
+        736,
         -32
       ],
       "id": "d500ad7f-b41e-42fb-bae9-e4058edef1f6",
@@ -104,8 +104,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        64,
-        160
+        80,
+        208
       ],
       "id": "5dcf7f90-dddd-4d5b-911f-22a18d57d37f",
       "name": "Generate Text",
@@ -158,8 +158,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        960,
-        144
+        1184,
+        240
       ],
       "id": "7eca1917-363f-4601-84d7-35ec552798d0",
       "name": "Return generated_text"
@@ -171,7 +171,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        736,
+        960,
         -32
       ],
       "id": "34854956-2db7-42f3-80a3-8ee9a69ed180",
@@ -219,7 +219,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [
-        288,
+        512,
         -32
       ],
       "id": "4e63f386-cd30-4c77-901f-8c1d64201e60",
@@ -289,7 +289,7 @@
       "typeVersion": 1.2,
       "position": [
         288,
-        160
+        352
       ],
       "id": "c11d2ae2-9d63-44b2-8be0-511ca1c408ea",
       "name": "HTTP Request Error Management"
@@ -306,7 +306,7 @@
           "conditions": [
             {
               "id": "a89c1201-eeab-4437-b886-74d1a771b21c",
-              "leftValue": "={{ $json.retury }}",
+              "leftValue": "={{ $json.retry }}",
               "rightValue": "",
               "operator": {
                 "type": "boolean",
@@ -323,19 +323,67 @@
       "typeVersion": 2.2,
       "position": [
         512,
-        240
+        432
       ],
       "id": "29f4f69d-d610-4a36-afdd-4a7e4884a5dc",
       "name": "If Retry"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "38d735fa-1d00-4332-aadb-43e4329d4535",
+              "leftValue": "$json.text",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        288,
+        -16
+      ],
+      "id": "408a58b5-8199-4b16-bda0-610863f6eeef",
+      "name": "If text is empty"
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        512,
+        192
+      ],
+      "id": "b803b9a4-6542-4f0c-beea-b5659e7d21a6",
+      "name": "Wait 10s",
+      "webhookId": "a9668581-c5db-464e-be26-12e31afbfc71"
     }
   ],
   "pinData": {
     "Execute Video Script": [
       {
         "json": {
-          "System_Prompt": "You are a master storyteller, crafting first-person narratives that are not merely stories, but visceral emotional experiences designed to captivate a YouTube audience from the very first second. Your style fuses the raw, emotionally charged drama of Revenge Realm, the profound human resilience and cathartic redemption arcs characteristic of Frank Darabont, and the introspective journey of self-discovery and destiny found in Paulo Coelho's most resonant works.\n\nYour ultimate goal is to create intensely compelling narratives of betrayal, relentless struggle, profound personal growth, and undeniable triumph, always culminating in a definitively happy and deeply fulfilling ending for the protagonist.\n\nFor this story, adopt the precise tone of voice of George Blackman, known for his urgent, conversational, and deeply relatable narratives that optimize for emotional resonance and viewer retention. This distinct tone will ensure the story feels authentic, personal, and immediately grabs the listener, maintaining an unbreakable grip until the cathartic conclusion.\n\nHere is the specific premise for this story:\n\n**Story Concept:** Silent Currents\n**Core Conflict Type:** professional dismissal\n**Protagonist's Focus:** underwater archaeologist\n**Field of Triumph:** underwater archaeology revealing environmental truths\n**Detailed Premise:** \"After being dismissed from a prestigious environmental agency for whistleblowing on a cover-up, I poured my shattered career into underwater archaeology. My passion was scoffed at as 'dusty treasure hunting,' but uncovering sunken relics reveals truths that challenge powerful interests and restore my voice in the fight for our planet's history.\"\n\nEach story must follow this exact, high-impact format:\n\nBEGIN WITH A GRIPPING HOOK: Launch the story with an immediate, shattering emotional impact. This isn't just a sentence; it's a detonation of the core conflict, a pivotal moment of brutal rejection, devastating humiliation, or the shocking aftermath of profound betrayal. This hook must seize the listener's attention by the throat, provoking an instant, visceral reaction and an overwhelming urgency to know what happens next. It must not merely hint at, but explicitly frame the profound life lesson or transformative journey that is about to unfold. Imagine the opening scene of a blockbuster drama or a viral documentary: a shocking revelation, a life-altering ultimatum, or the catastrophic consequence of a broken trust, leaving the audience breathless, desperate for answers, and unable to look away. This is your \"pattern interrupt\", designed to shatter expectations and compel immediate, unwavering emotional investment. **Ensure the hook directly relates to the 'Core Conflict Type' and 'Detailed Premise' provided.**\n\nTHE PAINFUL DEPARTURE & RELENTLESS PURSUIT: Immediately follow the narrator’s agonizing decision to abandon the past, fueled by the sting of rejection and an unwavering resolve to prove their inherent worth. Detail the unyielding, almost obsessive pursuit of their ambition, painting a vivid picture of their solitary journey. **Integrate the 'Protagonist's Focus' and the initial ridicule mentioned in the 'Detailed Premise'.**\n\nTHE ARDUOUS ASCENSION & PROFOUND TRIUMPH: Use vivid, yet remarkably concise descriptions to depict the arduous struggle that follows. Each challenge, every setback, should be a visceral experience, demonstrating the protagonist's grit. Contrast this with the monumental, undeniable success that emerges. The narrative should subtly, almost subliminally, weave in profound life lessons or universal insights, allowing the listener to extract invaluable wisdom directly applicable to their own lives. **Clearly show the triumph within the 'Field of Triumph' and how it disproved the initial ridicule.**\n\nTHE CATHARTIC RETURN & POETIC JUSTICE: Conclude with a dramatic, yet deeply satisfying moment of return or confrontation. This is where the protagonist’s hard-won triumph is unequivocally clear and profoundly beneficial, delivering a cathartic reveal that resonates with undeniable poetic justice. The former doubters or betrayers must face the irrefutable evidence of the protagonist's success, leading to their quiet acknowledgment or profound regret.\n\nTONE & FLOW: Maintain an emotionally charged, intensely motivational tone throughout. The narrative must be resonant and impactful, deeply focusing on profound character arcs and the lingering psychological impact of past wrongs, without ever veering into overt melodrama. The narrative flow should be propulsive, emphasizing the enduring struggle, the profound wisdom gained through hardship, and the overwhelmingly satisfying payoff of hard-earned vindication and genuine happiness. Word count must not exceed 1000 words.\n\nYou are writing for an audience that craves authentic personal redemption arcs, undeniable poetic justice, and truly cathartic reveals. They yearn for stories where unwavering perseverance rewrites destiny, karma delivers its undeniable verdict, and invaluable knowledge can be absorbed and directly applied to their own lives.",
-          "User_Prompt": "Write a 1000-word first-person story about someone who was fiercely mocked by their family for pursuing a \"ridiculous\" dream—like becoming a painter, a game developer, or starting a weird business. Everyone explicitly told them they’d fail and that they were an embarrassment to the family. Years later, they return home after making it big, having achieved monumental success. Include a powerful, unforgettable scene where the family witnesses firsthand what they have become and faces the consequences of their past derision. Ensure the tone is emotionally powerful, reflective, and delivers the signature cathartic impact of a Karma's Ledger story, ending on a positive and insightful note.  Write a 1000-word first-person story about someone who was fiercely mocked by their family for pursuing a dream initially deemed \"ridiculous\" and futile, explicitly told they’d fail and were an embarrassment. This protagonist, an underwater archaeologist, was mocked for their pursuit of underwater archaeology revealing environmental truths, stemming from a professional dismissal.  Years later, they return home after achieving monumental success, having transformed barren lands into thriving ecosystems through their underwater archaeology revealing environmental truths, proving their worth beyond doubt.  Include a powerful, unforgettable scene where the family witnesses firsthand what they have become and faces the consequences of their past derision. Ensure the tone is emotionally powerful, reflective, and delivers the signature cathartic impact of a Karma's Ledger story, ending on a positive and insightful note.  Story Premise for reference: \"After being dismissed from a prestigious environmental agency for whistleblowing on a cover-up, I poured my shattered career into underwater archaeology. My passion was scoffed at as 'dusty treasure hunting,' but uncovering sunken relics reveals truths that challenge powerful interests and restore my voice in the fight for our planet's history.\"",
-          "Model": "openai"
+          "System_Prompt": "You are an AI tasked with converting a horror story transcript into a single, cinematic image prompt for AI art generators like Flux.\n\t1.\tAbsorb the entire transcript.\n\t2.\tIdentify the scene with the strongest visual impact and peak tension.\n\t3.\tCompose one evocative, atmosphere-dripping prompt that brings that moment to life.\n\t4.\tFocus on setting, light, color palette, and eerie details.\n\t5.\tExclude any direct quotes or narrative snippets.\n\t6.\tReturn only the final image prompt—no code, labels, or commentary.\n\nExample:\nA decrepit Gothic cathedral under a blood-red sky, its shattered stained-glass windows glowing from within as ghostly silhouettes drift among toppled pews.",
+          "User_Prompt": "One ex—call her Lena—began logging everything: late notices from her building about “tenants at risk of disruption,” the landlord’s generic demands for “quiet hours,” the way her email could morph into something that suggested she was the one causing trouble She wasn’t making this up as a paranoia; the fear was real, and the paper trail she kept began to feel like a map of a siege Ari, by contrast, found a different way to measure threat Not the threat Lena expressed with her anxious, breathless texts, but a threat that existed in the space between a rumor and a boundary",
+          "Model": "evil"
         }
       }
     ]
@@ -378,7 +426,7 @@
       "main": [
         [
           {
-            "node": "LLM Completeness Check",
+            "node": "If text is empty",
             "type": "main",
             "index": 0
           }
@@ -429,7 +477,7 @@
       "main": [
         [
           {
-            "node": "Generate Text",
+            "node": "Set default inputs",
             "type": "main",
             "index": 0
           }
@@ -442,13 +490,42 @@
           }
         ]
       ]
+    },
+    "If text is empty": {
+      "main": [
+        [
+          {
+            "node": "Wait 10s",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "LLM Completeness Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 10s": {
+      "main": [
+        [
+          {
+            "node": "Set default inputs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "2e647221-b807-4891-bc8a-a16f1255eac2",
+  "versionId": "4c90d8d9-c125-4802-ba00-94391c3ad8d8",
   "meta": {
     "instanceId": "37fe6d8c3b2aaeda95afa9d59c8cbc7c79e8171e6cc2a68043e239f8403c390e"
   },
