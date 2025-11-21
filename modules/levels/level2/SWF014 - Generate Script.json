@@ -1,5 +1,5 @@
 {
-  "name": "SWF014 - Generate Script PR5",
+  "name": "SWF014 - Generate Script",
   "nodes": [
     {
       "parameters": {
@@ -68,7 +68,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        736,
+        944,
         -32
       ],
       "id": "d500ad7f-b41e-42fb-bae9-e4058edef1f6",
@@ -158,7 +158,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1184,
+        1392,
         240
       ],
       "id": "7eca1917-363f-4601-84d7-35ec552798d0",
@@ -171,7 +171,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        960,
+        1168,
         -32
       ],
       "id": "34854956-2db7-42f3-80a3-8ee9a69ed180",
@@ -219,7 +219,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [
-        512,
+        720,
         -32
       ],
       "id": "4e63f386-cd30-4c77-901f-8c1d64201e60",
@@ -288,7 +288,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [
-        288,
+        496,
         352
       ],
       "id": "c11d2ae2-9d63-44b2-8be0-511ca1c408ea",
@@ -322,7 +322,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        512,
+        720,
         432
       ],
       "id": "29f4f69d-d610-4a36-afdd-4a7e4884a5dc",
@@ -356,7 +356,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        288,
+        496,
         -16
       ],
       "id": "408a58b5-8199-4b16-bda0-610863f6eeef",
@@ -369,12 +369,45 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        512,
+        720,
         192
       ],
       "id": "b803b9a4-6542-4f0c-beea-b5659e7d21a6",
       "name": "Wait 10s",
       "webhookId": "a9668581-c5db-464e-be26-12e31afbfc71"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "36b2d634-e6fc-4d1f-8016-e133a17c66e7",
+              "leftValue": "={{ $json.text }}",
+              "rightValue": "{\"error\": \"all_tokens_failed\", \"status\": 500, \"message\": \"Failed\"}",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        288,
+        112
+      ],
+      "id": "134a4cd8-bd9a-4370-8452-6d896d5a36b7",
+      "name": "If not equal to \"{\"error\": \"all_tokens_failed\", \"status\": 500, \"message\": \"Failed\"}\""
     }
   ],
   "pinData": {
@@ -382,7 +415,7 @@
       {
         "json": {
           "System_Prompt": "You are an AI tasked with converting a horror story transcript into a single, cinematic image prompt for AI art generators like Flux.\n\t1.\tAbsorb the entire transcript.\n\t2.\tIdentify the scene with the strongest visual impact and peak tension.\n\t3.\tCompose one evocative, atmosphere-dripping prompt that brings that moment to life.\n\t4.\tFocus on setting, light, color palette, and eerie details.\n\t5.\tExclude any direct quotes or narrative snippets.\n\t6.\tReturn only the final image prompt—no code, labels, or commentary.\n\nExample:\nA decrepit Gothic cathedral under a blood-red sky, its shattered stained-glass windows glowing from within as ghostly silhouettes drift among toppled pews.",
-          "User_Prompt": "One ex—call her Lena—began logging everything: late notices from her building about “tenants at risk of disruption,” the landlord’s generic demands for “quiet hours,” the way her email could morph into something that suggested she was the one causing trouble She wasn’t making this up as a paranoia; the fear was real, and the paper trail she kept began to feel like a map of a siege Ari, by contrast, found a different way to measure threat Not the threat Lena expressed with her anxious, breathless texts, but a threat that existed in the space between a rumor and a boundary",
+          "User_Prompt": "He had made us believe that loyalty was a thing you could quantify, a ledger entry that you could balance by lighting a charity lamp or laying a cornerstone in a shop window where the town could see your generosity and call it virtue The forged document did not merely threaten the father’s reputation; it threatened the idea of the circle itself The village where I grew up—where every face had a name and every name bore a history—lived on the assumption that the strong held the weak and that the strong used their strength with a measured grace",
           "Model": "evil"
         }
       }
@@ -426,7 +459,7 @@
       "main": [
         [
           {
-            "node": "If text is empty",
+            "node": "If not equal to \"{\"error\": \"all_tokens_failed\", \"status\": 500, \"message\": \"Failed\"}\"",
             "type": "main",
             "index": 0
           }
@@ -519,13 +552,31 @@
           }
         ]
       ]
+    },
+    "If not equal to \"{\"error\": \"all_tokens_failed\", \"status\": 500, \"message\": \"Failed\"}\"": {
+      "main": [
+        [
+          {
+            "node": "If text is empty",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 10s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "4c90d8d9-c125-4802-ba00-94391c3ad8d8",
+  "versionId": "7e6dd7bd-667d-4492-b714-714681b7d3fa",
   "meta": {
     "instanceId": "37fe6d8c3b2aaeda95afa9d59c8cbc7c79e8171e6cc2a68043e239f8403c390e"
   },
@@ -548,12 +599,6 @@
       "createdAt": "2025-07-28T20:29:12.737Z",
       "id": "hdn1RXMFlgJVERz7",
       "name": "SWF014"
-    },
-    {
-      "updatedAt": "2025-08-18T01:38:15.118Z",
-      "createdAt": "2025-08-18T01:38:15.118Z",
-      "id": "qmW0kJzaplddZlJV",
-      "name": "PR5"
     },
     {
       "updatedAt": "2025-08-27T23:14:28.658Z",
